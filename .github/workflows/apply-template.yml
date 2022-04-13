@@ -2,7 +2,7 @@ name: Apply Template
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   repo_ids:
@@ -20,7 +20,7 @@ jobs:
       - name: Check if rename has occurred
         id: check_rename_occurred
         run: |
-          LINES=$(grep vitalam-service-template ./package.json)
+          LINES=$(grep openapi-service-template ./package.json)
           if [ -z "$LINES" ]; then
             echo "::set-output name=IS_RENAMED::true"
           else
@@ -34,7 +34,7 @@ jobs:
     name: Update repository references
     runs-on: ubuntu-latest
     needs: [repo_ids]
-    if: ${{ github.event.repository.name != 'vitalam-service-template' && needs.repo_ids.outputs.is_renamed == 'false' }}
+    if: ${{ github.event.repository.name != 'openapi-service-template' && needs.repo_ids.outputs.is_renamed == 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -43,15 +43,15 @@ jobs:
       - name: Reset versioning
         run: |
           npm version 0.0.1 --allow-same-version --no-git-tag-version
-          yq eval -i '.version |= "0.0.1"' ./helm/vitalam-service-template/Chart.yaml
-          yq eval -i '.appVersion |= "0.0.1"' ./helm/vitalam-service-template/Chart.yaml
-          yq eval -i '.image.tag |= "v0.0.1"' ./helm/vitalam-service-template/values.yaml
+          yq eval -i '.version |= "0.0.1"' ./helm/openapi-service-template/Chart.yaml
+          yq eval -i '.appVersion |= "0.0.1"' ./helm/openapi-service-template/Chart.yaml
+          yq eval -i '.image.tag |= "v0.0.1"' ./helm/openapi-service-template/values.yaml
       - name: Update repo name references
         run: |
-          find . \( -path ./.git -prune -o -path ./.github/workflows -prune \) -type f -o -name '*' -exec sed -i 's/vitalam-service-template/${{ needs.repo_ids.outputs.repo_name }}/gI' {} \;
+          find . \( -path ./.git -prune -o -path ./.github/workflows -prune \) -type f -o -name '*' -exec sed -i 's/openapi-service-template/${{ needs.repo_ids.outputs.repo_name }}/gI' {} \;
           find . \( -path ./.git -prune -o -path ./.github/workflows -prune \) -type f -o -name '*' -exec sed -i 's/digicatapult/${{ needs.repo_ids.outputs.org_name }}/gI' {} \;
       - name: Rename Helm Directory
-        run: mv ./helm/vitalam-service-template ./helm/${{ needs.repo_ids.outputs.repo_name }}
+        run: mv ./helm/openapi-service-template ./helm/${{ needs.repo_ids.outputs.repo_name }}
       - name: Remove template workflow
         run: rm ./.github/workflows/apply-template.yml
       - name: Set Git Config

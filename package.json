@@ -1,7 +1,7 @@
 {
-  "name": "@digicatapult/vitalam-service-template",
-  "version": "0.0.9",
-  "description": "Service for VITALam",
+  "name": "@digicatapult/openapi-service-template",
+  "version": "0.0.1",
+  "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --config ./test/mocharc.js ./test",
@@ -13,21 +13,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digicatapult/vitalam-service-template.git"
+    "url": "git+https://github.com/digicatapult/openapi-service-template.git"
   },
   "engines": {
     "node": "16.x.x",
     "npm": "8.x.x"
   },
   "keywords": [
-    "VITALam"
+    "OpenAPI"
   ],
   "author": "Digital Catapult",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/digicatapult/vitalam-service-template/issues"
+    "url": "https://github.com/digicatapult/openapi-service-template/issues"
   },
-  "homepage": "https://github.com/digicatapult/vitalam-service-template#readme",
+  "homepage": "https://github.com/digicatapult/openapi-service-template#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",

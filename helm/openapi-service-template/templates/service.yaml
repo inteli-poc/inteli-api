@@ -1,0 +1,14 @@
+{{- $fullName := include "openapi-service-template.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: openapi-service-template
+  labels:
+    {{- include "openapi-service-template.labels" . | nindent 4 }}
+spec:
+  selector:
+    name: {{ include "openapi-service-template.fullname" . }}
+  ports:
+    - protocol: 'TCP'
+      port: 80
+      targetPort: {{ .Values.config.port }}
