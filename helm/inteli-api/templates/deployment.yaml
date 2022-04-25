@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "openapi-service-template.fullname" . }}
+  name: {{ include "inteli-api.fullname" . }}
   labels:
-    {{- include "openapi-service-template.labels" . | nindent 4 }}
+    {{- include "inteli-api.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      name: {{ include "openapi-service-template.fullname" . }}
+      name: {{ include "inteli-api.fullname" . }}
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
-        name: {{ include "openapi-service-template.fullname" . }}
+        name: {{ include "inteli-api.fullname" . }}
     spec:
-      {{- include "openapi-service-template.imagePullSecrets" . | indent 6 }}
+      {{- include "inteli-api.imagePullSecrets" . | indent 6 }}
       initContainers: []
 
       containers:
-        - name: {{ include "openapi-service-template.fullname" . }}
+        - name: {{ include "inteli-api.fullname" . }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           livenessProbe:
@@ -34,5 +34,5 @@ spec:
             - name: PORT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "openapi-service-template.fullname" . }}-config
+                  name: {{ include "inteli-api.fullname" . }}-config
                   key: port

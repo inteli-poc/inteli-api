@@ -11,7 +11,7 @@ ENV NPM_CONFIG_LOGLEVEL ${LOGLEVEL}
 # Install base dependencies
 RUN npm -g install npm@8.x.x
 
-WORKDIR /openapi-service-template
+WORKDIR /inteli-api
 
 COPY . .
 RUN npm install --production

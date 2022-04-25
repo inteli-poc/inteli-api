@@ -1,7 +1,7 @@
 apiVersion: v2
-name: openapi-service-template
+name: inteli-api
 appVersion: '0.0.1'
-description: A Helm chart for openapi-service-template
+description: A Helm chart for inteli-api
 version: '0.0.1'
 type: application
 maintainers:

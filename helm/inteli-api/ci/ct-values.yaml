@@ -1,4 +1,4 @@
 image:
-  repository: 'openapi-service-template'
+  repository: 'inteli-api'
   tag: 'latest'
   PullPolicy: Never

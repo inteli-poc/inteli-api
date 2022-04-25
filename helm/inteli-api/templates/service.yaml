@@ -1,0 +1,14 @@
+{{- $fullName := include "inteli-api.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: inteli-api
+  labels:
+    {{- include "inteli-api.labels" . | nindent 4 }}
+spec:
+  selector:
+    name: {{ include "inteli-api.fullname" . }}
+  ports:
+    - protocol: 'TCP'
+      port: 80
+      targetPort: {{ .Values.config.port }}
