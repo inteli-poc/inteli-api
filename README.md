@@ -1,20 +1,6 @@
 # inteli-api
 
-Template repository for bootstrapping new OpenAPI-based services. Use this repo as a template in github when creating new OpenAPI-based services. When forked a new pull request will automatically be created in the new repository to apply templating. Before merging you should also give access to the forked repo the `GITHUB_TOKEN` organisation secret prior to merging. This will allow the release workflow to run successfully on merging.
-
-## What this repo provides
-
-This repo provides:
-
-- basic node.js project structure for a service
-- linting with our prettier configuration
-- open-sourcing materials
-- Docker file
-- A simple helm chart for the service
-- A service with a healthcheck endpoint on `/health`
-- An OpenAPI doc and endpoints for `/swagger` and `/api-docs`
-- Testing apparatus using `mocha`, `chai` and `supertest`
-- Github workflows for testing and release
+Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platform)
 
 ## Environment Variables
 
