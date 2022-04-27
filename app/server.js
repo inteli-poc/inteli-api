@@ -9,7 +9,7 @@ const compression = require('compression')
 const { PORT, API_VERSION, API_MAJOR_VERSION } = require('./env')
 const logger = require('./logger')
 const v1ApiDoc = require('./api-v1/api-doc')
-const v1CatalogueService = require('./api-v1/services/catalogueService')
+const v1RecipeService = require('./api-v1/services/recipeService')
 const v1AttachmentService = require('./api-v1/services/attachmentService')
 const v1BuildService = require('./api-v1/services/buildService')
 const v1OrderService = require('./api-v1/services/orderService')
@@ -38,7 +38,7 @@ async function createHttpServer() {
     apiDoc: v1ApiDoc,
     securityHandlers: {},
     dependencies: {
-      catalogueService: v1CatalogueService,
+      recipeService: v1RecipeService,
       attachmentService: v1AttachmentService,
       buildService: v1BuildService,
       partService: v1PartService,

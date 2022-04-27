@@ -1,45 +1,35 @@
 // eslint-disable-next-line no-unused-vars
-module.exports = function (catalogueService) {
+module.exports = function (recipeService) {
   const doc = {
     GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
-    },
-    POST: async function (req, res) {
       res.status(500).json({ message: 'Not Implemented' })
     },
   }
 
   doc.GET.apiDoc = {
-    summary: 'Get Catalogue Item Creation Action',
+    summary: 'Get Recipe',
     parameters: [
       {
-        description: 'Id of the catalogue-item',
+        description: 'Id of the recipe to get',
         in: 'path',
         required: true,
         name: 'id',
         allowEmptyValue: false,
       },
-      {
-        description: 'Id of the catalogue-item creation action',
-        in: 'path',
-        required: true,
-        name: 'creationId',
-        allowEmptyValue: false,
-      },
     ],
     responses: {
       200: {
-        description: 'Return Catalogue Item Creation Action',
+        description: 'Return Recipe',
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/CatalogueItemCreation',
+              $ref: '#/components/schemas/Recipe',
             },
           },
         },
       },
       404: {
-        description: 'Catalogue Item Creation Action not found',
+        description: 'Recipe not found',
         content: {
           'application/json': {
             schema: {
@@ -59,7 +49,7 @@ module.exports = function (catalogueService) {
         },
       },
     },
-    tags: ['catalogue-item'],
+    tags: ['recipe'],
   }
 
   return doc

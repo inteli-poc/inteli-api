@@ -27,15 +27,15 @@ const apiDoc = {
       },
     },
     schemas: {
-      NewCatalogueItem: {
+      NewRecipe: {
         type: 'object',
         properties: {
           externalId: {
-            description: 'id of the catalogue-item in an external ERP',
+            description: 'id of the recipe in an external ERP',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
           },
           name: {
-            description: 'Name of the catalogue-item',
+            description: 'Name of the recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
           },
           imageAttachmentId: {
@@ -43,15 +43,15 @@ const apiDoc = {
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
           material: {
-            description: 'Primary material of the constructed catalogue-item',
+            description: 'Primary material of the constructed recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
           },
           alloy: {
-            description: 'Primary alloy present in the constructed catalogue-item',
+            description: 'Primary alloy present in the constructed recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
           },
           price: {
-            description: 'Price of the catalogue-item. This information is not stored on-chain.',
+            description: 'Price of the recipe. This information is not stored on-chain.',
             type: 'string',
           },
           requiredCerts: {
@@ -64,23 +64,23 @@ const apiDoc = {
           },
           supplier: {
             description:
-              'Name of the supplier who is contracted to build the catalogue-item. This information is not stored directly on-chain',
+              'Name of the supplier who is contracted to build the recipe. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
           },
         },
       },
-      CatalogueItem: {
+      Recipe: {
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/NewCatalogueItem' }],
+        allOf: [{ $ref: '#/components/schemas/NewRecipe' }],
         properties: {
           id: {
-            description: 'local id of the catalogue-item',
+            description: 'local id of the recipe',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
           owner: {
             description:
-              'Name of the OEM who owns the design of the catalogue-item. This information is not stored directly on-chain',
+              'Name of the OEM who owns the design of the recipe. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
           },
@@ -203,8 +203,8 @@ const apiDoc = {
         type: 'object',
         description: 'Part to be created',
         properties: {
-          catalogueItemId: {
-            description: 'id of the catalogue-item that describes the design of this part',
+          recipeId: {
+            description: 'id of the recipe that describes the design of this part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
           orderId: {
@@ -271,7 +271,7 @@ const apiDoc = {
             description: 'List of parts to be supplied',
             maxItems: 10,
             items: {
-              description: 'id of the catalogue-item to be built',
+              description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             },
           },
@@ -352,7 +352,7 @@ const apiDoc = {
             description: 'List of parts to be supplied',
             maxItems: 10,
             items: {
-              description: 'id of the catalogue-item to be built',
+              description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             },
           },
@@ -377,7 +377,7 @@ const apiDoc = {
             description: 'List of parts to be supplied',
             maxItems: 10,
             items: {
-              description: 'id of the catalogue-item to be built',
+              description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             },
           },
@@ -513,18 +513,15 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildCompletion' }],
       },
-      NewCatalogueItemCreation: {
-        description: 'A new action on a catalogue-item that registers it on-chain',
+      NewRecipeCreation: {
+        description: 'A new action on a recipe that registers it on-chain',
         type: 'object',
         properties: {},
       },
-      CatalogueItemCreation: {
-        description: 'An action on a catalogue-item that registers it on-chain',
+      RecipeCreation: {
+        description: 'An action on a recipe that registers it on-chain',
         type: 'object',
-        allOf: [
-          { $ref: '#/components/schemas/ChainAction' },
-          { $ref: '#/components/schemas/NewCatalogueItemCreation' },
-        ],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewRecipeCreation' }],
       },
     },
     securitySchemes: {},
