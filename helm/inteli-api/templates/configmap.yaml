@@ -6,3 +6,7 @@ metadata:
     {{- include "inteli-api.labels" . | nindent 4 }}
 data:
   port: {{ .Values.config.port | quote }}
+  logLevel: {{ .Values.config.logLevel }}
+  dbHost: {{ include "inteli-api.postgresql.fullname" . }}
+  dbPort: {{ .Values.config.dbPort | quote }}
+  dbName: {{ .Values.config.dbName }}

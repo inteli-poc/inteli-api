@@ -51,3 +51,28 @@ imagePullSecrets:
     {{- end }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Create a default fully qualified postgresql name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "inteli-api.postgresql.fullname" -}}
+{{- if .Values.config.externalPostgresql -}}
+{{ .Values.config.externalPostgresql | trunc 63 | trimSuffix "-" -}}
+{{- else if not ( .Values.postgresql.enabled ) -}}
+{{ fail "Postgresql must either be enabled or passed via config.externalPostgresql" }}
+{{- else if .Values.postgresql.fullnameOverride -}}
+{{- .Values.postgresql.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "postgresql" .Values.postgresql.nameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "inteli-api.initDb.name" -}}
+{{- if .Values.fullnameOverride -}}
+{{- printf "%s-db" .Values.fullnameOverride | lower | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-db" .Release.Name .Chart.Name | lower | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}

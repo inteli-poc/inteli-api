@@ -16,6 +16,11 @@ const vars = envalid.cleanEnv(
     API_VERSION: envalid.str({ default: version }),
     API_MAJOR_VERSION: envalid.str({ default: 'v1' }),
     LOG_LEVEL: envalid.str({ default: 'info', devDefault: 'debug' }),
+    DB_HOST: envalid.host({ devDefault: 'localhost' }),
+    DB_PORT: envalid.port({ default: 5432 }),
+    DB_NAME: envalid.str({ default: 'inteli' }),
+    DB_USERNAME: envalid.str({ devDefault: 'postgres' }),
+    DB_PASSWORD: envalid.str({ devDefault: 'postgres' }),
   },
   {
     strict: true,

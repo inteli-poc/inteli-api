@@ -1,7 +1,16 @@
 config:
   port: 80
+  logLevel: info
+  dbName: inteli
+  dbPort: 5432
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.1.0'
+  tag: 'v1.2.0'
   pullSecrets: ['ghcr-digicatapult']
+
+postgresql:
+  enabled: true
+  postgresqlDatabase: inteli
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres

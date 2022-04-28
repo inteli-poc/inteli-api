@@ -17,8 +17,37 @@ spec:
         name: {{ include "inteli-api.fullname" . }}
     spec:
       {{- include "inteli-api.imagePullSecrets" . | indent 6 }}
-      initContainers: []
-
+      initContainers:
+        - name: {{ include "inteli-api.initDb.name" . }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command: [ 'npx', 'knex', "migrate:latest", "--env", "production" ]
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbHost
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbPort
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbName
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-secret
+                  key: dbUsername
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-secret
+                  key: dbPassword
       containers:
         - name: {{ include "inteli-api.fullname" . }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -36,3 +65,33 @@ spec:
                 configMapKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-config
                   key: port
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: logLevel
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbHost
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbPort
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: dbName
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-secret
+                  key: dbUsername
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-secret
+                  key: dbPassword
