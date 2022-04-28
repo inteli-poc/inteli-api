@@ -31,7 +31,25 @@ async function healthCheck({ app }) {
     })
 }
 
+async function postOrderRoute(order, { app }) {
+  console.log('routehelper', order)
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/order`)
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .send(order)
+    .then((response) => {
+      console.log(response)
+      return response
+    })
+    .catch((err) => {
+      console.error(`postOrderErr ${err}`)
+      return err
+    })
+}
+
 module.exports = {
   apiDocs,
   healthCheck,
+  postOrderRoute,
 }

@@ -23,6 +23,7 @@ exports.up = async (knex) => {
     def.string('owner', 255).notNullable()
     def.string('manufacturer', 255).notNullable()
     //def.enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted']).notNullable()
+    def.string('status', 255).notNullable()
     def.datetime('required_by').notNullable()
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())

@@ -5,7 +5,11 @@ module.exports = function (orderService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      console.log('route', req.body)
+      const { statusCode, result } = orderService.postProject(req.body)
+
+      return { statusCode, result }
+      //orderService.res.status(500).json({ message: 'Not Implemented' })
     },
   }
 
@@ -37,7 +41,7 @@ module.exports = function (orderService) {
         },
       },
     },
-    tags: ['order'],
+    tags: ['orders'],
   }
 
   doc.POST.apiDoc = {
@@ -83,7 +87,7 @@ module.exports = function (orderService) {
         },
       },
     },
-    tags: ['order'],
+    tags: ['orders'],
   }
 
   return doc

@@ -16,6 +16,11 @@ const client = knex({
   },
 })
 
+async function postOrderDb(reqBody) {
+  return client('orders').insert(reqBody).returning(['id', 'owner', 'status', 'manufacturer', 'required_by'])
+}
+
 module.exports = {
   client,
+  postOrderDb,
 }
