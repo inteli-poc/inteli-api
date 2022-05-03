@@ -5,7 +5,6 @@ async function postProject(reqBody) {
 
   const result = await postOrderDb(reqBody)
 
-  // const result = createdProject.length === 1 ? createdProject[0] : {}
   return { statusCode: 201, result }
 }
 
