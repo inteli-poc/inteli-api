@@ -63,7 +63,10 @@ async function createHttpServer() {
   // Sorry - app.use checks arity
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
-    if (err.status) {
+    if (err.errors) {
+      // openapi validation
+      res.status(err.status).send(err.errors)
+    } else if (err.status) {
       res.status(err.status).send({ error: err.status === 401 ? 'Unauthorised' : err.message })
     } else {
       logger.error('Fallback Error %j', err.stack)
