@@ -20,17 +20,28 @@ describe('health', function () {
     expect(actualResult.body).to.deep.equal(expectedResult)
   })
 
-  test('POST Order', async function () {
+  test('POST Order - 201', async function () {
     const newProject = {
       owner: 'BAE',
       manufacturer: 'Maher',
       status: 'Accepted',
-      required_by: new Date().toISOString(),
+      requiredBy: new Date().toISOString(),
+      items: [],
     }
 
     const response = await postOrderRoute(newProject, app)
-    console.log(response.body)
     expect(response.status).to.equal(201)
-    //assertPostProjectRequiredParams(response.body, newProject)
+    expect(response.body[0].owner).deep.equal(newProject.owner)
+  })
+
+  test('POST Order with required Params missing - 400', async function () {
+    const newProject = {
+      owner: 'BAE',
+      manufacturer: 'Maher',
+      status: 'Accepted',
+    }
+
+    const response = await postOrderRoute(newProject, app)
+    expect(response.status).to.equal(400)
   })
 })

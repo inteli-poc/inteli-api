@@ -5,11 +5,12 @@ module.exports = function (orderService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      console.log('route', req.body)
-      const { statusCode, result } = orderService.postProject(req.body)
-
-      return { statusCode, result }
-      //orderService.res.status(500).json({ message: 'Not Implemented' })
+      try {
+        const { statusCode, result } = await orderService.postProject(req.body)
+        return res.status(statusCode).json(result)
+      } catch (error) {
+        throw 'Error: ' + error
+      }
     },
   }
 
