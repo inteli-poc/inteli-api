@@ -16,6 +16,11 @@ const client = knex({
   },
 })
 
+const insertAttachment = async (name, fileData) => {
+  return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
+}
+
 module.exports = {
   client,
+  insertAttachment,
 }

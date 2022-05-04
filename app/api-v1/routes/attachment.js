@@ -1,11 +1,21 @@
-// eslint-disable-next-line no-unused-vars
+const logger = require('../../logger')
+const { BadRequestError } = require('../../utils/errors')
+
 module.exports = function (attachmentService) {
   const doc = {
     GET: async function (req, res) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      logger.info('Attachment upload: ', req.file)
+
+      if (!req.file) {
+        throw new BadRequestError({ message: 'No file uploaded', service: 'attachment' })
+      }
+
+      const attachment = await attachmentService.createAttachment(req.file)
+      const result = attachment[0]
+      res.status(201).json({ ...result, size: req.file.size })
     },
   }
 

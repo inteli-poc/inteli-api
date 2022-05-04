@@ -1,12 +1,14 @@
 const express = require('express')
+require('express-async-errors')
 const cors = require('cors')
 const pinoHttp = require('pino-http')
 const { initialize } = require('express-openapi')
 const swaggerUi = require('swagger-ui-express')
+const multer = require('multer')
 const path = require('path')
 const bodyParser = require('body-parser')
 const compression = require('compression')
-const { PORT, API_VERSION, API_MAJOR_VERSION } = require('./env')
+const { PORT, API_VERSION, API_MAJOR_VERSION, FILE_UPLOAD_SIZE_LIMIT_BYTES } = require('./env')
 const logger = require('./logger')
 const v1ApiDoc = require('./api-v1/api-doc')
 const v1RecipeService = require('./api-v1/services/recipeService')
@@ -14,6 +16,7 @@ const v1AttachmentService = require('./api-v1/services/attachmentService')
 const v1BuildService = require('./api-v1/services/buildService')
 const v1OrderService = require('./api-v1/services/orderService')
 const v1PartService = require('./api-v1/services/partService')
+const { handleErrors } = require('./utils/errors')
 
 async function createHttpServer() {
   const app = express()
@@ -33,9 +36,22 @@ async function createHttpServer() {
     return
   })
 
+  const multerOptions = {
+    limits: { fileSize: FILE_UPLOAD_SIZE_LIMIT_BYTES },
+    storage: multer.diskStorage({}),
+  }
+
   initialize({
     app,
     apiDoc: v1ApiDoc,
+    consumesMiddleware: {
+      'multipart/form-data': function (req, res, next) {
+        multer(multerOptions).single('file')(req, res, function (err) {
+          if (err) return next(err)
+          next()
+        })
+      },
+    },
     securityHandlers: {},
     dependencies: {
       recipeService: v1RecipeService,
@@ -59,20 +75,7 @@ async function createHttpServer() {
   }
 
   app.use(`/${API_MAJOR_VERSION}/swagger`, swaggerUi.serve, swaggerUi.setup(null, options))
-
-  // Sorry - app.use checks arity
-  // eslint-disable-next-line no-unused-vars
-  app.use((err, req, res, next) => {
-    if (err.errors) {
-      // openapi validation
-      res.status(err.status).send(err.errors)
-    } else if (err.status) {
-      res.status(err.status).send({ error: err.status === 401 ? 'Unauthorised' : err.message })
-    } else {
-      logger.error('Fallback Error %j', err.stack)
-      res.status(500).send('Fatal error!')
-    }
-  })
+  app.use(handleErrors)
 
   return { app }
 }

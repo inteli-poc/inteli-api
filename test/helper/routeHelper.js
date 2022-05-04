@@ -31,7 +31,37 @@ async function healthCheck({ app }) {
     })
 }
 
+async function postAttachment({ app }, fileData, filename) {
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/attachment`)
+    .set('Accept', 'application/json')
+    .set('Content-type', 'multipart/form-data')
+    .attach('file', fileData, filename)
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postAttachmentErr ${err}`)
+      return err
+    })
+}
+
+async function postAttachmentNoFile({ app }) {
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/attachment`)
+    .set('Accept', 'application/json')
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postAttachmentErr ${err}`)
+      return err
+    })
+}
+
 module.exports = {
   apiDocs,
   healthCheck,
+  postAttachment,
+  postAttachmentNoFile,
 }

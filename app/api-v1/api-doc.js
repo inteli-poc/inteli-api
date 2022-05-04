@@ -114,7 +114,7 @@ const apiDoc = {
           id: {
             $ref: '#/components/schemas/ObjectReference',
           },
-          name: {
+          filename: {
             description: 'Name of the file uploaded as an attachment',
             type: 'string',
             maxLength: 255,

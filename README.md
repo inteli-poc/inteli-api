@@ -6,18 +6,19 @@ Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platf
 
 `inteli-api` is configured primarily using environment variables as follows:
 
-| variable          | required | default  | description                                                                          |
-| :---------------- | :------: | :------: | :----------------------------------------------------------------------------------- |
-| SERVICE_TYPE      |    N     |  `info`  | Logging level. Valid values are [`trace`, `debug`, `info`, `warn`, `error`, `fatal`] |
-| PORT              |    N     |  `3001`  | The port for the API to listen on                                                    |
-| LOG_LEVEL         |    N     |  `info`  | Logging level. Valid values are [`trace`, `debug`, `info`, `warn`, `error`, `fatal`] |
-| API_VERSION       |    N     |    -     | API version                                                                          |
-| API_MAJOR_VERSION |    N     |    -     | API major version                                                                    |
-| DB_HOST           |    Y     |    -     | PostgreSQL database hostname                                                         |
-| DB_PORT           |    N     |  `5432`  | PostgreSQL database port                                                             |
-| DB_NAME           |    N     | `inteli` | PostgreSQL database name                                                             |
-| DB_USERNAME       |    Y     |    -     | PostgreSQL database username                                                         |
-| DB_PASSWORD       |    Y     |    -     | PostgreSQL database password                                                         |
+| variable                     | required |       default       | description                                                                          |
+| :--------------------------- | :------: | :-----------------: | :----------------------------------------------------------------------------------- |
+| SERVICE_TYPE                 |    N     |       `info`        | Logging level. Valid values are [`trace`, `debug`, `info`, `warn`, `error`, `fatal`] |
+| PORT                         |    N     |       `3001`        | The port for the API to listen on                                                    |
+| LOG_LEVEL                    |    N     |       `info`        | Logging level. Valid values are [`trace`, `debug`, `info`, `warn`, `error`, `fatal`] |
+| API_VERSION                  |    N     |          -          | API version                                                                          |
+| API_MAJOR_VERSION            |    N     |          -          | API major version                                                                    |
+| DB_HOST                      |    Y     |          -          | PostgreSQL database hostname                                                         |
+| DB_PORT                      |    N     |       `5432`        | PostgreSQL database port                                                             |
+| DB_NAME                      |    N     |      `inteli`       | PostgreSQL database name                                                             |
+| DB_USERNAME                  |    Y     |          -          | PostgreSQL database username                                                         |
+| DB_PASSWORD                  |    Y     |          -          | PostgreSQL database password                                                         |
+| FILE_UPLOAD_SIZE_LIMIT_BYTES |    N     | `1024 * 1024 * 100` | Maximum file size in bytes for upload                                                |
 
 ## Getting started
 
