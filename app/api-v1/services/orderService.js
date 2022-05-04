@@ -5,7 +5,11 @@ async function postProject(reqBody) {
 
   const result = await postOrderDb(reqBody)
 
-  return { statusCode: 201, result }
+  if (!result) {
+    return { statusCode: 400, result: {} }
+  } else {
+    return { statusCode: 201, result }
+  }
 }
 
 module.exports = {
