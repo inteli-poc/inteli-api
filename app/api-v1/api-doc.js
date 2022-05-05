@@ -532,7 +532,10 @@ const apiDoc = {
 // make all schema properties required
 const makeSchemaPropsRequired = (schemaObj) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
-    schemaObj.required = Object.keys(schemaObj.properties)
+    const props = Object.keys(schemaObj.properties)
+    if (props.length > 0) {
+      schemaObj.required = props
+    }
     Object.values(schemaObj.properties).forEach(makeSchemaPropsRequired)
   }
 }
