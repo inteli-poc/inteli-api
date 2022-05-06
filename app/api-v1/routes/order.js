@@ -6,7 +6,7 @@ module.exports = function (orderService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      const { statusCode, result } = await orderService.postProject(req.body)
+      const { statusCode, result } = await orderService.postOrder(req.body)
       if (statusCode != 201) {
         throw new BadRequestError({ message: '400 Bad Request', service: 'order' })
       }

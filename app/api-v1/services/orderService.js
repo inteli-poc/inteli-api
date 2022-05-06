@@ -1,7 +1,7 @@
 const { postOrderDb } = require('../../db')
 const { BadRequestError } = require('../../utils/errors')
 
-async function postProject(reqBody) {
+async function postOrder(reqBody) {
   // Will add a get function at a later date to check for duplication
 
   const result = await postOrderDb(reqBody)
@@ -13,5 +13,5 @@ async function postProject(reqBody) {
 }
 
 module.exports = {
-  postProject,
+  postOrder,
 }
