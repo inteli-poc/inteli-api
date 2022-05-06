@@ -12,7 +12,7 @@ describe('order', function () {
       app = await createHttpServer()
     })
 
-    test('POST Order - 201', async function () {
+    test.only('POST Order - 201', async function () {
       const newProject = {
         owner: 'BAE',
         manufacturer: 'Maher',
