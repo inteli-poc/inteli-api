@@ -16,7 +16,6 @@ const client = knex({
   },
 })
 
-
 async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
@@ -27,6 +26,7 @@ async function postOrderDb(reqBody) {
       items: reqBody.items,
     })
     .returning('*')
+}
 
 async function getAttachment(id) {
   return client('attachments').select(['id', 'filename', 'binary_blob']).where({ id })
@@ -34,7 +34,6 @@ async function getAttachment(id) {
 
 async function addRecipe(recipe) {
   return client('recipes').insert(recipe).returning('*')
-
 }
 
 const insertAttachment = async (name, fileData) => {

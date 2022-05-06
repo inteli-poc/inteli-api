@@ -31,7 +31,6 @@ async function healthCheck({ app }) {
     })
 }
 
-
 async function postOrderRoute(order, { app }) {
   return request(app)
     .post(`/${API_MAJOR_VERSION}/order`)
@@ -43,6 +42,8 @@ async function postOrderRoute(order, { app }) {
     })
     .catch((err) => {
       console.error(`postOrderErr ${err}`)
+    })
+}
 
 async function postRecipeRoute(recipe, { app }) {
   return request(app)
