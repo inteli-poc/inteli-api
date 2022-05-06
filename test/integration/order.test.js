@@ -1,4 +1,4 @@
-const { describe, before } = require('mocha')
+const { describe, before, test } = require('mocha')
 const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
