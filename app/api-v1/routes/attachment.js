@@ -47,6 +47,7 @@ module.exports = function (attachmentService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['attachment'],
   }
 
@@ -99,6 +100,7 @@ module.exports = function (attachmentService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['attachment'],
   }
 

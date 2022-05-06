@@ -17,6 +17,7 @@ const v1BuildService = require('./api-v1/services/buildService')
 const v1OrderService = require('./api-v1/services/orderService')
 const v1PartService = require('./api-v1/services/partService')
 const { handleErrors } = require('./utils/errors')
+const { verifyJwks } = require('./utils/auth')
 
 async function createHttpServer() {
   const app = express()
@@ -52,7 +53,9 @@ async function createHttpServer() {
         })
       },
     },
-    securityHandlers: {},
+    securityHandlers: {
+      bearerAuth: (req) => verifyJwks(req),
+    },
     dependencies: {
       recipeService: v1RecipeService,
       attachmentService: v1AttachmentService,

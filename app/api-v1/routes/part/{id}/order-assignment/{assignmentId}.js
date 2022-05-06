@@ -62,6 +62,7 @@ module.exports = function (partService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['part'],
   }
 

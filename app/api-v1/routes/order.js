@@ -42,7 +42,8 @@ module.exports = function (orderService) {
         },
       },
     },
-    tags: ['orders'],
+    security: [{ bearerAuth: [] }],
+    tags: ['order'],
   }
 
   doc.POST.apiDoc = {
@@ -88,7 +89,8 @@ module.exports = function (orderService) {
         },
       },
     },
-    tags: ['orders'],
+    security: [{ bearerAuth: [] }],
+    tags: ['order'],
   }
 
   return doc

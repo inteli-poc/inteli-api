@@ -62,6 +62,7 @@ module.exports = function (buildService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['build'],
   }
 

@@ -524,7 +524,13 @@ const apiDoc = {
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewRecipeCreation' }],
       },
     },
-    securitySchemes: {},
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
   },
   paths: {},
 }
