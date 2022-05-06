@@ -1,4 +1,5 @@
 const { postOrderDb } = require('../../db')
+const { BadRequestError } = require('../../utils/errors')
 
 async function postProject(reqBody) {
   // Will add a get function at a later date to check for duplication
@@ -6,7 +7,7 @@ async function postProject(reqBody) {
   const result = await postOrderDb(reqBody)
 
   if (!result) {
-    return { statusCode: 400, result: {} }
+    throw new BadRequestError({ message: '400 Bad Request', service: 'order' })
   } else {
     return { statusCode: 201, result }
   }
