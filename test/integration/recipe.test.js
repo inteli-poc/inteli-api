@@ -1,9 +1,11 @@
+const createJWKSMock = require('mock-jwks').default
 const { describe, before, it } = require('mocha')
 const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
 const { seed, cleanup } = require('../seeds/recipes')
 const { postRecipeRoute } = require('../helper/routeHelper')
+const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
 
 const logger = require('../../app/logger')
 
@@ -11,14 +13,23 @@ describe('Recipes', function () {
   describe('POST recipes', function () {
     this.timeout(15000)
     let app
+    let authToken
+    let jwksMock
 
     before(async function () {
       await seed()
       app = await createHttpServer()
+      jwksMock = createJWKSMock(AUTH_ISSUER)
+      jwksMock.start()
+      authToken = jwksMock.token({
+        aud: AUTH_AUDIENCE,
+        iss: AUTH_ISSUER,
+      })
     })
 
     after(async function () {
       await cleanup()
+      await jwksMock.stop()
     })
 
     it('should cause schema validation errors', async function () {
@@ -34,7 +45,7 @@ describe('Recipes', function () {
         supplier: 'foobar3000',
       }
 
-      const response = await postRecipeRoute(newRecipe, app)
+      const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(400)
     })
 
@@ -50,7 +61,7 @@ describe('Recipes', function () {
         supplier: 'foobar3000',
       }
 
-      const response = await postRecipeRoute(newRecipe, app)
+      const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(201)
     })
 
@@ -66,7 +77,7 @@ describe('Recipes', function () {
         supplier: 'foobar3000',
       }
 
-      const response = await postRecipeRoute(newRecipe, app)
+      const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(400)
       expect(response.text).to.equal('Attachment id not found')
     })

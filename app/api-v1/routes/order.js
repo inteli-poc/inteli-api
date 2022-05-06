@@ -37,6 +37,7 @@ module.exports = function (orderService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['order'],
   }
 
@@ -83,6 +84,7 @@ module.exports = function (orderService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['order'],
   }
 

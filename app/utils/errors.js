@@ -15,6 +15,12 @@ class BadRequestError extends HttpResponseError {
   }
 }
 
+class UnauthorizedError extends HttpResponseError {
+  constructor({ message }) {
+    super({ code: 401, message })
+  }
+}
+
 const handleErrors = (err, req, res, next) => {
   if (err instanceof HttpResponseError) {
     logger.warn(`Error in ${err.service} service: ${err.message}`)
@@ -27,8 +33,6 @@ const handleErrors = (err, req, res, next) => {
   // multer errors
   else if (err.code) {
     res.status(400).send(err.message)
-  } else if (err.status) {
-    res.status(err.status).send({ error: err.status === 401 ? 'Unauthorised' : err.message })
   } else {
     logger.error('Fallback Error %j', err.stack)
     res.status(500).send('Fatal error!')
@@ -41,4 +45,5 @@ module.exports = {
   handleErrors,
   BadRequestError,
   HttpResponseError,
+  UnauthorizedError,
 }

@@ -59,6 +59,7 @@ module.exports = function (recipeService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['recipe'],
   }
 
@@ -105,6 +106,7 @@ module.exports = function (recipeService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['recipe'],
   }
 

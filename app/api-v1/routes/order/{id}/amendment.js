@@ -58,6 +58,7 @@ module.exports = function (orderService) {
         },
       },
     },
+    security: [{ bearerAuth: [] }],
     tags: ['order'],
   }
 
