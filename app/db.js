@@ -16,7 +16,6 @@ const client = knex({
   },
 })
 
-
 async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
