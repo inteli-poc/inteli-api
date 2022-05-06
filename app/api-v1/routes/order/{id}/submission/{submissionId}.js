@@ -15,6 +15,9 @@ module.exports = function (orderService) {
         required: true,
         name: 'id',
         allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
       },
       {
         description: 'Id of the submission action',
@@ -22,6 +25,9 @@ module.exports = function (orderService) {
         required: true,
         name: 'submissionId',
         allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
       },
     ],
     responses: {

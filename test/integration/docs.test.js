@@ -5,6 +5,16 @@ const { expect } = require('chai').use(jsonChai)
 const { createHttpServer } = require('../../app/server')
 const { apiDocs } = require('../helper/routeHelper')
 
+const OpenAPISchemaValidator = require('openapi-schema-validator').default
+
+var validator = new OpenAPISchemaValidator({
+  version: 3,
+  // optional
+  extensions: {
+    /* place any properties here to extend the schema. */
+  },
+})
+
 describe('api-docs', function () {
   let app
 
@@ -17,7 +27,9 @@ describe('api-docs', function () {
 
     expect(actualResult.status).to.equal(200)
     expect(actualResult.body).to.be.a.jsonObj()
-    expect(JSON.stringify(actualResult.body)).to.include('openapi')
-    expect(JSON.stringify(actualResult.body)).to.include('info')
+
+    const validations = validator.validate(actualResult.body)
+
+    expect(validations.errors).to.be.empty
   })
 })

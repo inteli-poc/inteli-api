@@ -21,6 +21,7 @@ const vars = envalid.cleanEnv(
     DB_NAME: envalid.str({ default: 'inteli' }),
     DB_USERNAME: envalid.str({ devDefault: 'postgres' }),
     DB_PASSWORD: envalid.str({ devDefault: 'postgres' }),
+    FILE_UPLOAD_SIZE_LIMIT_BYTES: envalid.num({ default: 1024 * 1024 * 100, devDefault: 1024 * 1024 * 10 }),
   },
   {
     strict: true,

@@ -15,6 +15,9 @@ module.exports = function (partService) {
         required: true,
         name: 'id',
         allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
       },
       {
         description: 'Id of the part order assignment action',
@@ -22,6 +25,9 @@ module.exports = function (partService) {
         required: true,
         name: 'assignmentId',
         allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
       },
     ],
     responses: {

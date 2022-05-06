@@ -9,7 +9,8 @@
     "depcheck": "depcheck",
     "start": "NODE_ENV=production node app/index.js",
     "dev": "NODE_ENV=development nodemon app/index.js | pino-colada",
-    "coverage": "nyc npm run test"
+    "coverage": "nyc npm run test",
+    "migrate": "knex migrate:latest"
   },
   "repository": {
     "type": "git",
@@ -35,8 +36,10 @@
     "dotenv": "^16.0.0",
     "envalid": "^7.3.1",
     "express": "^4.17.3",
+    "express-async-errors": "^3.1.1",
     "express-openapi": "^10.1.0",
     "knex": "^2.0.0",
+    "multer": "^1.4.4",
     "pg": "^8.7.3",
     "pino": "^7.10.0",
     "pino-http": "^6.6.0",
@@ -52,6 +55,7 @@
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
     "nyc": "^15.1.0",
+    "openapi-schema-validator": "^11.0.0",
     "pino-colada": "^2.2.2",
     "prettier": "^2.6.2",
     "supertest": "^6.2.2"
