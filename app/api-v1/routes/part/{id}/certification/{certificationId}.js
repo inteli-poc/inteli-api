@@ -15,6 +15,19 @@ module.exports = function (partService) {
         required: true,
         name: 'id',
         allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
+      },
+      {
+        description: 'Id of the part certification action',
+        in: 'path',
+        required: true,
+        name: 'certificationId',
+        allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
       },
     ],
     responses: {

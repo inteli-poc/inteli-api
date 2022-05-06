@@ -42,6 +42,7 @@ async function postOrderRoute(order, { app }) {
     })
     .catch((err) => {
       console.error(`postOrderErr ${err}`)
+
       return err
     })
 }
