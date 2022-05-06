@@ -15,6 +15,9 @@ module.exports = {
     migrations: {
       tableName: 'migrations',
     },
+    seeds: {
+      directory: './test/seeds',
+    },
   },
   development: {
     client: 'pg',

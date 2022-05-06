@@ -1,3 +1,6 @@
+const logger = require('../../logger')
+const { BadRequestError } = require('../../utils/errors')
+
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService) {
   const doc = {
@@ -5,7 +8,26 @@ module.exports = function (recipeService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      if (!req.body) {
+        throw new BadRequestError({ message: 'No body provided uploaded', service: 'recipe' })
+      }
+
+      const { externalId, name, imageAttachmentId, material, alloy, price, requiredCerts, supplier } = req.body
+
+      const recipe = await recipeService.createRecipe({
+        externalId,
+        name,
+        imageAttachmentId,
+        material,
+        alloy,
+        price,
+        requiredCerts: JSON.stringify(requiredCerts),
+        supplier,
+      })
+
+      logger.info('Recipe created: ', recipe.id)
+
+      res.status(201).json(recipe)
     },
   }
 
