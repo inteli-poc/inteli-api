@@ -75,6 +75,7 @@ async function createHttpServer() {
   }
 
   app.use(`/${API_MAJOR_VERSION}/swagger`, swaggerUi.serve, swaggerUi.setup(null, options))
+
   app.use(handleErrors)
 
   return { app }

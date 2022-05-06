@@ -32,3 +32,35 @@ The following tables exist in the `inteli` database.
 | columns | Index Type | description |
 | :------ | :--------- | :---------- |
 | `id`    | PRIMARY    | Primary key |
+
+### `recipes`
+
+`recipes` is where recipes for orders are stored
+
+#### Columns
+
+| column              | PostgreSQL type           | nullable |       default        | description                            |
+| :------------------ | :------------------------ | :------- | :------------------: | :------------------------------------- |
+| `id`                | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the `attachment` |
+| `externalId`        | `CHARACTER VARYING (255)` | FALSE    |                      | The external id of the recipe          |
+| `name`              | `CHARACTER VARYING (255)` | FALSE    |                      | The name of recipe                     |
+| `imageAttachmentId` | `UUID`                    | FALSE    |                      | Id of attachment (FK)                  |
+| `material`          | `CHARACTER VARYING (255)` | FALSE    |                      |                                        |
+| `alloy`             | `CHARACTER VARYING (255)` | FALSE    |                      |                                        |
+| `price`             | `CHARACTER VARYING (255)` | FALSE    |                      |                                        |
+| `requiredCerts`     | `JSONB`                   | FALSE    |                      |                                        |
+| `supplier`          | `CHARACTER VARYING (255)` | FALSE    |                      |                                        |
+| `created_at`        | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was created       |
+| `updated_at`        | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was updated       |
+
+#### Indexes
+
+| columns | Index Type | description |
+| :------ | :--------- | :---------- |
+| `id`    | PRIMARY    | Primary key |
+
+#### Foreign Keys
+
+| columns             | References     | description                  |
+| :------------------ | :------------- | :--------------------------- |
+| `imageAttachmentId` | attachment(id) | The id of the attachment row |

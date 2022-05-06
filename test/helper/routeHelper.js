@@ -31,6 +31,7 @@ async function healthCheck({ app }) {
     })
 }
 
+
 async function postOrderRoute(order, { app }) {
   return request(app)
     .post(`/${API_MAJOR_VERSION}/order`)
@@ -43,6 +44,18 @@ async function postOrderRoute(order, { app }) {
     .catch((err) => {
       console.error(`postOrderErr ${err}`)
 
+async function postRecipeRoute(recipe, { app }) {
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/recipe`)
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .send(recipe)
+    .then((response) => {
+      console.log(response)
+      return response
+    })
+    .catch((err) => {
+      console.error(`postRecipeErr ${err}`)
       return err
     })
 }
@@ -79,6 +92,7 @@ module.exports = {
   apiDocs,
   healthCheck,
   postOrderRoute,
+  postRecipeRoute,
   postAttachment,
   postAttachmentNoFile,
 }
