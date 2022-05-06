@@ -2,7 +2,7 @@ apiVersion: v2
 name: inteli-api
 appVersion: '1.5.0'
 description: A Helm chart for inteli-api
-version: '1.4.0'
+version: '1.5.0'
 type: application
 maintainers:
   - name: digicatapult
