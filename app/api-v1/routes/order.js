@@ -1,15 +1,16 @@
 // eslint-disable-next-line no-unused-vars
+const { BadRequestError } = require('../../utils/errors')
 module.exports = function (orderService) {
   const doc = {
     GET: async function (req, res) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      try {
-        const { statusCode, result } = await orderService.postProject(req.body)
+      const { statusCode, result } = await orderService.postProject(req.body)
+      if (statusCode != 201) {
+        throw new BadRequestError({ message: 'Bad Request', service: 'order' })
+      } else {
         return res.status(statusCode).json(result)
-      } catch (error) {
-        throw 'Error: ' + error
       }
     },
   }
