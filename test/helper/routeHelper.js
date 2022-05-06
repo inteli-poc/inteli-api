@@ -31,11 +31,12 @@ async function healthCheck({ app }) {
     })
 }
 
-async function postOrderRoute(order, { app }) {
+async function postOrderRoute(order, { app }, token) {
   return request(app)
     .post(`/${API_MAJOR_VERSION}/order`)
     .set('Accept', 'application/json')
     .set('Content-Type', 'application/json')
+    .set('Authorization', `Bearer ${token}`)
     .send(order)
     .then((response) => {
       return response

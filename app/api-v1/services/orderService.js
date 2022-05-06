@@ -5,7 +5,6 @@ async function postProject(reqBody) {
   // Will add a get function at a later date to check for duplication
 
   const result = await postOrderDb(reqBody)
-
   if (!result) {
     throw new BadRequestError({ message: '400 Bad Request', service: 'order' })
   } else {
