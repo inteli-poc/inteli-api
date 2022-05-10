@@ -7,8 +7,8 @@ module.exports = function (orderService) {
     },
     POST: async function (req, res) {
       const { statusCode, result } = await orderService.postOrder(req.body)
-      if (statusCode != 201) {
-        throw new BadRequestError({ message: '400 Bad Request', service: 'order' })
+      if (!req.body) {
+        throw new BadRequestError({ message: 'No body uploaded', service: 'order' })
       }
       return res.status(statusCode).json(result)
     },

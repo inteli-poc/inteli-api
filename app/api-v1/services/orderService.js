@@ -6,7 +6,7 @@ async function postOrder(reqBody) {
 
   const result = await postOrderDb(reqBody)
   if (!result) {
-    throw new BadRequestError({ message: '400 Bad Request', service: 'order' })
+    throw new BadRequestError({ message: 'Order post error', service: 'order' })
   } else {
     return { statusCode: 201, result }
   }
