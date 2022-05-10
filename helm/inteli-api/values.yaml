@@ -3,6 +3,12 @@ config:
   logLevel: info
   dbName: inteli
   dbPort: 5432
+  auth:
+    jwksUri: https://inteli.eu.auth0.com/.well-known/jwks.json
+    audience: inteli-dev
+    issuer: https://inteli.eu.auth0.com/
+    tokenUrl: https://inteli.eu.auth0.com/oauth/token
+
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent

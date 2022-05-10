@@ -11,5 +11,53 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=inteli
+  
+  postgres-dscp:
+    image: postgres:14.1-alpine
+    ports:
+      - 5433:5432
+    volumes:
+      - dscp-storage:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=dscp
+
+  dscp-identity-service:
+    image: ghcr.io/digicatapult/dscp-identity-service:latest
+    command: /bin/sh -c "
+      sleep 60 &&
+      npx knex migrate:latest &&
+      node app/index.js"
+    ports:
+      - 3001:3001
+    environment:
+      - PORT=3001
+      # - USER_URI=3001
+      - API_HOST=dscp-node
+      - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
+      - AUTH_AUDIENCE=inteli-dev
+      - AUTH_ISSUER=https://inteli.eu.auth0.com/
+      - AUTH_TOKEN_URL=https://inteli.eu.auth0.com/oauth/token
+      - DB_HOST=postgres-dscp
+      - DB_PORT=5432
+      - DB_NAME=dscp
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+
+  dscp-node:
+    image: ghcr.io/digicatapult/dscp-node:latest
+    command:
+      --base-path /data/
+      --dev
+      --unsafe-ws-external
+      --unsafe-rpc-external
+      --rpc-cors all
+    ports:
+      - 30333:30333
+      - 9944:9944
+      - 9933:9933
+    restart: on-failure
 volumes:
   data-storage:
+  dscp-storage:

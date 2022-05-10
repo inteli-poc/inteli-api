@@ -10,3 +10,7 @@ data:
   dbHost: {{ include "inteli-api.postgresql.fullname" . }}
   dbPort: {{ .Values.config.dbPort | quote }}
   dbName: {{ .Values.config.dbName }}
+  authJwksUri: {{ .Values.config.auth.jwksUri }}
+  authAudience: {{ .Values.config.auth.audience }}
+  authIssuer: {{ .Values.config.auth.issuer }}
+  authTokenUrl: {{ .Values.config.auth.tokenUrl }}
