@@ -53,5 +53,18 @@ describe('order', function () {
       const response = await postOrderRoute(newProject, app, authToken)
       expect(response.status).to.equal(400)
     })
+
+    test('POST Order - Incorrect Status Enum', async function () {
+      const newProject = {
+        owner: 'BAE',
+        manufacturer: 'Maher',
+        status: 'Banana',
+        requiredBy: new Date().toISOString(),
+        items: [],
+      }
+
+      const response = await postOrderRoute(newProject, app, authToken)
+      expect(response.status).to.equal(400)
+    })
   })
 })

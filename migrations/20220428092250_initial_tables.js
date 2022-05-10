@@ -22,8 +22,12 @@ exports.up = async (knex) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
     def.string('owner', 255).notNullable()
     def.string('manufacturer', 255).notNullable()
-    //def.enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted']).notNullable()
-    def.string('status', 255).notNullable()
+    def
+      .enu('status', ['Submitted', 'Rejected', 'Amended', 'Accepted'], {
+        useNative: true,
+        enumName: 'status',
+      })
+      .notNullable()
     def.jsonb('items').notNullable()
     def.datetime('required_by').notNullable()
     def.datetime('created_at').notNullable().default(now())
