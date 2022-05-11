@@ -28,7 +28,8 @@ exports.up = async (knex) => {
         enumName: 'status',
       })
       .notNullable()
-    def.jsonb('items').notNullable()
+    //def.jsonb('items').notNullable()
+    def.specificType('items', 'uuid Array').notNullable()
     def.datetime('required_by').notNullable()
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())

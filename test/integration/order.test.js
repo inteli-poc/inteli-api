@@ -35,7 +35,7 @@ describe('order', function () {
         manufacturer: 'Maher',
         status: 'Accepted',
         requiredBy: new Date().toISOString(),
-        items: [],
+        items: ['00000000-0000-1000-8000-000000000000'],
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
