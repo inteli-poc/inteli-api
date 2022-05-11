@@ -66,5 +66,12 @@ describe('order', function () {
       const response = await postOrderRoute(newProject, app, authToken)
       expect(response.status).to.equal(400)
     })
+
+    test('POST Order - Empty Request Body', async function () {
+      const newProject = {}
+
+      const response = await postOrderRoute(newProject, app, authToken)
+      expect(response.status).to.equal(400)
+    })
   })
 })
