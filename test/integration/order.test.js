@@ -43,6 +43,19 @@ describe('order', function () {
       expect(response.body[0].owner).deep.equal(newProject.owner)
     })
 
+    test('POST Order - Invalid UUID', async function () {
+      const newProject = {
+        owner: 'BAE',
+        manufacturer: 'Maher',
+        status: 'Accepted',
+        requiredBy: new Date().toISOString(),
+        items: ['00000000-0000-1000-8000'],
+      }
+
+      const response = await postOrderRoute(newProject, app, authToken)
+      expect(response.status).to.equal(400)
+    })
+
     test('POST Order with required Params missing - 400', async function () {
       const newProject = {
         owner: 'BAE',
