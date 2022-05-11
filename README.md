@@ -24,9 +24,9 @@ Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platf
 | AUTH_ISSUER                  |    N     |           `https://inteli.eu.auth0.com/`            | Domain of the Auth0 API `                                                            |
 | AUTH_TOKEN_URL               |    N     |      `https://inteli.eu.auth0.com/oauth/token`      | Auth0 API endpoint that issues an Authorisation (Bearer) access token                |
 
-### `recipes`
+### `Orders`
 
-`recipes` is where recipes for orders are stored
+`orders` is where orders for orders are stored
 
 #### Columns
 
