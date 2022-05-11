@@ -24,6 +24,29 @@ Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platf
 | AUTH_ISSUER                  |    N     |           `https://inteli.eu.auth0.com/`            | Domain of the Auth0 API `                                                            |
 | AUTH_TOKEN_URL               |    N     |      `https://inteli.eu.auth0.com/oauth/token`      | Auth0 API endpoint that issues an Authorisation (Bearer) access token                |
 
+### `recipes`
+
+`recipes` is where recipes for orders are stored
+
+#### Columns
+
+| column         | PostgreSQL type           | nullable |       default        | description                                           |
+| :------------- | :------------------------ | :------- | :------------------: | :---------------------------------------------------- |
+| `id`           | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the                             |
+| `owner`        | `CHARACTER VARYING (255)` | FALSE    |                      | The name of owner                                     |
+| `manufacturer` | `CHARACTER VARYING (255)` | FALSE    |                      | The name of manufacturer                              |
+| `status`       | `ENUM`                    | FALSE    |                      | Can be 'Submitted', 'Rejected', 'Amended', 'Accepted' |
+| `items`        | `jsonB`                   | FALSE    |                      |                                                       |
+| `required_by`  | `DateTime`                | FALSE    |
+| `created_at`   | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was created                      |
+| `updated_at`   | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was updated                      |
+
+#### Indexes
+
+| columns | Index Type | description |
+| :------ | :--------- | :---------- |
+| `id`    | PRIMARY    | Primary key |
+
 ## Getting started
 
 To start dependencies
