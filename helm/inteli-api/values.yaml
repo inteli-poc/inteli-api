@@ -12,7 +12,7 @@ config:
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.7.0'
+  tag: 'v1.8.0'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:
