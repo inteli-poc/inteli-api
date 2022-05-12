@@ -21,7 +21,7 @@ class UnauthorizedError extends HttpResponseError {
   }
 }
 
-class IncorrectManufacturerError extends HttpResponseError {
+class IncorrectSupplierError extends HttpResponseError {
   constructor({ message }) {
     super({ code: 422, message })
   }
@@ -52,5 +52,5 @@ module.exports = {
   BadRequestError,
   HttpResponseError,
   UnauthorizedError,
-  IncorrectManufacturerError,
+  IncorrectSupplierError,
 }

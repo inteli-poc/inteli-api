@@ -1,5 +1,5 @@
 const { postOrderDb, getRecipeByIDs } = require('../../db')
-const { BadRequestError, IncorrectManufacturerError } = require('../../utils/errors')
+const { BadRequestError, IncorrectSupplierError } = require('../../utils/errors')
 
 async function postOrder(reqBody) {
   // Will add a get function at a later date to check for duplication
@@ -10,7 +10,7 @@ async function postOrder(reqBody) {
 
   recipes.forEach((recipeItem) => {
     if (recipeItem.supplier != reqBody.manufacturer) {
-      throw new IncorrectManufacturerError({ message: 'Order post error - Supplier does not match', service: 'order' })
+      throw new IncorrectSupplierError({ message: 'Order post error - Supplier does not match', service: 'order' })
     }
   })
 
