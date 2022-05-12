@@ -3,9 +3,9 @@ const { expect } = require('chai')
 const createJWKSMock = require('mock-jwks').default
 
 const { createHttpServer } = require('../../app/server')
-const { postOrderRoute } = require('../helper/routeHelper')
+const { postOrderRoute, postRecipeRoute } = require('../helper/routeHelper')
+const { seed, cleanup } = require('../seeds/orders')
 const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
-const { cleanup } = require('../seeds/orders')
 
 describe('order', function () {
   describe('valid order', function () {
@@ -15,6 +15,7 @@ describe('order', function () {
     let jwksMock
 
     before(async function () {
+      await seed()
       app = await createHttpServer()
       jwksMock = createJWKSMock(AUTH_ISSUER)
       jwksMock.start()
@@ -85,6 +86,34 @@ describe('order', function () {
 
       const response = await postOrderRoute(newProject, app, authToken)
       expect(response.status).to.equal(400)
+    })
+
+    test('POST Order - Check ID & Manufacturer', async function () {
+      const newRecipe = {
+        externalId: 'foobar3000',
+        name: 'foobar3000',
+        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
+        material: 'foobar3000',
+        alloy: 'foobar3000',
+        price: 'foobar3000',
+        requiredCerts: [{ description: 'foobar3000' }],
+        supplier: 'Maher',
+      }
+
+      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
+
+      const newOrder = {
+        owner: 'BAE',
+        manufacturer: 'Maher',
+        status: 'Accepted',
+        requiredBy: new Date().toISOString(),
+        items: [recipeResponse.body[0].id],
+      }
+
+      const response = await postOrderRoute(newOrder, app, authToken)
+      expect(response.body[0].manufacturer).to.equal(recipeResponse.body[0].supplier)
+      expect(response.body[0].items).to.contain(recipeResponse.body[0].id)
+      expect(response.status).to.equal(201)
     })
   })
 })
