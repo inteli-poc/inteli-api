@@ -88,7 +88,7 @@ describe('order', function () {
       expect(response.status).to.equal(400)
     })
 
-    test.only('POST Order - Check ID & Manufacturer', async function () {
+    test('POST Order - Check ID & Manufacturer', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
