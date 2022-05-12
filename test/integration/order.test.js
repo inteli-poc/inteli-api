@@ -115,5 +115,31 @@ describe('order', function () {
       expect(response.body[0].items).to.contain(recipeResponse.body[0].id)
       expect(response.status).to.equal(201)
     })
+
+    test('POST Order - Check ID & Manufacturer - FAIL', async function () {
+      const newRecipe = {
+        externalId: 'foobar3000',
+        name: 'foobar3000',
+        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
+        material: 'foobar3000',
+        alloy: 'foobar3000',
+        price: 'foobar3000',
+        requiredCerts: [{ description: 'foobar3000' }],
+        supplier: 'BAE',
+      }
+
+      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
+
+      const newOrder = {
+        owner: 'BAE',
+        manufacturer: 'Maher',
+        status: 'Accepted',
+        requiredBy: new Date().toISOString(),
+        items: [recipeResponse.body[0].id],
+      }
+
+      const response = await postOrderRoute(newOrder, app, authToken)
+      expect(response.status).to.equal(422)
+    })
   })
 })

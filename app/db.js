@@ -36,6 +36,10 @@ async function addRecipe(recipe) {
   return client('recipes').insert(recipe).returning('*')
 }
 
+async function getRecipeByIDs(ids) {
+  return client('recipes').select('*').whereIn('id', ids)
+}
+
 const insertAttachment = async (name, fileData) => {
   return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
 }
@@ -46,4 +50,5 @@ module.exports = {
   getAttachment,
   addRecipe,
   insertAttachment,
+  getRecipeByIDs,
 }
