@@ -15,6 +15,12 @@ class BadRequestError extends HttpResponseError {
   }
 }
 
+class InternalError extends HttpResponseError {
+  constructor({ message, service }) {
+    super({ code: 500, message, service })
+  }
+}
+
 class UnauthorizedError extends HttpResponseError {
   constructor({ message }) {
     super({ code: 401, message })
@@ -53,4 +59,5 @@ module.exports = {
   HttpResponseError,
   UnauthorizedError,
   IncorrectSupplierError,
+  InternalError,
 }

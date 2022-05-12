@@ -13,7 +13,7 @@ async function createRecipe(reqBody) {
     throw new BadRequestError({ message: 'Attachment id not found', service: 'recipe' })
   }
 
-  const recipe = await addRecipe(reqBody)
+  const [recipe] = await addRecipe(reqBody)
   return recipe
 }
 

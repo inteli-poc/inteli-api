@@ -3,6 +3,8 @@ config:
   logLevel: info
   dbName: inteli
   dbPort: 5432
+  identityServiceHost: localhost
+  identityServicePort: 80
   auth:
     jwksUri: https://inteli.eu.auth0.com/.well-known/jwks.json
     audience: inteli-dev
@@ -12,7 +14,7 @@ config:
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.8.0'
+  tag: 'v1.7.1'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:

@@ -23,6 +23,8 @@ Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platf
 | AUTH_AUDIENCE                |    N     |                    `inteli-dev`                     | Identifier of the Auth0 API                                                          |
 | AUTH_ISSUER                  |    N     |           `https://inteli.eu.auth0.com/`            | Domain of the Auth0 API `                                                            |
 | AUTH_TOKEN_URL               |    N     |      `https://inteli.eu.auth0.com/oauth/token`      | Auth0 API endpoint that issues an Authorisation (Bearer) access token                |
+| IDENTITY_SERVICE_HOST        |    Y     |                                                     | Hostname of the `dscp-identity-service`                                              |
+| IDENTITY_SERVICE_PORT        |    Y     |                                                     | Port of the `dscp-identity-service`                                                  |
 
 ### `Orders`
 
