@@ -14,3 +14,5 @@ data:
   authAudience: {{ .Values.config.auth.audience }}
   authIssuer: {{ .Values.config.auth.issuer }}
   authTokenUrl: {{ .Values.config.auth.tokenUrl }}
+  identityServiceHost: {{ .Values.config.identityServiceHost }}
+  identityServicePort: {{ .Values.config.identityServicePort | quote }}
