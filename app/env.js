@@ -15,6 +15,8 @@ const vars = envalid.cleanEnv(
     PORT: envalid.port({ default: 80, devDefault: 3000 }),
     API_VERSION: envalid.str({ default: version }),
     API_MAJOR_VERSION: envalid.str({ default: 'v1' }),
+    DSCP_API_HOST: envalid.host({ devDefault: 'localhost' }),
+    DSCP_API_PORT: envalid.port({ devDefault: 3001 }),
     LOG_LEVEL: envalid.str({ default: 'info', devDefault: 'debug' }),
     DB_HOST: envalid.host({ devDefault: 'localhost' }),
     DB_PORT: envalid.port({ default: 5432 }),
@@ -27,7 +29,7 @@ const vars = envalid.cleanEnv(
     AUTH_ISSUER: envalid.url({ devDefault: 'https://inteli.eu.auth0.com/' }),
     AUTH_TOKEN_URL: envalid.url({ devDefault: 'https://inteli.eu.auth0.com/oauth/token' }),
     IDENTITY_SERVICE_HOST: envalid.host({ devDefault: 'localhost' }),
-    IDENTITY_SERVICE_PORT: envalid.port({ devDefault: 3001 }),
+    IDENTITY_SERVICE_PORT: envalid.port({ devDefault: 3002 }),
   },
   {
     strict: true,

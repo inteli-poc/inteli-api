@@ -1,5 +1,7 @@
 config:
   port: 80
+  dscpApiHost: dscp-api
+  dscpApiPort: 80
   logLevel: info
   dbName: inteli
   dbPort: 5432
@@ -14,7 +16,7 @@ config:
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.7.1'
+  tag: 'v1.7.2'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:

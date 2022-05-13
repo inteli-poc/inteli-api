@@ -5,6 +5,7 @@ coverage
 .idea
 .env
 .vscode
+test.env
 
 github_token
 helm/**/*.tgz

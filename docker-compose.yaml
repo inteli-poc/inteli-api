@@ -1,23 +1,25 @@
 version: '3'
 
 services:
-  postgres-data:
+  postgres-inteli-api:
     image: postgres:14.1-alpine
+    container_name: postgres-inteli-api
     ports:
       - 5432:5432
     volumes:
-      - data-storage:/var/lib/postgresql/data
+      - inteli-api-storage:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=inteli
   
-  postgres-dscp:
+  postgres-identity-service:
     image: postgres:14.1-alpine
+    container_name: postgres-identity
     ports:
       - 5433:5432
     volumes:
-      - dscp-storage:/var/lib/postgresql/data
+      - identity-storage:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -25,21 +27,21 @@ services:
 
   dscp-identity-service:
     image: ghcr.io/digicatapult/dscp-identity-service:latest
+    container_name: identity-service
     command: /bin/sh -c "
       sleep 60 &&
       npx knex migrate:latest &&
       node app/index.js"
     ports:
-      - 3001:3001
+      - 3002:3001
     environment:
       - PORT=3001
-      # - USER_URI=3001
       - API_HOST=dscp-node
       - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
       - AUTH_AUDIENCE=inteli-dev
       - AUTH_ISSUER=https://inteli.eu.auth0.com/
       - AUTH_TOKEN_URL=https://inteli.eu.auth0.com/oauth/token
-      - DB_HOST=postgres-dscp
+      - DB_HOST=postgres-identity-service
       - DB_PORT=5432
       - DB_NAME=dscp
       - DB_USERNAME=postgres
@@ -47,6 +49,7 @@ services:
 
   dscp-node:
     image: ghcr.io/digicatapult/dscp-node:latest
+    container_name: node
     command:
       --base-path /data/
       --dev
@@ -58,6 +61,38 @@ services:
       - 9944:9944
       - 9933:9933
     restart: on-failure
+
+  ipfs:
+    image: ipfs/go-ipfs:v0.12.2
+    container_name: ipfs
+    environment:
+      - |
+        IPFS_SWARM_KEY=/key/swarm/psk/1.0.0/
+        /base16/
+        0000000000000000000000000000000000000000000000000000000000000000
+    ports:
+      - 4001:4001
+      - 8080:8080
+      - 5001:5001
+
+  dscp-api:
+    image: ghcr.io/digicatapult/dscp-api:v4.0.0
+    container_name: dscp-api
+    ports:
+      - 3001:3001
+    environment:
+      - PORT=3001
+      - API_HOST=dscp-node
+      - API_PORT=9944
+      - USER_URI=//Alice
+      - IPFS_HOST=dscp-ipfs
+      - IPFS_PORT=5001
+      - LOG_LEVEL=trace
+      - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
+      - AUTH_AUDIENCE=inteli-dev
+      - AUTH_ISSUER=https://inteli.eu.auth0.com/
+      - AUTH_TOKEN_URL=https://inteli.eu.auth0.com/oauth/token
+    restart: on-failure
 volumes:
-  data-storage:
-  dscp-storage:
+  inteli-api-storage:
+  identity-storage:
