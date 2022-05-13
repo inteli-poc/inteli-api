@@ -26,29 +26,6 @@ Inteli OpenAPI service for interacting with the DSCP (Digital Supply-Chain Platf
 | IDENTITY_SERVICE_HOST        |    Y     |                                                     | Hostname of the `dscp-identity-service`                                              |
 | IDENTITY_SERVICE_PORT        |    Y     |                                                     | Port of the `dscp-identity-service`                                                  |
 
-### `Orders`
-
-`orders` is where orders for orders are stored
-
-#### Columns
-
-| column         | PostgreSQL type           | nullable |       default        | description                                           |
-| :------------- | :------------------------ | :------- | :------------------: | :---------------------------------------------------- |
-| `id`           | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the                             |
-| `owner`        | `CHARACTER VARYING (255)` | FALSE    |                      | The name of owner                                     |
-| `manufacturer` | `CHARACTER VARYING (255)` | FALSE    |                      | The name of manufacturer                              |
-| `status`       | `ENUM`                    | FALSE    |                      | Can be 'Submitted', 'Rejected', 'Amended', 'Accepted' |
-| `items`        | `jsonB`                   | FALSE    |                      |                                                       |
-| `required_by`  | `DateTime`                | FALSE    |
-| `created_at`   | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was created                      |
-| `updated_at`   | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was updated                      |
-
-#### Indexes
-
-| columns | Index Type | description |
-| :------ | :--------- | :---------- |
-| `id`    | PRIMARY    | Primary key |
-
 ## Getting started
 
 To start dependencies
