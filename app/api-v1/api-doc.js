@@ -255,7 +255,7 @@ const apiDoc = {
         type: 'object',
         description: 'A new purchase-order to be submitted',
         properties: {
-          manufacturer: {
+          supplier: {
             description:
               'Name of the manufacturer who will supply parts from this purchase-order. This information is not stored directly on-chain',
             type: 'string',

@@ -19,9 +19,7 @@ const client = knex({
 async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
-      owner: reqBody.owner,
-      manufacturer: reqBody.manufacturer,
-      status: reqBody.status,
+      supplier: reqBody.supplier,
       required_by: reqBody.requiredBy,
       items: reqBody.items,
     })

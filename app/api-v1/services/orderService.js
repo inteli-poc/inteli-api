@@ -7,12 +7,13 @@ async function postOrder(reqBody) {
   // This section checks if the order manufacturer does not match the supplier
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
-
-  recipes.forEach((recipeItem) => {
-    if (recipeItem.supplier != reqBody.manufacturer) {
-      throw new IncorrectSupplierError({ message: 'Order post error - Supplier does not match', service: 'order' })
-    }
-  })
+  if (recipes) {
+    recipes.forEach((recipeItem) => {
+      if (recipeItem.supplier != reqBody.supplier) {
+        throw new IncorrectSupplierError({ message: 'Order post error - Supplier does not match', service: 'order' })
+      }
+    })
+  }
 
   const result = await postOrderDb(reqBody)
   if (!result) {
