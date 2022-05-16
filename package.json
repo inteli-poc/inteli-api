@@ -1,6 +1,6 @@
 {
   "name": "@digicatapult/inteli-api",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
@@ -63,6 +63,6 @@
     "openapi-schema-validator": "^11.0.0",
     "pino-colada": "^2.2.2",
     "prettier": "^2.6.2",
-    "supertest": "^6.2.2"
+    "supertest": "^6.2.3"
   }
 }

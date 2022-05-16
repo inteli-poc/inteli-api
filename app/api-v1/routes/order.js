@@ -1,11 +1,18 @@
 // eslint-disable-next-line no-unused-vars
-module.exports = function (orderService) {
+const { BadRequestError } = require('../../utils/errors')
+module.exports = function (orderService, identityService) {
   const doc = {
     GET: async function (req, res) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      const { address: supplierAddress } = await identityService.getMemberByAlias(req, req.body.supplier)
+
+      const { statusCode, result } = await orderService.postOrder({ ...req.body, supplier: supplierAddress })
+      if (!req.body) {
+        throw new BadRequestError({ message: 'No body uploaded', service: 'order' })
+      }
+      return res.status(statusCode).json({ ...result[0], supplier: req.body.supplier })
     },
   }
 
