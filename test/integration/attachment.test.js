@@ -3,7 +3,7 @@ const { describe, before, it, after } = require('mocha')
 const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
-const { postAttachment, postAttachmentNoFile } = require('../helper/routeHelper')
+const { postAttachment, postAttachmentNoFile, postAttachmentJSON } = require('../helper/routeHelper')
 const { AUTH_ISSUER, AUTH_AUDIENCE, FILE_UPLOAD_SIZE_LIMIT_BYTES } = require('../../app/env')
 
 describe('attachments', function () {
@@ -47,5 +47,33 @@ describe('attachments', function () {
     const response = await postAttachmentNoFile(app, authToken)
     expect(response.status).to.equal(400)
     expect(response.error.text).to.equal('No file uploaded')
+  })
+
+  it('should return 201 - json object uploaded', async function () {
+    const attachment = { key: 'test' }
+    const response = await postAttachmentJSON(app, attachment, authToken)
+
+    expect(response.status).to.equal(201)
+    expect(response.body).to.have.property('id')
+    expect(response.body.filename).to.equal('json')
+    expect(response.body.size).to.equal(Buffer.from(JSON.stringify(attachment)).length)
+  })
+
+  it('should return 201 - json array uploaded', async function () {
+    const attachment = ['test']
+    const response = await postAttachmentJSON(app, attachment, authToken)
+
+    expect(response.status).to.equal(201)
+    expect(response.body).to.have.property('id')
+    expect(response.body.filename).to.equal('json')
+    expect(response.body.size).to.equal(Buffer.from(JSON.stringify(attachment)).length)
+  })
+
+  it('should return 400 - json string uploaded', async function () {
+    const attachment = 'test'
+    const response = await postAttachmentJSON(app, attachment, authToken)
+
+    expect(response.status).to.equal(400)
+    expect(response.error.text).to.equal('Unexpected token t in JSON at position 0')
   })
 })

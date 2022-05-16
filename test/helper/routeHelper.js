@@ -124,6 +124,22 @@ async function postAttachmentNoFile({ app }, token) {
     })
 }
 
+async function postAttachmentJSON({ app }, body, token) {
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/attachment`)
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .set('Authorization', `Bearer ${token}`)
+    .send(body)
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postAttachmentErr ${err}`)
+      return err
+    })
+}
+
 module.exports = {
   apiDocs,
   healthCheck,
@@ -133,4 +149,5 @@ module.exports = {
   postAttachment,
   postAttachmentNoFile,
   getRecipeByIdRoute,
+  postAttachmentJSON,
 }
