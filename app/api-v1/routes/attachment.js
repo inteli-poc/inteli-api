@@ -7,14 +7,21 @@ module.exports = function (attachmentService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      logger.info('Attachment upload: ', req.file)
+      if (req.headers['content-type'] === 'application/json') {
+        logger.info('JSON attachment upload: %j', req.body)
+        const buffer = Buffer.from(JSON.stringify(req.body))
+        const [result] = await attachmentService.createAttachment('json', buffer)
+        res.status(201).json({ ...result, size: buffer.length })
+        return
+      }
+
+      logger.info('File attachment upload: %s', req.file)
 
       if (!req.file) {
         throw new BadRequestError({ message: 'No file uploaded', service: 'attachment' })
       }
 
-      const attachment = await attachmentService.createAttachment(req.file)
-      const result = attachment[0]
+      const [result] = await attachmentService.createAttachmentFromFile(req.file)
       res.status(201).json({ ...result, size: req.file.size })
     },
   }
@@ -65,6 +72,22 @@ module.exports = function (attachmentService) {
               },
             },
           },
+        },
+        'application/json': {
+          schema: {
+            anyOf: [
+              {
+                type: 'object',
+                properties: {},
+                additionalProperties: true,
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+          },
+          example: {},
         },
       },
     },

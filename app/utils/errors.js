@@ -51,6 +51,8 @@ const handleErrors = (err, req, res, next) => {
   // multer errors
   else if (err.code) {
     res.status(400).send(err.message)
+  } else if (err.status) {
+    res.status(err.status).send(err.expose ? err.message : 'Unknown error')
   } else {
     logger.error('Fallback Error %j', err.stack)
     res.status(500).send('Fatal error!')
