@@ -12,8 +12,7 @@ module.exports = function (orderService, identityService) {
       if (!req.body) {
         throw new BadRequestError({ message: 'No body uploaded', service: 'order' })
       }
-      result[0].supplier = req.body.supplier
-      return res.status(statusCode).json(result)
+      return res.status(statusCode).json({ ...result[0], supplier: req.body.supplier })
     },
   }
 

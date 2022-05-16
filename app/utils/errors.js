@@ -33,6 +33,12 @@ class IncorrectSupplierError extends HttpResponseError {
   }
 }
 
+class SupplierDoesNotExistError extends HttpResponseError {
+  constructor({ message }) {
+    super({ code: 404, message })
+  }
+}
+
 const handleErrors = (err, req, res, next) => {
   if (err instanceof HttpResponseError) {
     logger.warn(`Error in ${err.service} service: ${err.message}`)
@@ -60,4 +66,5 @@ module.exports = {
   UnauthorizedError,
   IncorrectSupplierError,
   InternalError,
+  SupplierDoesNotExistError,
 }
