@@ -78,6 +78,22 @@ async function getRecipeRoute({ app }, token) {
     })
 }
 
+async function getRecipeByIdRoute({ app }, id, token) {
+  return request(app)
+    .get(`/${API_MAJOR_VERSION}/recipe/${id}`)
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .set('Authorization', `Bearer ${token}`)
+    .send()
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`GetRecipeErr ${err}`)
+      return err
+    })
+}
+
 async function postAttachment({ app }, fileData, filename, token) {
   return request(app)
     .post(`/${API_MAJOR_VERSION}/attachment`)
@@ -116,4 +132,5 @@ module.exports = {
   getRecipeRoute,
   postAttachment,
   postAttachmentNoFile,
+  getRecipeByIdRoute,
 }

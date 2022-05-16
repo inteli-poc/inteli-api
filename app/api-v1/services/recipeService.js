@@ -1,4 +1,4 @@
-const { getAttachment, addRecipe, getRecipes: getRecipesDb } = require('../../db')
+const { getAttachment, addRecipe, getRecipes: getRecipesDb, getRecipeByIDdb } = require('../../db')
 const { BadRequestError } = require('../../utils/errors')
 
 async function createRecipe(reqBody) {
@@ -21,7 +21,18 @@ async function getRecipes() {
   return getRecipesDb()
 }
 
+async function getRecipeByID(id) {
+  const recipeResult = await getRecipeByIDdb(id)
+  if (recipeResult.length === 0) {
+    return { statusCode: 404, result: {} }
+  } else {
+    const result = recipeResult[0]
+    return { statusCode: 200, result }
+  }
+}
+
 module.exports = {
   createRecipe,
   getRecipes,
+  getRecipeByID,
 }
