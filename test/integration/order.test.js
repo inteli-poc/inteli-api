@@ -61,7 +61,7 @@ describe('order', function () {
       nock.cleanAll()
     })
 
-    test.only('POST Order with existing supplier - 201', async function () {
+    test('POST Order with existing supplier - 201', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
