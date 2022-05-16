@@ -18,15 +18,6 @@ exports.up = async (knex) => {
     def.primary(['id'])
   })
 
-  await knex.schema.createTable('orders', (def) => {
-    def.uuid('id').defaultTo(uuidGenerateV4())
-    def.string('supplier', 255).notNullable()
-    def.specificType('items', 'uuid Array').notNullable()
-    def.datetime('required_by').notNullable()
-    def.datetime('created_at').notNullable().default(now())
-    def.datetime('updated_at').notNullable().default(now())
-  })
-
   await knex.schema.createTable('recipes', (def) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
 
@@ -50,6 +41,5 @@ exports.up = async (knex) => {
 exports.down = async (knex) => {
   await knex.schema.dropTable('recipes')
   await knex.schema.dropTable('attachments')
-  await knex.schema.dropTable('orders')
   await knex.raw('DROP EXTENSION "uuid-ossp"')
 }
