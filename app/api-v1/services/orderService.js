@@ -1,5 +1,5 @@
 const { postOrderDb, getRecipeByIDs } = require('../../db')
-const { BadRequestError, IncorrectSupplierError, SupplierDoesNotExistError } = require('../../utils/errors')
+const { BadRequestError, IncorrectSupplierError, RecipeDoesNoExistError } = require('../../utils/errors')
 
 async function postOrder(reqBody) {
   // Will add a get function at a later date to check for duplication
@@ -7,8 +7,8 @@ async function postOrder(reqBody) {
   // This section checks if the order manufacturer does not match the supplier
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
-  if (recipes.length == 0) {
-    throw new SupplierDoesNotExistError({ message: 'Order post error - Supplier does not exist', service: 'order' })
+  if (recipes.length != uniqueRecipeIDs.length) {
+    throw new RecipeDoesNoExistError({ message: 'Order post error - Supplier does not exist', service: 'order' })
   } else {
     recipes.forEach((recipeItem) => {
       if (recipeItem.supplier != reqBody.supplier) {
