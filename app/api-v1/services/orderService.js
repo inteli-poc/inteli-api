@@ -8,7 +8,7 @@ async function postOrder(reqBody) {
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
   if (recipes.length != uniqueRecipeIDs.length) {
-    throw new RecipeDoesNoExistError({ message: 'Order post error - Supplier does not exist', service: 'order' })
+    throw new RecipeDoesNoExistError({ message: 'Order post error - Recipe does not exist', service: 'order' })
   } else {
     recipes.forEach((recipeItem) => {
       if (recipeItem.supplier != reqBody.supplier) {

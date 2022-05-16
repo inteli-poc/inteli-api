@@ -61,7 +61,7 @@ describe('order', function () {
       nock.cleanAll()
     })
 
-    test('POST Order with existing supplier - 201', async function () {
+    test.only('POST Order with existing supplier - 201', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -79,7 +79,6 @@ describe('order', function () {
         requiredBy: new Date().toISOString(),
         items: [recipeResponse.body.id],
       }
-
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.status).to.equal(201)
       expect(response.body.supplier).deep.equal(newOrder.supplier)
@@ -107,6 +106,29 @@ describe('order', function () {
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.status).to.equal(201)
       expect(response.body.supplier).deep.equal(newOrder.supplier)
+    })
+
+    test('POST Order with existing supplier and non existing supplier - 422', async function () {
+      const newRecipe = {
+        externalId: 'supplier3000',
+        name: 'supplier3000',
+        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
+        material: 'supplier3000',
+        alloy: 'supplier3000',
+        price: 'supplier3000',
+        requiredCerts: [{ description: 'supplier3000' }],
+        supplier: 'supplier3000',
+      }
+
+      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
+      const newOrder = {
+        supplier: 'supplier3000',
+        requiredBy: new Date().toISOString(),
+        items: [recipeResponse.body.id, '10000000-0000-2000-9000-000000000000'],
+      }
+
+      const response = await postOrderRoute(newOrder, app, authToken)
+      expect(response.status).to.equal(422)
     })
 
     test('POST Order with non-existant supplier - 422', async function () {
