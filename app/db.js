@@ -34,9 +34,9 @@ async function addRecipe(recipe) {
   return client('recipes').insert(recipe).returning('*')
 }
 
-
 async function getRecipeByIDs(ids) {
   return client('recipes').select('*').whereIn('id', ids)
+}
 
 async function getRecipes() {
   return client('recipes').select()
