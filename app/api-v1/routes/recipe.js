@@ -5,7 +5,25 @@ const { BadRequestError } = require('../../utils/errors')
 module.exports = function (recipeService, identityService) {
   const doc = {
     GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      const recipes = await recipeService.getRecipes()
+      const result = await Promise.all(
+        recipes.map(async (recipe) => {
+          const { alias: supplierAlias } = await identityService.getMemberByAddress(req, recipe.supplier)
+          const { id, externalId, name, imageAttachmentId, material, alloy, price, requiredCerts } = recipe
+          return {
+            id,
+            externalId,
+            name,
+            imageAttachmentId,
+            material,
+            alloy,
+            price,
+            requiredCerts,
+            supplier: supplierAlias,
+          }
+        })
+      )
+      res.status(200).json(result)
     },
     POST: async function (req, res) {
       if (!req.body) {

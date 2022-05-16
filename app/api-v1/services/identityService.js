@@ -24,6 +24,9 @@ const getMemberByAlias = async (req, alias) => {
   throw new InternalError({ message: 'Internal server error' })
 }
 
+const getMemberByAddress = (...args) => getMemberByAlias(...args)
+
 module.exports = {
   getMemberByAlias,
+  getMemberByAddress,
 }
