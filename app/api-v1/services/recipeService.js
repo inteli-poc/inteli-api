@@ -1,4 +1,4 @@
-const { getAttachment, addRecipe } = require('../../db')
+const { getAttachment, addRecipe, getRecipes: getRecipesDb } = require('../../db')
 const { BadRequestError } = require('../../utils/errors')
 
 async function createRecipe(reqBody) {
@@ -17,6 +17,11 @@ async function createRecipe(reqBody) {
   return recipe
 }
 
+async function getRecipes() {
+  return getRecipesDb()
+}
+
 module.exports = {
   createRecipe,
+  getRecipes,
 }

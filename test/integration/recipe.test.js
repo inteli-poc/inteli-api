@@ -1,12 +1,13 @@
 const createJWKSMock = require('mock-jwks').default
 const { describe, before, it } = require('mocha')
 const { expect } = require('chai')
-const nock = require('nock')
 
 const { createHttpServer } = require('../../app/server')
 const { seed, cleanup } = require('../seeds/recipes')
-const { postRecipeRoute } = require('../helper/routeHelper')
-const { AUTH_ISSUER, AUTH_AUDIENCE, IDENTITY_SERVICE_HOST, IDENTITY_SERVICE_PORT } = require('../../app/env')
+const { postRecipeRoute, getRecipeRoute } = require('../helper/routeHelper')
+const { setupIdentityMock } = require('../helper/identityHelper')
+const recipesFixture = require('../fixtures/recipes')
+const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
 
 const logger = require('../../app/logger')
 
@@ -33,22 +34,7 @@ describe('Recipes', function () {
       await jwksMock.stop()
     })
 
-    beforeEach(async function () {
-      nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
-        .get('/v1/members/foobar3000')
-        .reply(200, {
-          alias: 'foobar3000',
-          address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-        })
-        .get('/v1/members/invalid')
-        .reply(404, {})
-        .get('/v1/members/error')
-        .reply(500, {})
-    })
-
-    afterEach(async function () {
-      nock.cleanAll()
-    })
+    setupIdentityMock()
 
     it('should accept valid body', async function () {
       const newRecipe = {
@@ -59,7 +45,7 @@ describe('Recipes', function () {
         alloy: 'foobar3000',
         price: 'foobar3000',
         requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
       }
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
@@ -81,7 +67,7 @@ describe('Recipes', function () {
         alloy: 'foobar3000',
         price: 'foobar3000',
         requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
       }
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
@@ -97,7 +83,7 @@ describe('Recipes', function () {
         alloy: 'foobar3000',
         price: 'foobar3000',
         requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
       }
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
@@ -137,6 +123,49 @@ describe('Recipes', function () {
       const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(500)
       expect(response.text).to.equal('Internal server error')
+    })
+  })
+
+  describe('GET recipes', function () {
+    this.timeout(15000)
+    let app
+    let authToken
+    let jwksMock
+
+    before(async function () {
+      await seed()
+      app = await createHttpServer()
+      jwksMock = createJWKSMock(AUTH_ISSUER)
+      jwksMock.start()
+      authToken = jwksMock.token({
+        aud: AUTH_AUDIENCE,
+        iss: AUTH_ISSUER,
+      })
+    })
+
+    after(async function () {
+      await cleanup()
+      await jwksMock.stop()
+    })
+
+    setupIdentityMock()
+
+    it('should accept valid body', async function () {
+      const recipes = await Promise.all(
+        recipesFixture.map(async (newRecipe) => {
+          const { body: recipe } = await postRecipeRoute(newRecipe, app, authToken)
+          return recipe
+        })
+      )
+
+      const response = await getRecipeRoute(app, authToken)
+      expect(response.status).to.equal(200)
+      expect(response.body).to.be.an('array')
+      expect(response.body.length).to.equal(recipes.length)
+      for (const recipe of response.body) {
+        const expectation = recipes.find(({ id }) => id === recipe.id)
+        expect(recipe).to.deep.equal(expectation)
+      }
     })
   })
 })
