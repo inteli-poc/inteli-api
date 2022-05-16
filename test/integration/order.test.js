@@ -109,7 +109,7 @@ describe('order', function () {
       expect(response.body.supplier).deep.equal(newOrder.supplier)
     })
 
-    test('POST Order with non-existant supplier - 404', async function () {
+    test('POST Order with non-existant supplier - 422', async function () {
       const newProject = {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
@@ -117,7 +117,7 @@ describe('order', function () {
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(404)
+      expect(response.status).to.equal(422)
     })
 
     test('POST Order - Invalid UUID', async function () {
