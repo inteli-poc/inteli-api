@@ -78,7 +78,6 @@ The following tables exist in the `inteli` database.
 | `items`       | `UUID ARRAY`              | FALSE    |          -           | IDs of the supplier from the identity service                                     |
 | `created_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was first created                                                    |
 | `updated_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was updated         
-|
 
 #### Indexes
 
