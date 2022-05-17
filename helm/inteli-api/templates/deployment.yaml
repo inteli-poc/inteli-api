@@ -48,16 +48,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-secret
                   key: dbPassword
-            - name: IDENTITY_SERVICE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "inteli-api.fullname" . }}-config
-                  key: identityServiceHost
-            - name: IDENTITY_SERVICE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "inteli-api.fullname" . }}-config
-                  key: identityServicePort
       containers:
         - name: {{ include "inteli-api.fullname" . }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -135,3 +125,13 @@ spec:
                 configMapKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-config
                   key: authTokenUrl
+            - name: IDENTITY_SERVICE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: identityServiceHost
+            - name: IDENTITY_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: identityServicePort
