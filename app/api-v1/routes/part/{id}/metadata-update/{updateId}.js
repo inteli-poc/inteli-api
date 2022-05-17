@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-module.exports = function (attachmentService) {
+module.exports = function (partService) {
   const doc = {
     GET: async function (req, res) {
       res.status(500).json({ message: 'Not Implemented' })
@@ -7,10 +7,10 @@ module.exports = function (attachmentService) {
   }
 
   doc.GET.apiDoc = {
-    summary: 'GET attachment by id',
+    summary: 'Get Part Metadata Update Action',
     parameters: [
       {
-        description: 'Id of the attachment to get',
+        description: 'Id of the part',
         in: 'path',
         required: true,
         name: 'id',
@@ -19,34 +19,35 @@ module.exports = function (attachmentService) {
           $ref: '#/components/schemas/ObjectReference',
         },
       },
+      {
+        description: 'Id of the Part Metadata Update action',
+        in: 'path',
+        required: true,
+        name: 'updateId',
+        allowEmptyValue: false,
+        schema: {
+          $ref: '#/components/schemas/ObjectReference',
+        },
+      },
     ],
     responses: {
       200: {
-        description: 'Return attachment',
+        description: 'Return Part Metadata Update Action',
         content: {
-          'application/octet-stream': {
-            schema: {
-              description: 'Attachment file',
-              type: 'string',
-              format: 'binary',
-            },
-          },
           'application/json': {
             schema: {
-              description: 'Attachment json',
-              anyOf: [
-                {
-                  type: 'object',
-                  properties: {},
-                  additionalProperties: true,
-                },
-                {
-                  type: 'array',
-                  items: {},
-                },
-              ],
+              $ref: '#/components/schemas/PartMetadataUpdate',
             },
-            example: {},
+          },
+        },
+      },
+      404: {
+        description: 'Part Metadata Update not found',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/responses/NotFoundError',
+            },
           },
         },
       },
@@ -62,7 +63,7 @@ module.exports = function (attachmentService) {
       },
     },
     security: [{ bearerAuth: [] }],
-    tags: ['attachment'],
+    tags: ['part'],
   }
 
   return doc

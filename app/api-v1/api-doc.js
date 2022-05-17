@@ -317,6 +317,11 @@ const apiDoc = {
             format: 'date-time',
           },
         },
+        example: {
+          id: '36345f4f-6535-42e2-83f9-79e2e195ec22',
+          status: 'InBlock',
+          submittedAt: new Date().toISOString(),
+        },
       },
       NewOrderSubmission: {
         description: 'A new action on an order that causes it to be submitted',
@@ -522,6 +527,31 @@ const apiDoc = {
         description: 'An action on a recipe that registers it on-chain',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewRecipeCreation' }],
+      },
+      NewPartMetadataUpdate: {
+        description: 'A new action on a part that adds arbitrary metadata',
+        type: 'object',
+        properties: {
+          metadataType: {
+            description: 'The type of metadata, for example "location"',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+          },
+          attachmentId: {
+            description: 'Id of an attachment containing build data to register',
+            type: 'string',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            nullable: true,
+          },
+        },
+        example: {
+          metadataType: 'location',
+          attachmentId: 'ba7a8e74-f553-407c-9de9-0aefdcd5ac6d',
+        },
+      },
+      PartMetadataUpdate: {
+        description: 'An action on a build that adds arbitrary metadata',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
       },
     },
     securitySchemes: {
