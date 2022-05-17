@@ -73,9 +73,8 @@ The following tables exist in the `inteli` database.
 
 | column        | PostgreSQL type           | nullable |       default        | description                            |
 | :------------ | :------------------------ | :------- | :------------------: | :------------------------------------- |
-| `id`          | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the `order` 
-|
-| `supplier`    | `CHARACTER VARYING (255)` | FALSE    |          -           | Name of the supplier                                                              |
+| `id`          | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the `order`      |
+| `supplier`    | `CHARACTER VARYING (255)` | FALSE    |          -           | Name of the supplier                   |                                           
 | `items`       | `UUID ARRAY`              | FALSE    |          -           | IDs of the supplier from the identity service                                     |
 | `created_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was first created                                                    |
 | `updated_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was updated         
