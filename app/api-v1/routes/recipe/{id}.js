@@ -3,9 +3,9 @@ module.exports = function (recipeService) {
   const doc = {
     GET: async function (req, res) {
       const { id } = req.params
-      const { statusCode, result } = await recipeService.getRecipeByID(id)
+      const result = await recipeService.getRecipeByID(id)
 
-      return res.status(statusCode).json(result)
+      return res.status(200).json(result)
     },
   }
 

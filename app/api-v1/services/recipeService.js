@@ -27,7 +27,7 @@ async function getRecipeByID(id) {
     throw new ItemNotFoundError({ message: 'Item not found', service: 'order' })
   } else {
     const result = recipeResult[0]
-    return { statusCode: 200, result }
+    return result
   }
 }
 
