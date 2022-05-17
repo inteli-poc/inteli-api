@@ -38,6 +38,10 @@ async function getRecipeByIDs(ids) {
   return client('recipes').select('*').whereIn('id', ids)
 }
 
+async function getRecipeByIDdb(id) {
+  return client('recipes').select('*').where({ id })
+}
+
 async function getRecipes() {
   return client('recipes').select()
 }
@@ -54,4 +58,5 @@ module.exports = {
   getRecipes,
   insertAttachment,
   getRecipeByIDs,
+  getRecipeByIDdb,
 }

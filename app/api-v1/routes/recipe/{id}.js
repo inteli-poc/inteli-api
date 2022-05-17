@@ -2,7 +2,10 @@
 module.exports = function (recipeService) {
   const doc = {
     GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      const { id } = req.params
+      const result = await recipeService.getRecipeByID(id)
+
+      return res.status(200).json(result)
     },
   }
 
