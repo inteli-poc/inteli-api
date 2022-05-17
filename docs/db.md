@@ -71,13 +71,15 @@ The following tables exist in the `inteli` database.
 
 #### Columns
 
-| column       | PostgreSQL type           | nullable |       default        | description                                                                         |
-| :----------- | :------------------------ | :------- | :------------------: | :---------------------------------------------------------------------------------- | --- |
-| `id`         | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the `attachment`                                              |
-| `supplier`   | `CHARACTER VARYING (255)` | FALSE    |          -           | Name of the supplier                                                                |
-| `items`      | `UUID ARRAY`              | FALSE    |          -           | IDs of the supplier as supplied by the identity service function `getMemberByAlias` |
-| `created_at` | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was created                                                    |
-| `updated_at` | `Timestamp with timezone` | FALSE    |                      | Timestamp the record was updated                                                    |     |
+| column        | PostgreSQL type           | nullable |       default        | description                            |
+| :------------ | :------------------------ | :------- | :------------------: | :------------------------------------- |
+| `id`          | `UUID`                    | FALSE    | `uuid_generate_v4()` | Unique identifier for the `order` 
+|
+| `supplier`    | `CHARACTER VARYING (255)`  | FALSE    |          -           | Name of the supplier                    |
+| `items` | `UUID ARRAY`                   | FALSE    |          -           | IDs of the supplier as supplied by the identity service function `getMemberByAlias`         |
+| `created_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was first created         |
+| `updated_at`  | `Timestamp with timezone` | FALSE    |       `now()`        | When the row was updated         
+|
 
 #### Indexes
 
