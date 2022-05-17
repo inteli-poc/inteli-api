@@ -57,34 +57,6 @@ describe('Recipes', function () {
       expect(responseRest).to.deep.equal(newRecipe)
     })
 
-    it('should get recipe by id - 200', async function () {
-      const newRecipe = {
-        externalId: 'foobar3000',
-        name: 'foobar3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'foobar3000',
-        alloy: 'foobar3000',
-        price: 'foobar3000',
-        requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'valid-1',
-      }
-
-      const recipe = await postRecipeRoute(newRecipe, app, authToken)
-      const response = await getRecipeByIdRoute(app, recipe.body.id, authToken)
-      expect(response.status).to.equal(200)
-    })
-
-    it('should fail to get by id - 404', async function () {
-      const response = await getRecipeByIdRoute(app, '11111111-ba46-4871-9d91-63248be7b884', authToken)
-      expect(response.status).to.equal(404)
-    })
-
-    // it.only('should fail when invalid id is given - 404', async function () {
-    //   const response = await getRecipeByIdRoute(app, '', authToken)
-    //   //console.log(response)
-    //   expect(response.status).to.equal(404)
-    // })
-
     it('should cause schema validation errors', async function () {
       logger.info('recipe test')
       const newRecipe = {
@@ -194,6 +166,33 @@ describe('Recipes', function () {
         const expectation = recipes.find(({ id }) => id === recipe.id)
         expect(recipe).to.deep.equal(expectation)
       }
+    })
+
+    it('should get recipe by id - 200', async function () {
+      const newRecipe = {
+        externalId: 'foobar3000',
+        name: 'foobar3000',
+        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
+        material: 'foobar3000',
+        alloy: 'foobar3000',
+        price: 'foobar3000',
+        requiredCerts: [{ description: 'foobar3000' }],
+        supplier: 'valid-1',
+      }
+
+      const recipe = await postRecipeRoute(newRecipe, app, authToken)
+      const response = await getRecipeByIdRoute(app, recipe.body.id, authToken)
+      expect(response.status).to.equal(200)
+    })
+
+    it('should fail to get by non-existant id - 404', async function () {
+      const response = await getRecipeByIdRoute(app, '11111111-ba46-4871-9d91-63248be7b884', authToken)
+      expect(response.status).to.equal(404)
+    })
+
+    it('should return a 400 with an incorrect ID format', async function () {
+      const response = await getRecipeByIdRoute(app, '63248be7b884', authToken)
+      expect(response.status).to.equal(400)
     })
   })
 })

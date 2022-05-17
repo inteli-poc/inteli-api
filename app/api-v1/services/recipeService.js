@@ -1,5 +1,5 @@
 const { getAttachment, addRecipe, getRecipes: getRecipesDb, getRecipeByIDdb } = require('../../db')
-const { BadRequestError } = require('../../utils/errors')
+const { BadRequestError, ItemNotFoundError } = require('../../utils/errors')
 
 async function createRecipe(reqBody) {
   if (!reqBody) {
@@ -24,7 +24,7 @@ async function getRecipes() {
 async function getRecipeByID(id) {
   const recipeResult = await getRecipeByIDdb(id)
   if (recipeResult.length === 0) {
-    return { statusCode: 404, result: {} }
+    throw new ItemNotFoundError({ message: 'Item not found', service: 'order' })
   } else {
     const result = recipeResult[0]
     return { statusCode: 200, result }

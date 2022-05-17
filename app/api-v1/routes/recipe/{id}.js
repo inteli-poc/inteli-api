@@ -1,15 +1,11 @@
-const { ItemNotFoundError } = require('../../../utils/errors')
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService) {
   const doc = {
     GET: async function (req, res) {
       const { id } = req.params
       const { statusCode, result } = await recipeService.getRecipeByID(id)
-      if (result == {}) {
-        throw new ItemNotFoundError({ message: 'Item not found', service: 'order' })
-      } else {
-        return res.status(statusCode).json(result)
-      }
+
+      return res.status(statusCode).json(result)
     },
   }
 
