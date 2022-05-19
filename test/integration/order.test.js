@@ -61,7 +61,7 @@ describe('order', function () {
       nock.cleanAll()
     })
 
-    test('POST Order with existing supplier - 201', async function () {
+    test.only('POST Order with existing supplier - 201', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -78,8 +78,14 @@ describe('order', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: [recipeResponse.body.id],
+        purchaserAddress: 'this is an address!!!',
       }
+
       const response = await postOrderRoute(newOrder, app, authToken)
+      console.log('** response.body', response.body)
+
+      console.log('** response.text', response.text)
+
       expect(response.status).to.equal(201)
       expect(response.body.supplier).deep.equal(newOrder.supplier)
     })
@@ -170,7 +176,7 @@ describe('order', function () {
       expect(response.status).to.equal(400)
     })
 
-    test('POST Order - Check ID & Manufacturer', async function () {
+    test.skip('POST Order - Check ID & Manufacturer', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -190,6 +196,7 @@ describe('order', function () {
       }
 
       const response = await postOrderRoute(newOrder, app, authToken)
+      console.log('*** response', response.body)
       expect(response.body.supplier).to.equal(recipeResponse.body.supplier)
       expect(response.body.items).to.contain(recipeResponse.body.id)
       expect(response.status).to.equal(201)

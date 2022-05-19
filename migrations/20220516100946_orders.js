@@ -10,6 +10,7 @@ exports.up = async (knex) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
     def.string('supplier', 255).notNullable()
     def.specificType('items', 'uuid Array').notNullable()
+    def.string('purchaser_address', '255').notNullable()
     def.datetime('required_by').notNullable()
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())

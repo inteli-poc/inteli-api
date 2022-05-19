@@ -261,6 +261,11 @@ const apiDoc = {
             type: 'string',
             maxLength: 255,
           },
+          // purchaserAddress: {
+          //   description: 'The address of the purchaser',
+          //   type: 'string',
+          //   maxLength: 255,
+          // },
           requiredBy: {
             description: 'Date and time at which the purchase-order must be completed',
             type: 'string',
