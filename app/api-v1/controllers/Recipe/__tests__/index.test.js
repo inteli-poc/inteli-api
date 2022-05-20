@@ -6,13 +6,19 @@ const { BadRequestError, NotFoundError } = require('../../../../utils/errors')
 const { client } = require('../../../../db')
 const { transaction } = require('../')
 
-const payload = {
+const postPayload = {
   params: {
     id: 'recipe-id',
   },
   token: 'some-auth-token',
 }
-
+const getPayload = {
+  params: {
+    id: 'recipe-id',
+    creationId: 'transaction-id',
+  },
+  token: 'some-auth-token',
+}
 const recipeExample = {
   id: 1,
   price: '99.99',
@@ -23,6 +29,14 @@ const recipeExample = {
 const submitTransaction = async (req) => {
   try {
     return await transaction.create(req)
+  } catch (err) {
+    return err
+  }
+}
+
+const getTransaction = async (req) => {
+  try {
+    return await transaction.get(req)
   } catch (err) {
     return err
   }
@@ -56,7 +70,7 @@ describe('recipe controller', () => {
 
       it('throws validation error', () => {
         expect(response).to.be.an.instanceOf(BadRequestError)
-        expect(response.message).to.be.equal('missing [id] param from request')
+        expect(response.message).to.be.equal('missing parameters')
       })
 
       it('does not perform any database calls and does not create transaction', () => {
@@ -73,7 +87,7 @@ describe('recipe controller', () => {
 
       it('throws not found error along with the message', () => {
         expect(response).to.be.an.instanceOf(NotFoundError)
-        expect(response.message).to.be.equal('recipe not found')
+        expect(response.message).to.be.equal('not found')
       })
 
       it('does not create a transaction', () => {
@@ -85,7 +99,7 @@ describe('recipe controller', () => {
       beforeEach(async () => {
         nock('http://localhost:3001').post('/v3/run-process').reply(200, [20])
         whereRecipeStub = stub().resolves([recipeExample])
-        response = await submitTransaction(payload)
+        response = await submitTransaction(postPayload)
       })
 
       it('validates req params', () => {})
@@ -109,6 +123,51 @@ describe('recipe controller', () => {
           status: 200,
           message: 'transaction transaction-uuid has been created',
         })
+      })
+    })
+  })
+
+  describe('transactions /get', () => {
+    beforeEach(async () => {
+      response = await getTransaction(getPayload)
+    })
+
+    describe('if req.params.id is not provided', () => {
+      beforeEach(async () => {
+        response = await getTransaction({ params: {} })
+      })
+
+      it('throws validation error', () => {
+        expect(response).to.be.an.instanceOf(BadRequestError)
+        expect(response.message).to.be.equal('missing parameters')
+      })
+
+      it('does not perform any database calls and does not create transaction', () => {
+        expect(whereRecipeStub.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('if recipe does not exists in local db', () => {
+      beforeEach(async () => {
+        whereRecipeStub = stub().resolves([])
+        response = await getTransaction(getPayload)
+      })
+
+      it('throws not found error along with the message', () => {
+        expect(response).to.be.an.instanceOf(NotFoundError)
+        expect(response.message).to.be.equal('not found')
+      })
+    })
+
+    it('returns transaction', () => {
+      expect(response).to.deep.equal({
+        status: 200,
+        creation: {
+          id: 1,
+          price: '99.99',
+          material: 'iron',
+          supplier: 'supplier-address',
+        },
       })
     })
   })

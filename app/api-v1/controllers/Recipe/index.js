@@ -3,23 +3,43 @@ const { client } = require('../../../db')
 const { mapRecipeData } = require('./helpers')
 const { BadRequestError, NotFoundError } = require('../../../utils/errors')
 
+const throwErr = (type, path) => {
+  switch (type) {
+    case 400:
+      throw new BadRequestError({
+        message: 'missing parameters',
+        path,
+      })
+    case 404:
+      throw new NotFoundError({
+        message: 'not found',
+        path,
+      })
+  }
+}
+
 module.exports = {
   transaction: {
+    get: async (req) => {
+      const path = '/recipe/{id}/creation/${creationId}'
+      const { creationId, id } = req.params
+      const [transaction] = await client.from('recipe_transactions').select('*').where({ id: creationId, token_id: id })
+
+      if (!id || !creationId) throwErr(400, path)
+      if (!transaction) throwErr(404, path)
+
+      return {
+        status: 200,
+        creation: transaction,
+      }
+    },
     create: async (req) => {
-      const service = '/recipe/{id}/creation'
+      const path = '/recipe/{id}/creation'
       const { id } = req.params
-      if (!id)
-        throw new BadRequestError({
-          message: 'missing [id] param from request',
-          service,
-        })
+      if (!id) throwErr(400, path)
 
       const [recipe] = await client.from('recipes').select('*').where({ id })
-      if (!recipe)
-        throw new NotFoundError({
-          message: 'recipe not found',
-          service,
-        })
+      if (!recipe) throwErr(404, path)
 
       const payload = {
         inputs: [],
@@ -30,7 +50,6 @@ module.exports = {
           },
         ],
       }
-
       const token = await runProcess(payload, req.token)
       const transaction = await client
         .from('recipe_transactions')
