@@ -1,5 +1,5 @@
 const pino = require('pino')
-const env = require('./env')
+const env = require('../../env')
 
 const logger = pino(
   {

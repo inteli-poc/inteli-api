@@ -9,7 +9,7 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const { PORT, API_VERSION, API_MAJOR_VERSION, FILE_UPLOAD_SIZE_LIMIT_BYTES } = require('./env')
-const logger = require('./logger')
+const logger = require('./utils/Logger')
 const v1ApiDoc = require('./api-v1/api-doc')
 const v1RecipeService = require('./api-v1/services/recipeService')
 const v1AttachmentService = require('./api-v1/services/attachmentService')
@@ -82,7 +82,6 @@ async function createHttpServer() {
   }
 
   app.use(`/${API_MAJOR_VERSION}/swagger`, swaggerUi.serve, swaggerUi.setup(null, options))
-
   app.use(handleErrors)
 
   return { app }
@@ -132,4 +131,7 @@ async function startServer() {
   }
 }
 
-module.exports = { startServer, createHttpServer }
+module.exports = {
+  startServer,
+  createHttpServer,
+}

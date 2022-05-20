@@ -161,7 +161,9 @@ jobs:
           time: '30s'
       - name: Initialise DB
         run: npx knex migrate:latest --env test
-      - name: Run tests
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Run integration tests
         run: npm run test
         env:
           AUTH_TEST_USERNAME: ${{ secrets.AUTH_TEST_USERNAME }}

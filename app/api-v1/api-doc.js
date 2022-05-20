@@ -95,6 +95,11 @@ const apiDoc = {
           },
         },
       },
+      OnChainAddress: {
+        type: 'string',
+        description: 'A literal which will be represented as on-chain metadata',
+        maxLength: 55,
+      },
       OnChainLiteral: {
         type: 'string',
         description: 'A literal which will be represented as on-chain metadata',

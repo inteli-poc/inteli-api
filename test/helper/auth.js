@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 
-const logger = require('../../app/logger')
+const logger = require('../../app/utils/Logger')
 const { AUTH_TOKEN_URL, AUTH_AUDIENCE } = require('../../app/env')
 
 let authToken

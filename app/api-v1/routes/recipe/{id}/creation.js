@@ -1,3 +1,5 @@
+const { transaction } = require('../../../controllers/Recipe')
+
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService) {
   const doc = {
@@ -5,7 +7,8 @@ module.exports = function (recipeService) {
       res.status(500).json({ message: 'Not Implemented' })
     },
     POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      const { status, ...body } = await transaction.create(req)
+      res.status(status).send(body)
     },
   }
 
