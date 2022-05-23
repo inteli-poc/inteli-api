@@ -46,14 +46,15 @@ describe('order', function () {
 
       nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
         .persist()
-        .get('/v1/members/supplier3000')
+        .get('/v1/self/5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
         .reply(200, {
-          alias: 'supplier3000',
-          address: '4FHold46xGXgs5mUiveU2sbTyGBzmstUspZC92UhjJM694jz',
+          alias: 'foobar3000',
         })
-        .get('/v1/members/invalid')
+        .get('/v1/self/')
+        .reply(400, {})
+        .get('/v1/self/invalid')
         .reply(404, {})
-        .get('/v1/members/error')
+        .get('/v1/self/error')
         .reply(500, {})
     })
 
@@ -61,7 +62,7 @@ describe('order', function () {
       nock.cleanAll()
     })
 
-    test.only('POST Order with existing supplier - 201', async function () {
+    test('POST Order with existing supplier - 201', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -78,63 +79,13 @@ describe('order', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: [recipeResponse.body.id],
-        purchaserAddress: 'this is an address!!!',
+        purchaserAddress: '',
       }
 
       const response = await postOrderRoute(newOrder, app, authToken)
-      console.log('** response.body', response.body)
-
-      console.log('** response.text', response.text)
 
       expect(response.status).to.equal(201)
       expect(response.body.supplier).deep.equal(newOrder.supplier)
-    })
-
-    test('POST Order with existing supplier - 201', async function () {
-      const newRecipe = {
-        externalId: 'supplier3000',
-        name: 'supplier3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'supplier3000',
-        alloy: 'supplier3000',
-        price: 'supplier3000',
-        requiredCerts: [{ description: 'supplier3000' }],
-        supplier: 'supplier3000',
-      }
-
-      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
-      const newOrder = {
-        supplier: 'supplier3000',
-        requiredBy: new Date().toISOString(),
-        items: [recipeResponse.body.id],
-      }
-
-      const response = await postOrderRoute(newOrder, app, authToken)
-      expect(response.status).to.equal(201)
-      expect(response.body.supplier).deep.equal(newOrder.supplier)
-    })
-
-    test('POST Order with existing supplier and non existing supplier - 422', async function () {
-      const newRecipe = {
-        externalId: 'supplier3000',
-        name: 'supplier3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'supplier3000',
-        alloy: 'supplier3000',
-        price: 'supplier3000',
-        requiredCerts: [{ description: 'supplier3000' }],
-        supplier: 'supplier3000',
-      }
-
-      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
-      const newOrder = {
-        supplier: 'supplier3000',
-        requiredBy: new Date().toISOString(),
-        items: [recipeResponse.body.id, '10000000-0000-2000-9000-000000000000'],
-      }
-
-      const response = await postOrderRoute(newOrder, app, authToken)
-      expect(response.status).to.equal(422)
     })
 
     test('POST Order with non-existant supplier - 422', async function () {
@@ -142,6 +93,7 @@ describe('order', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000-000000000000'],
+        purchaserAddress: '',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -153,6 +105,7 @@ describe('order', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000'],
+        purchaserAddress: '',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -176,7 +129,7 @@ describe('order', function () {
       expect(response.status).to.equal(400)
     })
 
-    test.skip('POST Order - Check ID & Manufacturer', async function () {
+    test('POST Order - Check ID & Manufacturer', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -193,37 +146,13 @@ describe('order', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: [recipeResponse.body.id],
+        purchaserAddress: '',
       }
 
       const response = await postOrderRoute(newOrder, app, authToken)
-      console.log('*** response', response.body)
       expect(response.body.supplier).to.equal(recipeResponse.body.supplier)
       expect(response.body.items).to.contain(recipeResponse.body.id)
       expect(response.status).to.equal(201)
-    })
-
-    test('POST Order - Check ID & Manufacturer - FAIL', async function () {
-      const newRecipe = {
-        externalId: 'foobar3000',
-        name: 'foobar3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'foobar3000',
-        alloy: 'foobar3000',
-        price: 'foobar3000',
-        requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
-      }
-
-      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
-
-      const newOrder = {
-        supplier: 'supplier3000',
-        requiredBy: new Date().toISOString(),
-        items: [recipeResponse.body.id],
-      }
-
-      const response = await postOrderRoute(newOrder, app, authToken)
-      expect(response.status).to.equal(422)
     })
   })
 })

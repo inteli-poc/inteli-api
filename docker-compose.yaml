@@ -46,6 +46,7 @@ services:
       - DB_NAME=dscp
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
+      - SELF_ADDRESS=5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
 
   dscp-node:
     image: ghcr.io/digicatapult/dscp-node:latest

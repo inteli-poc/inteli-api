@@ -22,6 +22,7 @@ async function postOrderDb(reqBody) {
       supplier: reqBody.supplier,
       required_by: reqBody.requiredBy,
       items: reqBody.items,
+      purchaser_address: reqBody.purchaserAddress,
     })
     .returning('*')
 }
