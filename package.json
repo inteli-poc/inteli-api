@@ -1,10 +1,12 @@
 {
   "name": "@digicatapult/inteli-api",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
+    "db:migrate": "npx knex migrate:latest --env test",
     "test": "NODE_ENV=test mocha --config ./test/mocharc.js ./test",
+    "test:unit": "NODE_ENV=test mocha --config ./test/mocharc.js ./app",
     "lint": "eslint .",
     "depcheck": "depcheck",
     "start": "NODE_ENV=production node app/index.js",
@@ -63,6 +65,7 @@
     "openapi-schema-validator": "^11.0.0",
     "pino-colada": "^2.2.2",
     "prettier": "^2.6.2",
-    "supertest": "^6.2.3"
+    "sinon": "^14.0.0",
+    "supertest": "^6.2.2"
   }
 }

@@ -1,4 +1,4 @@
-const logger = require('../../logger')
+const logger = require('../../utils/Logger')
 const { BadRequestError } = require('../../utils/errors')
 
 module.exports = function (attachmentService) {

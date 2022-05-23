@@ -13,10 +13,20 @@ config:
     issuer: https://inteli.eu.auth0.com/
     tokenUrl: https://inteli.eu.auth0.com/oauth/token
 
+ingress:
+  # annotations: {}
+  # className: ""
+  paths:
+    - /v1/attachment
+    - /v1/build
+    - /v1/order
+    - /v1/part
+    - /v1/recipe
+
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.13.0'
+  tag: 'v1.14.0'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:

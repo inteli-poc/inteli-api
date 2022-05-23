@@ -1,6 +1,5 @@
 const knex = require('knex')
-
-const env = require('./env')
+const env = require('../env')
 
 const client = knex({
   client: 'pg',

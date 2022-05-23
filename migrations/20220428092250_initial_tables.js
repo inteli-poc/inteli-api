@@ -23,18 +23,18 @@ exports.up = async (knex) => {
 
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
-    def.string('externalId').notNullable()
+    def.string('external_id').notNullable()
     def.string('name').notNullable()
-    def.uuid('imageAttachmentId').notNullable()
+    def.uuid('image_attachment_id').notNullable()
     def.string('material').notNullable()
     def.string('alloy').notNullable()
     def.string('price').notNullable()
-    def.json('requiredCerts').notNullable()
+    def.json('required_certs').notNullable()
     def.string('supplier').notNullable()
 
     def.primary(['id'])
 
-    def.foreign('imageAttachmentId').references('id').on('attachments').onDelete('CASCADE').onUpdate('CASCADE')
+    def.foreign('image_attachment_id').references('id').on('attachments').onDelete('CASCADE').onUpdate('CASCADE')
   })
 }
 

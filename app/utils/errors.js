@@ -1,4 +1,4 @@
-const logger = require('../logger')
+const logger = require('../utils/Logger')
 
 class HttpResponseError extends Error {
   constructor({ code = 500, message, service }) {
@@ -6,6 +6,12 @@ class HttpResponseError extends Error {
     this.code = code
     this.message = message
     this.service = service
+  }
+}
+
+class NotFoundError extends HttpResponseError {
+  constructor({ message, service }) {
+    super({ code: 404, message, service })
   }
 }
 
@@ -72,6 +78,7 @@ module.exports = {
   BadRequestError,
   HttpResponseError,
   UnauthorizedError,
+  NotFoundError,
   IncorrectSupplierError,
   InternalError,
   RecipeDoesNoExistError,

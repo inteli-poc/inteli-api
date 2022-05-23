@@ -1,4 +1,4 @@
-const logger = require('../../logger')
+const logger = require('../../utils/Logger')
 const { BadRequestError } = require('../../utils/errors')
 
 // eslint-disable-next-line no-unused-vars
@@ -35,13 +35,13 @@ module.exports = function (recipeService, identityService) {
       const { address: supplierAddress } = await identityService.getMemberByAlias(req, supplier)
 
       const recipe = await recipeService.createRecipe({
-        externalId,
+        external_id: externalId,
         name,
-        imageAttachmentId,
+        image_attachment_id: imageAttachmentId,
         material,
         alloy,
         price,
-        requiredCerts: JSON.stringify(requiredCerts),
+        required_certs: JSON.stringify(requiredCerts),
         supplier: supplierAddress,
       })
 
