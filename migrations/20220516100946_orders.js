@@ -8,9 +8,15 @@ exports.up = async (knex) => {
 
   await knex.schema.createTable('orders', (def) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
-    def.string('supplier', 255).notNullable()
+    def.string('supplier', 48).notNullable()
     def.specificType('items', 'uuid Array').notNullable()
-    def.string('purchaser_address', '255').notNullable()
+    def.string('purchaser', 48).notNullable()
+    def
+      .enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'], {
+        useNative: true,
+        enumName: 'status',
+      })
+      .notNullable()
     def.datetime('required_by').notNullable()
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())

@@ -1,5 +1,5 @@
 const { postOrderDb, getRecipeByIDs } = require('../../db')
-const { BadRequestError, IncorrectSupplierError, RecipeDoesNoExistError } = require('../../utils/errors')
+const { IncorrectSupplierError, RecipeDoesNotExistError } = require('../../utils/errors')
 
 async function postOrder(reqBody) {
   // Will add a get function at a later date to check for duplication
@@ -8,7 +8,7 @@ async function postOrder(reqBody) {
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
   if (recipes.length != uniqueRecipeIDs.length) {
-    throw new RecipeDoesNoExistError({ message: 'Order post error - Recipe does not exist', service: 'order' })
+    throw new RecipeDoesNotExistError({ message: 'Order post error - Recipe does not exist', service: 'order' })
   } else {
     recipes.forEach((recipeItem) => {
       if (recipeItem.supplier != reqBody.supplier) {
@@ -17,12 +17,8 @@ async function postOrder(reqBody) {
     })
   }
 
-  const result = await postOrderDb(reqBody)
-  if (!result) {
-    throw new BadRequestError({ message: 'Order post error', service: 'order' })
-  } else {
-    return { statusCode: 201, result }
-  }
+  const [result] = await postOrderDb({ ...reqBody, status: 'Created' })
+  return { statusCode: 201, result }
 }
 
 module.exports = {

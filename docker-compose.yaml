@@ -33,9 +33,9 @@ services:
       npx knex migrate:latest &&
       node app/index.js"
     ports:
-      - 3002:3001
+      - 3002:3002
     environment:
-      - PORT=3001
+      - PORT=3002
       - API_HOST=dscp-node
       - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
       - AUTH_AUDIENCE=inteli-dev

@@ -10,17 +10,22 @@ module.exports = function (orderService, identityService) {
         throw new BadRequestError({ message: 'No body uploaded', service: 'order' })
       }
 
-      const response = await identityService.getMemberByAlias(req, req.body.supplier)
-
-      const selfAddress = await identityService.getMemberBySelf(req, response.address)
+      const { address: supplierAddress } = await identityService.getMemberByAlias(req, req.body.supplier)
+      const selfAddress = await identityService.getMemberBySelf(req)
+      const { alias: selfAlias } = await identityService.getMemberByAlias(req, selfAddress)
 
       const { statusCode, result } = await orderService.postOrder({
         ...req.body,
-        supplier: response.address,
-        purchaserAddress: selfAddress.alias,
+        supplier: supplierAddress,
+        purchaserAddress: selfAlias,
       })
 
-      return res.status(statusCode).json({ ...result[0], supplier: req.body.supplier, purchaserAddress: response })
+      return res.status(statusCode).json({
+        id: result.id,
+        status: 'Created',
+        purchaser: selfAlias,
+        ...req.body,
+      })
     },
   }
 

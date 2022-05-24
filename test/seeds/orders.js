@@ -17,6 +17,20 @@ const seed = async () => {
       binary_blob: 9999999,
     },
   ])
+
+  await client('recipes').insert([
+    {
+      id: '10000000-0000-1000-8000-000000000000',
+      external_id: 'foobar3000',
+      name: 'foobar3000',
+      image_attachment_id: '00000000-0000-1000-8000-000000000000',
+      material: 'foobar3000',
+      alloy: 'foobar3000',
+      price: 'foobar3000',
+      required_certs: JSON.stringify([{ description: 'foobar3000' }]),
+      supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+    },
+  ])
 }
 
 module.exports = {

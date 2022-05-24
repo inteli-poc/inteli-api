@@ -6,6 +6,7 @@ const { IDENTITY_SERVICE_HOST, IDENTITY_SERVICE_PORT } = require('../../app/env'
 const setupIdentityMock = function () {
   beforeEach(async function () {
     nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
+      .persist()
       .get('/v1/members/5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
       .reply(200, {
         alias: 'valid-1',
@@ -26,6 +27,8 @@ const setupIdentityMock = function () {
         alias: 'valid-2',
         address: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       })
+      .get('/v1/self')
+      .reply(200, '"5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY"')
       .get('/v1/members/invalid')
       .reply(404, {})
       .get('/v1/members/error')

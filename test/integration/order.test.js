@@ -1,12 +1,12 @@
 const { describe, before, test } = require('mocha')
 const { expect } = require('chai')
 const createJWKSMock = require('mock-jwks').default
-const nock = require('nock')
 
 const { createHttpServer } = require('../../app/server')
-const { postOrderRoute, postRecipeRoute } = require('../helper/routeHelper')
+const { postOrderRoute } = require('../helper/routeHelper')
+const { setupIdentityMock } = require('../helper/identityHelper')
 const { seed, cleanup } = require('../seeds/orders')
-const { AUTH_ISSUER, AUTH_AUDIENCE, IDENTITY_SERVICE_HOST, IDENTITY_SERVICE_PORT } = require('../../app/env')
+const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
 
 describe('order', function () {
   describe('valid order', function () {
@@ -31,81 +31,60 @@ describe('order', function () {
       await jwksMock.stop()
     })
 
-    beforeEach(async function () {
-      nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
-        .persist()
-        .get('/v1/members/foobar3000')
-        .reply(200, {
-          alias: 'foobar3000',
-          address: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-        })
-        .get('/v1/members/invalid')
-        .reply(404, {})
-        .get('/v1/members/error')
-        .reply(500, {})
-
-      nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
-        .persist()
-        .get('/v1/self/5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
-        .reply(200, {
-          alias: 'foobar3000',
-        })
-        .get('/v1/self/')
-        .reply(400, {})
-        .get('/v1/self/invalid')
-        .reply(404, {})
-        .get('/v1/self/error')
-        .reply(500, {})
-    })
-
-    afterEach(async function () {
-      nock.cleanAll()
-    })
+    setupIdentityMock()
 
     test('POST Order with existing supplier - 201', async function () {
-      const newRecipe = {
-        externalId: 'foobar3000',
-        name: 'foobar3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'foobar3000',
-        alloy: 'foobar3000',
-        price: 'foobar3000',
-        requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
-      }
-
-      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
       const newOrder = {
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
-        items: [recipeResponse.body.id],
-        purchaserAddress: '',
+        items: ['10000000-0000-1000-8000-000000000000'],
       }
-
       const response = await postOrderRoute(newOrder, app, authToken)
 
       expect(response.status).to.equal(201)
       expect(response.body.supplier).deep.equal(newOrder.supplier)
     })
 
-    test('POST Order with non-existant supplier - 422', async function () {
+    test('POST Order - Check ID & Manufacturer', async function () {
+      const newOrder = {
+        supplier: 'valid-1',
+        requiredBy: new Date().toISOString(),
+        items: ['10000000-0000-1000-8000-000000000000'],
+      }
+      const response = await postOrderRoute(newOrder, app, authToken)
+      expect(response.body.supplier).to.equal('valid-1')
+      expect(response.body.purchaser).to.equal('valid-2')
+      expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
+      expect(response.status).to.equal(201)
+    })
+
+    test('POST Order with non-existant supplier - 400', async function () {
       const newProject = {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
-        items: ['00000000-0000-1000-8000-000000000000'],
-        purchaserAddress: '',
+        items: ['10000000-0000-1000-8000-000000000000'],
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(422)
+      expect(response.status).to.equal(400)
+    })
+
+    test('POST Order with incorrect supplier - 400', async function () {
+      const newProject = {
+        supplier: 'valid-2',
+        requiredBy: new Date().toISOString(),
+        items: ['10000000-0000-1000-8000-000000000000'],
+      }
+
+      const response = await postOrderRoute(newProject, app, authToken)
+      expect(response.status).to.equal(400)
     })
 
     test('POST Order - Invalid UUID', async function () {
       const newProject = {
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000'],
-        purchaserAddress: '',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -127,32 +106,6 @@ describe('order', function () {
 
       const response = await postOrderRoute(newProject, app, authToken)
       expect(response.status).to.equal(400)
-    })
-
-    test('POST Order - Check ID & Manufacturer', async function () {
-      const newRecipe = {
-        externalId: 'foobar3000',
-        name: 'foobar3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'foobar3000',
-        alloy: 'foobar3000',
-        price: 'foobar3000',
-        requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
-      }
-
-      const recipeResponse = await postRecipeRoute(newRecipe, app, authToken)
-      const newOrder = {
-        supplier: 'foobar3000',
-        requiredBy: new Date().toISOString(),
-        items: [recipeResponse.body.id],
-        purchaserAddress: '',
-      }
-
-      const response = await postOrderRoute(newOrder, app, authToken)
-      expect(response.body.supplier).to.equal(recipeResponse.body.supplier)
-      expect(response.body.items).to.contain(recipeResponse.body.id)
-      expect(response.status).to.equal(201)
     })
   })
 })
