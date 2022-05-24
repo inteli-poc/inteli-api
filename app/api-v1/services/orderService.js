@@ -6,6 +6,7 @@ async function postOrder(reqBody) {
 
   // This section checks if the order manufacturer does not match the supplier
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
+
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
   if (recipes.length != uniqueRecipeIDs.length) {
     throw new RecipeDoesNotExistError({ message: 'Order post error - Recipe does not exist', service: 'order' })

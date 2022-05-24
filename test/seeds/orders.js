@@ -34,7 +34,7 @@ const seed = async () => {
 
   await client('recipes').insert([
     {
-      id: '10000000-0000-2000-9000-000000000000',
+      id: '10000000-0000-1000-9000-000000000000',
       external_id: 'supplier3000',
       name: 'supplier3000',
       image_attachment_id: '00000000-0000-1000-8000-000000000000',
@@ -42,7 +42,7 @@ const seed = async () => {
       alloy: 'supplier3000',
       price: 'supplier3000',
       required_certs: JSON.stringify([{ description: 'supplier3000' }]),
-      supplier: '4FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+      supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
     },
   ])
 }

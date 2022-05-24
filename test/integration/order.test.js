@@ -69,15 +69,26 @@ describe('order', function () {
       expect(response.status).to.equal(400)
     })
 
-    test('POST Order with more than one item - 400', async function () {
+    test('POST Order with more than one item - 201', async function () {
       const newProject = {
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-2000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
+        items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
+      expect(response.status).to.equal(201)
+    })
+
+    test('POST Order with 2 different items - 201', async function () {
+      const newProject = {
+        supplier: 'valid-1',
+        requiredBy: new Date().toISOString(),
+        items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
+      }
+
+      const response = await postOrderRoute(newProject, app, authToken)
+      expect(response.status).to.equal(201)
     })
 
     test('POST Order with incorrect supplier - 400', async function () {
