@@ -290,7 +290,7 @@ const apiDoc = {
             description: 'local id of the purchase-order',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          owner: {
+          purchaser: {
             description:
               'Name of the submitter of the purchase-order. This information is not stored directly on-chain',
             type: 'string',

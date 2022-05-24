@@ -35,13 +35,13 @@ class UnauthorizedError extends HttpResponseError {
 
 class IncorrectSupplierError extends HttpResponseError {
   constructor({ message }) {
-    super({ code: 422, message })
+    super({ code: 400, message })
   }
 }
 
-class RecipeDoesNoExistError extends HttpResponseError {
+class RecipeDoesNotExistError extends HttpResponseError {
   constructor({ message }) {
-    super({ code: 422, message })
+    super({ code: 400, message })
   }
 }
 
@@ -81,6 +81,6 @@ module.exports = {
   NotFoundError,
   IncorrectSupplierError,
   InternalError,
-  RecipeDoesNoExistError,
+  RecipeDoesNotExistError,
   ItemNotFoundError,
 }

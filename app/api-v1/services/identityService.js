@@ -24,9 +24,25 @@ const getMemberByAlias = async (req, alias) => {
   throw new InternalError({ message: 'Internal server error' })
 }
 
+const getMemberBySelf = async (req) => {
+  const response = await fetch(`${URL_PREFIX}/self`, {
+    headers: {
+      Authorization: `Bearer ${req.token}`,
+    },
+  })
+
+  if (response.ok) {
+    const member = await response.json()
+    return member
+  }
+
+  throw new InternalError({ message: 'Internal server error' })
+}
+
 const getMemberByAddress = (...args) => getMemberByAlias(...args)
 
 module.exports = {
   getMemberByAlias,
   getMemberByAddress,
+  getMemberBySelf,
 }
