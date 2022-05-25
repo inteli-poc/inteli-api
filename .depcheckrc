@@ -1,2 +1,1 @@
-ignores: ["pg"]
-skip-missing: true
+ignores: ['pg']
