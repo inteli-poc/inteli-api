@@ -7,8 +7,7 @@ const seed = require('../seeds/recipes')
 const { postRecipeRoute, getRecipeRoute, getRecipeByIdRoute } = require('../helper/routeHelper')
 const { setupIdentityMock } = require('../helper/identityHelper')
 const recipesFixture = require('../fixtures/recipes')
-const { AUTH_ISSUER, AUTH_AUDIENCE, IDENTITY_SERVICE_HOST, IDENTITY_SERVICE_PORT } = require('../../app/env')
-const nock = require('nock')
+const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
 
 const logger = require('../../app/utils/Logger')
 
@@ -28,28 +27,12 @@ describe('Recipes', function () {
         aud: AUTH_AUDIENCE,
         iss: AUTH_ISSUER,
       })
-      setupIdentityMock()
     })
 
-    beforeEach(() => {
-      nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
-        .persist()
-        .get('/v1/members/foobar3000')
-        .reply(200, {
-          alias: 'alias',
-          address: 'foobar3000',
-        })
-        .persist()
-        .get('/v1/members/5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutAA')
-        .reply(200, {
-          alias: 'alias',
-          address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutAA',
-        })
-    })
+    setupIdentityMock()
 
     after(async function () {
       await jwksMock.stop()
-      nock.cleanAll()
     })
 
     it('should accept valid body', async function () {
@@ -61,7 +44,7 @@ describe('Recipes', function () {
         alloy: 'foobar3000',
         price: 'foobar3000',
         requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
       }
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
@@ -70,7 +53,10 @@ describe('Recipes', function () {
       expect(responseId).to.match(
         /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
       )
-      expect(responseRest).to.deep.equal(newRecipe)
+      expect(responseRest).to.deep.equal({
+        ...newRecipe,
+        owner: 'valid-2',
+      })
     })
 
     it('should cause schema validation errors', async function () {
@@ -90,23 +76,7 @@ describe('Recipes', function () {
       expect(response.status).to.equal(400)
     })
 
-    it('should accept valid body', async function () {
-      const newRecipe = {
-        externalId: 'foobar3000',
-        name: 'foobar3000',
-        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
-        material: 'foobar3000',
-        alloy: 'foobar3000',
-        price: 'foobar3000',
-        requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
-      }
-
-      const response = await postRecipeRoute(newRecipe, app, authToken)
-      expect(response.status).to.equal(201)
-    })
-
-    it('invalid attachment id returns null', async function () {
+    it('invalid attachment id returns error', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
         name: 'foobar3000',
@@ -159,7 +129,6 @@ describe('Recipes', function () {
   })
 
   describe('GET recipes', function () {
-    this.timeout(5000)
     let app
     let authToken
     let jwksMock
@@ -175,39 +144,10 @@ describe('Recipes', function () {
       })
     })
 
-    beforeEach(async function () {
-      nock(`http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}`)
-        .persist()
-        .get('/v1/members/foobar3000')
-        .reply(200, {
-          alias: 'foobar3000-alias',
-          address: 'foobar3000',
-        })
-        .persist()
-        .get('/v1/members/valid-1')
-        .reply(200, {
-          alias: 'valid-alias-1',
-          address: 'valid-1',
-        })
-        .persist()
-        .get('/v1/members/valid-2')
-        .reply(200, {
-          alias: 'valid-alias-2',
-          address: 'valid-2',
-        })
-        .persist()
-        .get('/v1/members/5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutAA')
-        .reply(200, {
-          alias: 'alias',
-          address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutAA',
-        })
-    })
-
     setupIdentityMock()
 
     after(async function () {
       await jwksMock.stop()
-      nock.cleanAll()
     })
 
     it('should get recipe by id - 200', async function () {
@@ -219,7 +159,7 @@ describe('Recipes', function () {
         alloy: 'foobar3000',
         price: 'foobar3000',
         requiredCerts: [{ description: 'foobar3000' }],
-        supplier: 'foobar3000',
+        supplier: 'valid-1',
       }
 
       const recipe = await postRecipeRoute(newRecipe, app, authToken)
@@ -227,7 +167,7 @@ describe('Recipes', function () {
       expect(response.status).to.equal(200)
     })
 
-    it('should accept valid body', async function () {
+    it('should get recipe list - 200', async function () {
       const recipes = await Promise.all(
         recipesFixture.map(async (newRecipe) => {
           const { body: recipe } = await postRecipeRoute(newRecipe, app, authToken)
@@ -242,7 +182,10 @@ describe('Recipes', function () {
       body
         .filter(({ id }) => ids.includes(id))
         .map((recipe, i) => {
-          expect(recipes[i]).to.deep.contains(recipe)
+          expect(recipes[i]).to.deep.contains({
+            ...recipe,
+            owner: 'valid-2',
+          })
         })
     })
 

@@ -29,6 +29,7 @@ const seed = async () => {
       price: 'foobar3000',
       required_certs: JSON.stringify([{ description: 'foobar3000' }]),
       supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+      owner: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
     },
   ])
 
@@ -43,6 +44,7 @@ const seed = async () => {
       price: 'supplier3000',
       required_certs: JSON.stringify([{ description: 'supplier3000' }]),
       supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+      owner: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
     },
   ])
 }
