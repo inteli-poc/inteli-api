@@ -1,68 +1,63 @@
 const { transaction } = require('../../../controllers/Recipe')
+const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
-module.exports = function (recipeService) {
+module.exports = function () {
   const doc = {
-    GET: async function (req, res) {
-      const { status, response } = await transaction.getAll(req)
-      res.status(status).send(response)
-    },
-    POST: async function (req, res) {
-      const { status, ...body } = await transaction.create(req)
-      res.status(status).send(body)
-    },
-  }
-
-  doc.GET.apiDoc = {
-    summary: 'List Recipe Creation Actions',
-    parameters: [
-      {
-        description: 'Id of the recipe',
-        in: 'path',
-        required: true,
-        name: 'id',
-        allowEmptyValue: false,
-        schema: {
-          $ref: '#/components/schemas/ObjectReference',
+    GET: buildValidatedJsonHandler(transaction.getAll, {
+      summary: 'List Recipe Creation Actions',
+      parameters: [
+        {
+          description: 'Id of the recipe',
+          in: 'path',
+          required: true,
+          name: 'id',
+          allowEmptyValue: false,
+          schema: {
+            $ref: '#/components/schemas/ObjectReference',
+          },
         },
-      },
-    ],
-    responses: {
-      200: {
-        description: 'Return Recipe Creation Actions',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/RecipeCreation',
+      ],
+      responses: {
+        200: {
+          description: 'Return Recipe Creation Actions',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/RecipeCreation',
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: 'Recipe not found',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/NotFoundError',
+              },
+            },
+          },
+        },
+        default: {
+          description: 'An error occurred',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/Error',
               },
             },
           },
         },
       },
-      404: {
-        description: 'Recipe not found',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/NotFoundError',
-            },
-          },
-        },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
+      tags: ['recipe'],
+    }),
+    POST: async function (req, res) {
+      const { status, ...body } = await transaction.create(req)
+      res.status(status).send(body)
     },
-    tags: ['recipe'],
   }
 
   doc.POST.apiDoc = {

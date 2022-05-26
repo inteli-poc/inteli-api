@@ -30,7 +30,11 @@ module.exports = {
 
       return {
         status: 200,
-        response: transactions.map(({ id, created_at: submittedAt, status }) => ({ id, submittedAt, status })),
+        response: transactions.map(({ id, created_at, status }) => ({
+          id,
+          submittedAt: created_at.toISOString(),
+          status,
+        })),
       }
     },
     get: async (req) => {
