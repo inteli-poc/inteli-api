@@ -7,7 +7,7 @@ module.exports = function (orderService, identityService) {
     },
     POST: async function (req, res) {
       if (!req.body) {
-        throw new BadRequestError({ message: 'No body uploaded', service: 'order' })
+        throw new BadRequestError({ message: 'No body uploaded', req })
       }
 
       const { address: supplierAddress } = await identityService.getMemberByAlias(req, req.body.supplier)

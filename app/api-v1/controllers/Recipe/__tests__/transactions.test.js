@@ -4,7 +4,9 @@ const { stub } = require('sinon')
 
 const { BadRequestError, NotFoundError } = require('../../../../utils/errors')
 const { client } = require('../../../../db')
-const { transaction } = require('../')
+const db = require('../../../../db')
+const { transaction } = require('..')
+const { recipeExample, transactionsExample, listResponse, recipeId } = require('./transaction_fixtures')
 
 const postPayload = {
   params: {
@@ -19,16 +21,18 @@ const getPayload = {
   },
   token: 'some-auth-token',
 }
-const recipeExample = {
-  id: 1,
-  price: '99.99',
-  material: 'iron',
-  supplier: 'supplier-address',
-}
 
 const submitTransaction = async (req) => {
   try {
     return await transaction.create(req)
+  } catch (err) {
+    return err
+  }
+}
+
+const getAllTransactions = async (req) => {
+  try {
+    return await transaction.getAll(req)
   } catch (err) {
     return err
   }
@@ -62,9 +66,68 @@ describe('recipe controller', () => {
 
   afterEach(() => nock.cleanAll)
 
+  describe('transactions /getAll', () => {
+    const context = {}
+    const withGetTransactionsStub = (context, returnVal) => {
+      beforeEach(async () => {
+        context.getAllRecipeTransactionsStub = stub(db, 'getAllRecipeTransactions').resolves(returnVal)
+      })
+      afterEach(() => {
+        context.getAllRecipeTransactionsStub.restore()
+      })
+    }
+
+    describe('if req.params.id is not provided', () => {
+      withGetTransactionsStub(context, transactionsExample)
+
+      beforeEach(async () => {
+        response = await getAllTransactions({ params: {} })
+      })
+
+      it('throws validation error', () => {
+        expect(response).to.be.an.instanceOf(BadRequestError)
+        expect(response.message).to.be.equal('missing parameters')
+      })
+
+      it('does not perform any database calls and does not create transaction', () => {
+        expect(context.getAllRecipeTransactionsStub.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('if none transactions found', () => {
+      withGetTransactionsStub({}, [])
+
+      beforeEach(async () => {
+        response = await getAllTransactions({ params: { id: 'RECIPE00-9000-1000-8000-000000000000' } })
+      })
+
+      it('returns an empty list', () => {
+        const { status, response: body } = response
+        expect(status).to.be.equal(200)
+        expect(body).to.deep.equal([])
+      })
+    })
+
+    describe('happy path', () => {
+      const context = {}
+      withGetTransactionsStub(context, transactionsExample)
+
+      beforeEach(async () => {
+        response = await getAllTransactions({ params: { id: recipeId } })
+      })
+
+      it('returns an array of transactions', () => {
+        const { status, response: body } = response
+        expect(status).to.be.equal(200)
+        expect(body).to.deep.equal(listResponse)
+      })
+    })
+  })
+
   describe('transactions /create', () => {
     describe('if req.params.id is not provided', () => {
       beforeEach(async () => {
+        whereRecipeStub.reset()
         response = await submitTransaction({ params: {} })
       })
 
@@ -82,7 +145,7 @@ describe('recipe controller', () => {
     describe('if recipe does not exists in local db', () => {
       beforeEach(async () => {
         whereRecipeStub = stub().resolves([])
-        response = await submitTransaction({ params: { id: 1 } })
+        response = await submitTransaction({ params: { id: 'RECIPE00-9000-1000-8000-000000000000' } })
       })
 
       it('throws not found error along with the message', () => {
@@ -112,7 +175,7 @@ describe('recipe controller', () => {
         expect(insertTransactionStub.getCall(0).args).to.be.deep.equal([
           {
             recipe_id: 'recipe-id',
-            status: 'submitted',
+            status: 'Submitted',
             token_id: 20,
           },
         ])
@@ -163,7 +226,7 @@ describe('recipe controller', () => {
       expect(response).to.deep.equal({
         status: 200,
         creation: {
-          id: 1,
+          id: 'RECIPE00-9000-1000-8000-000000000000',
           price: '99.99',
           material: 'iron',
           supplier: 'supplier-address',

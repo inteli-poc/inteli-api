@@ -47,12 +47,17 @@ async function getRecipes() {
   return client('recipes').select()
 }
 
+async function getAllRecipeTransactions(recipe_id) {
+  return client.from('recipe_transactions').select().where({ recipe_id })
+}
+
 const insertAttachment = async (name, fileData) => {
   return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
 }
 
 module.exports = {
   client,
+  getAllRecipeTransactions,
   postOrderDb,
   getAttachment,
   addRecipe,

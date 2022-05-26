@@ -19,7 +19,7 @@ const lastTokenId = async (authToken) => {
     return id
   }
 
-  throw new InternalError({ message: 'Internal server error', service: 'dscp-api' })
+  throw new InternalError({ message: 'Internal server error' })
 }
 
 const getItemById = async (authToken, tokenId) => {
@@ -35,7 +35,7 @@ const getItemById = async (authToken, tokenId) => {
     return item
   }
 
-  throw new InternalError({ message: 'Internal server error', service: 'dscp-api' })
+  throw new InternalError({ message: 'Internal server error' })
 }
 
 const runProcess = async (authToken, inputs, outputs) => {
@@ -55,7 +55,7 @@ const runProcess = async (authToken, inputs, outputs) => {
     return ids
   }
 
-  throw new InternalError({ message: 'Internal server error', service: 'dscp-api' })
+  throw new InternalError({ message: 'Internal server error' })
 }
 
 module.exports = { lastTokenId, getItemById, runProcess }
