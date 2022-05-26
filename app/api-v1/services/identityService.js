@@ -6,18 +6,18 @@ const { IDENTITY_SERVICE_HOST, IDENTITY_SERVICE_PORT } = require('../../env')
 const URL_PREFIX = `http://${IDENTITY_SERVICE_HOST}:${IDENTITY_SERVICE_PORT}/v1`
 
 const getMemberByAlias = async (req, alias) => {
-  const response = await fetch(`${URL_PREFIX}/members/${encodeURIComponent(alias)}`, {
+  const res = await fetch(`${URL_PREFIX}/members/${encodeURIComponent(alias)}`, {
     headers: {
       Authorization: `Bearer ${req.token}`,
     },
   })
 
-  if (response.ok) {
-    const member = await response.json()
+  if (res.ok) {
+    const member = await res.json()
     return member
   }
 
-  if (response.status === 404) {
+  if (res.status === 404) {
     throw new BadRequestError({ message: `Member "${alias}" does not exist` })
   }
 

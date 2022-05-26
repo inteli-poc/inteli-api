@@ -18,7 +18,7 @@ module.exports = function (attachmentService) {
       logger.info('File attachment upload: %s', req.file)
 
       if (!req.file) {
-        throw new BadRequestError({ message: 'No file uploaded', service: 'attachment' })
+        throw new BadRequestError({ message: 'No file uploaded', req })
       }
 
       const [result] = await attachmentService.createAttachmentFromFile(req.file)

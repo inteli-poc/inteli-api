@@ -27,7 +27,7 @@ module.exports = function (recipeService, identityService) {
     },
     POST: async function (req, res) {
       if (!req.body) {
-        throw new BadRequestError({ message: 'No body provided uploaded', service: 'recipe' })
+        throw new BadRequestError({ message: 'No body provided uploaded', req })
       }
 
       const { externalId, name, imageAttachmentId, material, alloy, price, requiredCerts, supplier } = req.body

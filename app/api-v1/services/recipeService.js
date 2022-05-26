@@ -10,7 +10,7 @@ async function createRecipe(reqBody) {
 
   const attachment = await getAttachment(image_attachment_id)
   if (!attachment.length) {
-    throw new BadRequestError({ message: 'Attachment id not found', service: 'recipe' })
+    throw new BadRequestError({ message: 'Attachment id not found', req: reqBody })
   }
 
   const [recipe] = await addRecipe(reqBody)
@@ -24,7 +24,7 @@ async function getRecipes() {
 async function getRecipeByID(id) {
   const recipeResult = await getRecipeByIDdb(id)
   if (recipeResult.length === 0) {
-    throw new ItemNotFoundError({ message: 'Item not found', service: 'order' })
+    throw new ItemNotFoundError({ message: 'Item not found' })
   } else {
     const result = recipeResult[0]
     return result

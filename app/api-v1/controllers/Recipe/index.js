@@ -1,32 +1,47 @@
 const { runProcess } = require('../../../utils/dscp-api')
-const { client } = require('../../../db')
+const db = require('../../../db')
 const { mapRecipeData } = require('./helpers')
 const { BadRequestError, NotFoundError } = require('../../../utils/errors')
 
-const throwErr = (type, path) => {
+const throwErr = (type, req) => {
   switch (type) {
     case 400:
       throw new BadRequestError({
         message: 'missing parameters',
-        path,
+        req,
       })
     case 404:
       throw new NotFoundError({
         message: 'not found',
-        path,
+        req,
       })
   }
 }
 
 module.exports = {
+  // TODO abstranct to transactions controller and first path e.g. /recipe /order is database model
+  // do this along with order
   transaction: {
-    get: async (req) => {
-      const path = '/recipe/{id}/creation/${creationId}'
-      const { creationId, id } = req.params
-      const [transaction] = await client.from('recipe_transactions').select('*').where({ id: creationId, token_id: id })
+    getAll: async (req) => {
+      const { id } = req.params
+      if (!id) throwErr(400, req)
 
-      if (!id || !creationId) throwErr(400, path)
-      if (!transaction) throwErr(404, path)
+      const transactions = await db.getAllRecipeTransactions(id)
+
+      return {
+        status: 200,
+        response: transactions.map(({ id, created_at: submittedAt, status }) => ({ id, submittedAt, status })),
+      }
+    },
+    get: async (req) => {
+      const { creationId, id } = req.params
+      if (!id || !creationId) throwErr(400, req)
+
+      const [transaction] = await db.client
+        .from('recipe_transactions')
+        .select('*')
+        .where({ id: creationId, recipe_id: id })
+      if (!transaction) throwErr(404, req)
 
       return {
         status: 200,
@@ -34,12 +49,11 @@ module.exports = {
       }
     },
     create: async (req) => {
-      const path = '/recipe/{id}/creation'
       const { id } = req.params
-      if (!id) throwErr(400, path)
+      if (!id) throwErr(400, req)
 
-      const [recipe] = await client.from('recipes').select('*').where({ id })
-      if (!recipe) throwErr(404, path)
+      const [recipe] = await db.client.from('recipes').select('*').where({ id })
+      if (!recipe) throwErr(404, req)
 
       const payload = {
         inputs: [],
@@ -51,12 +65,12 @@ module.exports = {
         ],
       }
       const token = await runProcess(payload, req.token)
-      const transaction = await client
+      const transaction = await db.client
         .from('recipe_transactions')
         .insert({
           token_id: token[0],
           recipe_id: id,
-          status: 'submitted',
+          status: 'Submitted',
         })
         .returning(['id'])
         .then((t) => t[0])

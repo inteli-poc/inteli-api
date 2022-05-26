@@ -4,7 +4,8 @@ const { transaction } = require('../../../controllers/Recipe')
 module.exports = function (recipeService) {
   const doc = {
     GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
+      const { status, response } = await transaction.getAll(req)
+      res.status(status).send(response)
     },
     POST: async function (req, res) {
       const { status, ...body } = await transaction.create(req)
