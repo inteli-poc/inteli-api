@@ -55,6 +55,10 @@ const insertAttachment = async (name, fileData) => {
   return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
 }
 
+async function getAttachmentByIdDb(id) {
+  return client('attachments').select(['filename', 'binary_blob']).where({ id })
+}
+
 module.exports = {
   client,
   getAllRecipeTransactions,
@@ -65,4 +69,5 @@ module.exports = {
   insertAttachment,
   getRecipeByIDs,
   getRecipeByIDdb,
+  getAttachmentByIdDb,
 }

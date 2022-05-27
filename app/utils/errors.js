@@ -50,6 +50,12 @@ class ItemNotFoundError extends HttpResponseError {
   }
 }
 
+class NotAcceptableError extends HttpResponseError {
+  constructor({ message }) {
+    super({ code: 406, message })
+  }
+}
+
 const handleErrors = (err, req, res, next) => {
   if (err instanceof HttpResponseError) {
     logger.warn(`Error in ${req.path} message: ${err.message}`, req)
@@ -82,4 +88,5 @@ module.exports = {
   InternalError,
   RecipeDoesNotExistError,
   ItemNotFoundError,
+  NotAcceptableError,
 }
