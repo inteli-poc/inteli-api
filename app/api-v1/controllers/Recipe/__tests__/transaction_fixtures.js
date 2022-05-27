@@ -12,7 +12,7 @@ module.exports = {
       recipe_id: 'RECIPE00-0000-1000-8000-000000000000',
       token_id: 2,
       status: 'Accepted',
-      created_at: '2022-05-23T11:04:29.316Z',
+      created_at: new Date('2022-05-23T11:04:29.316Z'),
       type: 'Creation',
     },
     {
@@ -20,7 +20,7 @@ module.exports = {
       recipe_id: 'RECIPE00-0000-1000-8000-00000000000',
       token_id: 1,
       status: 'Accepted',
-      created_at: '2022-05-23T13:04:29.316Z',
+      created_at: new Date('2022-05-23T13:04:29.316Z'),
       type: 'Creation',
     },
   ],

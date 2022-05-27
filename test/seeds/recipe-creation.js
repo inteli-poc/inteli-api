@@ -41,7 +41,7 @@ module.exports = async () => {
   await db.client('recipe_transactions').insert({
     recipe_id: recipe.id,
     type: 'Creation',
-    status: 'Accepted',
+    status: 'InBlock',
     created_at: '2020-10-10',
   })
 

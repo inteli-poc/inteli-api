@@ -5,7 +5,7 @@ const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
 const { getAllRecipeTransactions } = require('../helper/routeHelper')
-const seed = require('../seeds/main')
+const seed = require('../seeds/recipe-creation')
 const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
 
 describe('get all recipe transactions', () => {
@@ -60,7 +60,7 @@ describe('get all recipe transactions', () => {
     expect(status).to.be.equal(200)
     expect(body.length).to.equal(2)
     expect(body[0]).to.deep.contain({
-      status: 'Accepted',
+      status: 'InBlock',
       submittedAt: '2020-10-10T00:00:00.000Z',
     })
     expect(body[1]).to.deep.contain({
