@@ -90,7 +90,7 @@ describe('Recipes', function () {
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(400)
-      expect(response.text).to.equal('Attachment id not found')
+      expect(response.text).to.equal('Bad Request: Attachment id not found')
     })
 
     it('invalid supplier name errors', async function () {
@@ -107,7 +107,7 @@ describe('Recipes', function () {
 
       const response = await postRecipeRoute(newRecipe, app, authToken)
       expect(response.status).to.equal(400)
-      expect(response.text).to.equal('Member "invalid" does not exist')
+      expect(response.text).to.equal('Bad Request: Member "invalid" does not exist')
     })
 
     it('identity server error propagates', async function () {

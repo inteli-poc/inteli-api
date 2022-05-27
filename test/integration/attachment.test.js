@@ -46,7 +46,7 @@ describe('attachments', function () {
   it('should return 400 - no file', async function () {
     const response = await postAttachmentNoFile(app, authToken)
     expect(response.status).to.equal(400)
-    expect(response.error.text).to.equal('No file uploaded')
+    expect(response.error.text).to.equal('Bad Request: No file uploaded')
   })
 
   it('should return 201 - json object uploaded', async function () {

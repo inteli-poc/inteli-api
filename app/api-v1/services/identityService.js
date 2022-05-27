@@ -18,21 +18,21 @@ const getMemberByAlias = async (req, alias) => {
   }
 
   if (res.status === 404) {
-    throw new BadRequestError({ message: `Member "${alias}" does not exist` })
+    throw new BadRequestError(`Member "${alias}" does not exist`)
   }
 
   throw new InternalError({ message: 'Internal server error' })
 }
 
 const getMemberBySelf = async (req) => {
-  const response = await fetch(`${URL_PREFIX}/self`, {
+  const res = await fetch(`${URL_PREFIX}/self`, {
     headers: {
       Authorization: `Bearer ${req.token}`,
     },
   })
 
-  if (response.ok) {
-    const member = await response.json()
+  if (res.ok) {
+    const member = await res.json()
     return member
   }
 

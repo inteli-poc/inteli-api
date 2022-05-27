@@ -3,14 +3,14 @@ const { BadRequestError, ItemNotFoundError } = require('../../utils/errors')
 
 async function createRecipe(reqBody) {
   if (!reqBody) {
-    throw new BadRequestError({ message: 'Invalid recipe input' })
+    throw new BadRequestError('Invalid recipe input')
   }
 
   const { image_attachment_id } = reqBody
 
   const attachment = await getAttachment(image_attachment_id)
   if (!attachment.length) {
-    throw new BadRequestError({ message: 'Attachment id not found', req: reqBody })
+    throw new BadRequestError('Attachment id not found')
   }
 
   const [recipe] = await addRecipe(reqBody)
@@ -24,7 +24,7 @@ async function getRecipes() {
 async function getRecipeByID(id) {
   const recipeResult = await getRecipeByIDdb(id)
   if (recipeResult.length === 0) {
-    throw new ItemNotFoundError({ message: 'Item not found' })
+    throw new ItemNotFoundError('Item not found')
   } else {
     const result = recipeResult[0]
     return result
