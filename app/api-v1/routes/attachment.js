@@ -1,11 +1,41 @@
 const logger = require('../../utils/Logger')
 const { BadRequestError } = require('../../utils/errors')
+const attachmentController = require('../controllers/Attachment')
+const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 
 module.exports = function (attachmentService) {
   const doc = {
-    GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
-    },
+    GET: buildValidatedJsonHandler(attachmentController.getAll, {
+      summary: 'List attachments',
+      parameters: [],
+      responses: {
+        200: {
+          description: 'Return attachment list',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/AttachmentEntry',
+                },
+              },
+            },
+          },
+        },
+        default: {
+          description: 'An error occurred',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/Error',
+              },
+            },
+          },
+        },
+      },
+      security: [{ bearerAuth: [] }],
+      tags: ['attachment'],
+    }),
     POST: async function (req, res) {
       if (req.headers['content-type'] === 'application/json') {
         logger.info('JSON attachment upload: %j', req.body)
@@ -24,38 +54,6 @@ module.exports = function (attachmentService) {
       const [result] = await attachmentService.createAttachmentFromFile(req.file)
       res.status(201).json({ ...result, size: req.file.size })
     },
-  }
-
-  doc.GET.apiDoc = {
-    summary: 'List attachments',
-    parameters: [],
-    responses: {
-      200: {
-        description: 'Return attachment list',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/AttachmentEntry',
-              },
-            },
-          },
-        },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['attachment'],
   }
 
   doc.POST.apiDoc = {

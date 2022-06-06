@@ -1,91 +1,85 @@
-// eslint-disable-next-line no-unused-vars
-module.exports = function (buildService, partService) {
-  const doc = {
-    GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
-    },
-    POST: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
-    },
-  }
+const buildController = require('../controllers/Build')
+const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 
-  doc.GET.apiDoc = {
-    summary: 'List Builds',
-    parameters: [],
-    responses: {
-      200: {
-        description: 'Return Builds',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/Build',
+module.exports = function () {
+  const doc = {
+    GET: buildValidatedJsonHandler(buildController.getAll, {
+      summary: 'List Builds',
+      parameters: [],
+      responses: {
+        200: {
+          description: 'Return Builds',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/Build',
+                },
+              },
+            },
+          },
+        },
+        default: {
+          description: 'An error occurred',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/Error',
               },
             },
           },
         },
       },
-      default: {
-        description: 'An error occurred',
+      security: [{ bearerAuth: [] }],
+      tags: ['build'],
+    }),
+    POST: buildValidatedJsonHandler(buildController.create, {
+      summary: 'Create Build',
+      requestBody: {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/responses/Error',
+              $ref: '#/components/schemas/NewBuild',
             },
           },
         },
       },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['build'],
-  }
-
-  doc.POST.apiDoc = {
-    summary: 'Create Build',
-    requestBody: {
-      content: {
-        'application/json': {
-          schema: {
-            $ref: '#/components/schemas/NewBuild',
+      responses: {
+        201: {
+          description: 'Build Created',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Build',
+              },
+            },
           },
         },
-      },
-    },
-    responses: {
-      201: {
-        description: 'Build Created',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Build',
+        400: {
+          description: 'Invalid request',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/BadRequestError',
+              },
+            },
+          },
+        },
+        default: {
+          description: 'An error occurred',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/Error',
+              },
             },
           },
         },
       },
-      400: {
-        description: 'Invalid request',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/BadRequestError',
-            },
-          },
-        },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['build'],
+      security: [{ bearerAuth: [] }],
+      tags: ['build'],
+    }),
   }
 
   return doc
