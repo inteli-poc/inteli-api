@@ -1,41 +1,39 @@
-// eslint-disable-next-line no-unused-vars
-module.exports = function (partService) {
-  const doc = {
-    GET: async function (req, res) {
-      res.status(500).json({ message: 'Not Implemented' })
-    },
-  }
+const partController = require('../controllers/Part')
+const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 
-  doc.GET.apiDoc = {
-    summary: 'List Parts',
-    parameters: [],
-    responses: {
-      200: {
-        description: 'Return Parts',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/Part',
+module.exports = function () {
+  const doc = {
+    GET: buildValidatedJsonHandler(partController.getAll, {
+      summary: 'List Parts',
+      parameters: [],
+      responses: {
+        200: {
+          description: 'Return Parts',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/Part',
+                },
+              },
+            },
+          },
+        },
+        default: {
+          description: 'An error occurred',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/responses/Error',
               },
             },
           },
         },
       },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['part'],
+      security: [{ bearerAuth: [] }],
+      tags: ['part'],
+    }),
   }
 
   return doc
