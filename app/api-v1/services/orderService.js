@@ -4,7 +4,7 @@ const { IncorrectSupplierError, RecipeDoesNotExistError } = require('../../utils
 async function postOrder(reqBody) {
   // Will add a get function at a later date to check for duplication
 
-  // This section checks if the order manufacturer does not match the supplier
+  // This section checks if the order supplier does not match the supplier
   const uniqueRecipeIDs = [...new Set(reqBody.items)]
 
   const recipes = await getRecipeByIDs(uniqueRecipeIDs)
