@@ -1,136 +1,148 @@
 const logger = require('../../utils/Logger')
+const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 const { BadRequestError } = require('../../utils/errors')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService, identityService) {
   const doc = {
-    GET: async function (req, res) {
-      const recipes = await recipeService.getRecipes()
-      const result = await Promise.all(
-        recipes.map(async (recipe) => {
-          const { alias: supplierAlias } = await identityService.getMemberByAddress(req, recipe.supplier)
-          const { id, externalId, name, imageAttachmentId, material, alloy, price, requiredCerts } = recipe
-          return {
-            id,
-            externalId,
-            name,
-            imageAttachmentId,
-            material,
-            alloy,
-            price,
-            requiredCerts,
-            supplier: supplierAlias,
-          }
-        })
-      )
-      res.status(200).json(result)
-    },
-    POST: async function (req, res) {
-      if (!req.body) {
-        throw new BadRequestError({ message: 'No body provided uploaded', req })
-      }
-
-      const { externalId, name, imageAttachmentId, material, alloy, price, requiredCerts, supplier } = req.body
-
-      const { address: supplierAddress } = await identityService.getMemberByAlias(req, supplier)
-
-      const recipe = await recipeService.createRecipe({
-        external_id: externalId,
-        name,
-        image_attachment_id: imageAttachmentId,
-        material,
-        alloy,
-        price,
-        required_certs: JSON.stringify(requiredCerts),
-        supplier: supplierAddress,
-      })
-
-      logger.info('Recipe created: ', recipe.id)
-
-      res.status(201).json({
-        id: recipe.id,
-        ...req.body,
-      })
-    },
-  }
-
-  doc.GET.apiDoc = {
-    summary: 'List Recipes',
-    parameters: [],
-    responses: {
-      200: {
-        description: 'Return Recipes',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/Recipe',
+    GET: buildValidatedJsonHandler(
+      async function (req) {
+        const recipes = await recipeService.getRecipes()
+        const result = await Promise.all(
+          recipes.map(async (recipe) => {
+            const { alias: supplierAlias } = await identityService.getMemberByAddress(req, recipe.supplier)
+            const { alias: ownerAlias } = await identityService.getMemberByAddress(req, recipe.owner)
+            const { id, external_id, name, image_attachment_id, material, alloy, price, required_certs } = recipe
+            return {
+              id,
+              externalId: external_id,
+              name,
+              imageAttachmentId: image_attachment_id,
+              material,
+              alloy,
+              price,
+              requiredCerts: required_certs,
+              supplier: supplierAlias,
+              owner: ownerAlias,
+            }
+          })
+        )
+        return { status: 200, response: result }
+      },
+      {
+        summary: 'List Recipes',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'Return Recipes',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Recipe',
+                  },
+                },
+              },
+            },
+          },
+          default: {
+            description: 'An error occurred',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/Error',
+                },
               },
             },
           },
         },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['recipe'],
-  }
+        security: [{ bearerAuth: [] }],
+        tags: ['recipe'],
+      }
+    ),
+    POST: buildValidatedJsonHandler(
+      async function (req) {
+        if (!req.body) {
+          throw new BadRequestError({ message: 'No body provided uploaded', req })
+        }
 
-  doc.POST.apiDoc = {
-    summary: 'Create Recipe',
-    requestBody: {
-      content: {
-        'application/json': {
-          schema: {
-            $ref: '#/components/schemas/NewRecipe',
+        const { externalId, name, imageAttachmentId, material, alloy, price, requiredCerts, supplier } = req.body
+
+        const { address: supplierAddress } = await identityService.getMemberByAlias(req, supplier)
+        const selfAddress = await identityService.getMemberBySelf(req)
+        const { alias: selfAlias } = await identityService.getMemberByAddress(req, selfAddress)
+
+        const recipe = await recipeService.createRecipe({
+          external_id: externalId,
+          name,
+          image_attachment_id: imageAttachmentId,
+          material,
+          alloy,
+          price,
+          required_certs: JSON.stringify(requiredCerts),
+          owner: selfAddress,
+          supplier: supplierAddress,
+        })
+
+        logger.info('Recipe created: ', recipe.id)
+
+        return {
+          status: 201,
+          response: {
+            id: recipe.id,
+            owner: selfAlias,
+            ...req.body,
           },
-        },
+        }
       },
-    },
-    responses: {
-      201: {
-        description: 'Recipe Created',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Recipe',
+      {
+        summary: 'Create Recipe',
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/NewRecipe',
+              },
             },
           },
         },
-      },
-      400: {
-        description: 'Invalid request',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/BadRequestError',
+        responses: {
+          201: {
+            description: 'Recipe Created',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Recipe',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Invalid request',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/BadRequestError',
+                },
+              },
+            },
+          },
+          default: {
+            description: 'An error occurred',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/Error',
+                },
+              },
             },
           },
         },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['recipe'],
+        security: [{ bearerAuth: [] }],
+        tags: ['recipe'],
+      }
+    ),
   }
 
   return doc

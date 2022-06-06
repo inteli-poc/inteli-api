@@ -21,6 +21,11 @@ module.exports = async () => {
       filename: 'foo1.jpg',
       binary_blob: 9999999,
     },
+    {
+      id: '00000000-0000-1000-9000-000000000001',
+      filename: 'json',
+      binary_blob: { 'First Item': 'Test Data' },
+    },
   ])
   await client('recipes').insert({
     id: '00000000-0000-1000-8000-000000000001',
@@ -31,6 +36,7 @@ module.exports = async () => {
     alloy: 'TEST-alloy',
     price: '99.99',
     required_certs: JSON.stringify([{ description: 'TEST-certificate' }]),
-    supplier: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutAA',
+    supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+    owner: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
   })
 }

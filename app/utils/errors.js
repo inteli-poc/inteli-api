@@ -1,24 +1,22 @@
 const logger = require('../utils/Logger')
 
 class HttpResponseError extends Error {
-  constructor({ code = 500, message, req = { path: 'unknown' } }) {
+  constructor({ code = 500, message }) {
     super(message)
     this.code = code
     this.message = message
-    this.path = req.path
-    this.request = req
   }
 }
 
 class NotFoundError extends HttpResponseError {
-  constructor({ message, req }) {
-    super({ code: 404, message, req })
+  constructor(msg) {
+    super({ code: 404, message: `Not Found: ${msg}` })
   }
 }
 
 class BadRequestError extends HttpResponseError {
-  constructor({ message, req }) {
-    super({ code: 400, message, req })
+  constructor(msg) {
+    super({ code: 400, message: `Bad Request: ${msg}` })
   }
 }
 
@@ -52,9 +50,15 @@ class ItemNotFoundError extends HttpResponseError {
   }
 }
 
+class NotAcceptableError extends HttpResponseError {
+  constructor({ message }) {
+    super({ code: 406, message })
+  }
+}
+
 const handleErrors = (err, req, res, next) => {
   if (err instanceof HttpResponseError) {
-    logger.warn(`Error in ${req.path} message: ${err.message}`)
+    logger.warn(`Error in ${req.path} message: ${err.message}`, req)
     res.status(err.code).send(err.message)
   }
   // openapi validation
@@ -84,4 +88,5 @@ module.exports = {
   InternalError,
   RecipeDoesNotExistError,
   ItemNotFoundError,
+  NotAcceptableError,
 }

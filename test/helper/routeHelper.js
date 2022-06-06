@@ -140,11 +140,40 @@ async function postAttachmentJSON({ app }, body, token) {
     })
 }
 
+async function getAttachmentRouteJSON(id, { app }, token) {
+  return request(app)
+    .get(`/${API_MAJOR_VERSION}/attachment/${id}`)
+    .set('Accept', 'application/json')
+    .set('Authorization', `Bearer ${token}`)
+    .send()
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postAttachmentErr ${err}`)
+      return err
+    })
+}
+
+async function getAttachmentRouteOctet(id, { app }, token) {
+  return request(app)
+    .get(`/${API_MAJOR_VERSION}/attachment/${id}`)
+    .set('Accept', 'application/octet-stream')
+    .set('Authorization', `Bearer ${token}`)
+    .send()
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postAttachmentErr ${err}`)
+      return err
+    })
+}
+
 async function getAllRecipeTransactions({ app }, token, recipeId) {
   return request(app)
     .get(`/${API_MAJOR_VERSION}/recipe/${recipeId}/creation`)
     .set('Accept', 'application/json')
-    .set('Content-Type', 'application/json')
     .set('Authorization', `Bearer ${token}`)
     .then((response) => {
       return response
@@ -166,4 +195,6 @@ module.exports = {
   getAllRecipeTransactions,
   getRecipeByIdRoute,
   postAttachmentJSON,
+  getAttachmentRouteJSON,
+  getAttachmentRouteOctet,
 }

@@ -95,11 +95,6 @@ const apiDoc = {
           },
         },
       },
-      OnChainAddress: {
-        type: 'string',
-        description: 'A literal which will be represented as on-chain metadata',
-        maxLength: 55,
-      },
       OnChainLiteral: {
         type: 'string',
         description: 'A literal which will be represented as on-chain metadata',
@@ -175,8 +170,8 @@ const apiDoc = {
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             },
           },
-          manufacturer: {
-            description: 'Name of the manufacturer who ran the build. This information is not stored directly on-chain',
+          supplier: {
+            description: 'Name of the supplier who ran the build. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
           },
@@ -233,9 +228,8 @@ const apiDoc = {
             description: 'id of the build that produces/produced this part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          manufacturer: {
-            description:
-              'Name of the manufacturer who created the part. This information is not stored directly on-chain',
+          supplier: {
+            description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
           },
@@ -262,7 +256,7 @@ const apiDoc = {
         properties: {
           supplier: {
             description:
-              'Name of the manufacturer who will supply parts from this purchase-order. This information is not stored directly on-chain',
+              'Name of the supplier who will supply parts from this purchase-order. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
           },
