@@ -1,72 +1,64 @@
 const { transaction } = require('../../../../controllers/Recipe')
+const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService) {
   const doc = {
-    GET: async function (req, res) {
-      const { status, ...body } = await transaction.get(req)
-      res.status(status).send(body)
-    },
-  }
-
-  doc.GET.apiDoc = {
-    summary: 'Get Recipe Creation Action',
-    parameters: [
-      {
-        description: 'Id of the recipe',
-        in: 'path',
-        required: true,
-        name: 'id',
-        allowEmptyValue: false,
-        schema: {
-          $ref: '#/components/schemas/ObjectReference',
-        },
+    GET: buildValidatedJsonHandler(
+      async function (req) {
+        const { status, ...body } = await transaction.get(req)
+        return { status, response: body }
       },
       {
-        description: 'Id of the recipe creation action',
-        in: 'path',
-        required: true,
-        name: 'creationId',
-        allowEmptyValue: false,
-        schema: {
-          $ref: '#/components/schemas/ObjectReference',
-        },
-      },
-    ],
-    responses: {
-      200: {
-        description: 'Return Recipe Creation Action',
-        content: {
-          'application/json': {
+        summary: 'Get Recipe Creation Action',
+        parameters: [
+          {
+            description: 'Id of the recipe',
+            in: 'path',
+            required: true,
+            name: 'id',
+            allowEmptyValue: false,
             schema: {
-              $ref: '#/components/schemas/RecipeCreation',
+              $ref: '#/components/schemas/ObjectReference',
+            },
+          },
+          {
+            description: 'Id of the recipe creation action',
+            in: 'path',
+            required: true,
+            name: 'creationId',
+            allowEmptyValue: false,
+            schema: {
+              $ref: '#/components/schemas/ObjectReference',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Return Recipe Creation Action',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RecipeCreation',
+                },
+              },
+            },
+          },
+          404: {
+            description: 'Recipe Creation Action not found',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundError',
+                },
+              },
             },
           },
         },
-      },
-      404: {
-        description: 'Recipe Creation Action not found',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/NotFoundError',
-            },
-          },
-        },
-      },
-      default: {
-        description: 'An error occurred',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/responses/Error',
-            },
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-    tags: ['recipe'],
+        security: [{ bearerAuth: [] }],
+        tags: ['recipe'],
+      }
+    ),
   }
 
   return doc

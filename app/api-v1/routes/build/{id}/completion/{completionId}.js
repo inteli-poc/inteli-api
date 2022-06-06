@@ -44,17 +44,7 @@ module.exports = function (buildService) {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/responses/NotFoundError',
-              },
-            },
-          },
-        },
-        default: {
-          description: 'An error occurred',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/responses/Error',
+                $ref: '#/components/schemas/NotFoundError',
               },
             },
           },

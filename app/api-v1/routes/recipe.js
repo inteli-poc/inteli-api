@@ -46,16 +46,6 @@ module.exports = function (recipeService, identityService) {
               },
             },
           },
-          default: {
-            description: 'An error occurred',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/responses/Error',
-                },
-              },
-            },
-          },
         },
         security: [{ bearerAuth: [] }],
         tags: ['recipe'],
@@ -123,17 +113,7 @@ module.exports = function (recipeService, identityService) {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/responses/BadRequestError',
-                },
-              },
-            },
-          },
-          default: {
-            description: 'An error occurred',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/responses/Error',
+                  $ref: '#/components/schemas/BadRequestError',
                 },
               },
             },

@@ -4,8 +4,6 @@ const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
 const { postAttachment } = require('../helper/routeHelper')
-const { getAuthToken } = require('../helper/auth')
-const { lastTokenId } = require('../../app/api-v1/services/dscpApiService')
 
 describe('authentication', function () {
   let app
@@ -22,12 +20,6 @@ describe('authentication', function () {
     const response = await postAttachment(app, Buffer.from('a'.repeat(size)), filename, authToken)
 
     expect(response.status).to.equal(401)
-    expect(response.error.text).to.have.equal('An error occurred during jwks verification')
-  })
-
-  it('should return 200 - valid token for dscp-api - test user', async function () {
-    const response = await lastTokenId(await getAuthToken())
-
-    expect(response).to.have.property('id')
+    expect(response.body).to.deep.equal({ message: 'An error occurred during jwks verification' })
   })
 })

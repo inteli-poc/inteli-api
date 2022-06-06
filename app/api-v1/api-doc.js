@@ -12,21 +12,31 @@ const apiDoc = {
     },
   ],
   components: {
-    responses: {
+    schemas: {
+      Error: {
+        description: 'An error occurred',
+        type: 'object',
+        properties: {
+          message: {
+            type: 'string',
+          },
+        },
+      },
       NotFoundError: {
         description: 'This resource cannot be found',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/Error' }],
       },
       BadRequestError: {
         description: 'The request is invalid',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/Error' }],
       },
       UnauthorizedError: {
         description: 'Access token is missing or invalid',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/Error' }],
       },
-      Error: {
-        description: 'An error occurred',
-      },
-    },
-    schemas: {
       NewRecipe: {
         type: 'object',
         properties: {
