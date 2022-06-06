@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const validatorMod = require('openapi-response-validator')
 
-const { buildValidatedJsonHandler } = require('../routeResponseValidator')
+const { buildValidatedJsonHandler, commonResponses } = require('../routeResponseValidator')
 const { exampleDoc } = require('./response_validator_fixtures')
 const commonApiDoc = require('../../api-v1/api-doc')
 
@@ -52,8 +52,15 @@ describe('buildValidatedJsonHandler', () => {
     expect(context.handler).to.be.a('function')
   })
 
-  it('returns function with apiDoc', () => {
-    expect(context.handler.apiDoc).to.equal(exampleDoc)
+  it('returns function with apiDoc + common responses', () => {
+    const expectedResponses = {
+      ...commonResponses,
+      ...exampleDoc.responses,
+    }
+    expect(context.handler.apiDoc).to.deep.equal({
+      ...exampleDoc,
+      responses: expectedResponses,
+    })
   })
 
   it('builds a validator', () => {
@@ -64,7 +71,13 @@ describe('buildValidatedJsonHandler', () => {
   it('builds a validator with responses and components', () => {
     const stub = context.stubs.ctor
     expect(stub.firstCall.args).to.deep.equal([
-      { responses: exampleDoc.responses, components: commonApiDoc.components },
+      {
+        responses: {
+          ...commonResponses,
+          ...exampleDoc.responses,
+        },
+        components: commonApiDoc.components,
+      },
     ])
   })
 })

@@ -2,10 +2,37 @@ const OpenAPIResponseValidatorModule = require('openapi-response-validator')
 const commonApiDoc = require('../api-v1/api-doc')
 const logger = require('./Logger')
 
+const commonResponses = {
+  401: {
+    description: 'An unauthorized error occurred',
+    content: {
+      'application/json': {
+        schema: {
+          $ref: '#/components/schemas/UnauthorizedError',
+        },
+      },
+    },
+  },
+  default: {
+    description: 'An error occurred',
+    content: {
+      'application/json': {
+        schema: {
+          $ref: '#/components/schemas/Error',
+        },
+      },
+    },
+  },
+}
+
 const buildValidatedJsonHandler = (controller, apiDoc) => {
   const OpenAPIResponseValidator = OpenAPIResponseValidatorModule.default
+  const responses = {
+    ...commonResponses,
+    ...apiDoc.responses,
+  }
   const responseValidator = new OpenAPIResponseValidator({
-    responses: apiDoc.responses,
+    responses,
     components: commonApiDoc.components,
   })
   const handler = async function (req, res) {
@@ -18,10 +45,14 @@ const buildValidatedJsonHandler = (controller, apiDoc) => {
       res.status(status).json(response)
     }
   }
-  handler.apiDoc = apiDoc
+  handler.apiDoc = {
+    ...apiDoc,
+    responses,
+  }
   return handler
 }
 
 module.exports = {
+  commonResponses,
   buildValidatedJsonHandler,
 }
