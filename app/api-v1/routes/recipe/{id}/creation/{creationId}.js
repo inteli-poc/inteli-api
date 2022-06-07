@@ -1,4 +1,5 @@
 const { transaction } = require('../../../../controllers/Recipe')
+const { getDefaultSecurity } = require('../../../../../utils/auth')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
@@ -55,7 +56,7 @@ module.exports = function (recipeService) {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['recipe'],
       }
     ),

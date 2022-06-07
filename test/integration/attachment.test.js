@@ -1,9 +1,10 @@
 const createJWKSMock = require('mock-jwks').default
 const { describe, before, it, after } = require('mocha')
 const { expect } = require('chai')
-const seed = require('../seeds/recipes')
+const { seed, cleanup } = require('../seeds/recipes')
 
 const { createHttpServer } = require('../../app/server')
+const { AUTH_ISSUER, AUTH_AUDIENCE, FILE_UPLOAD_SIZE_LIMIT_BYTES, AUTH_TYPE } = require('../../app/env')
 const {
   postAttachment,
   postAttachmentNoFile,
@@ -11,9 +12,11 @@ const {
   getAttachmentRouteJSON,
   getAttachmentRouteOctet,
 } = require('../helper/routeHelper')
-const { AUTH_ISSUER, AUTH_AUDIENCE, FILE_UPLOAD_SIZE_LIMIT_BYTES } = require('../../app/env')
 
-describe('attachments', function () {
+const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
+const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
+
+describeAuthOnly('attachments - authenticated', function () {
   let app
   let authToken
   let jwksMock
@@ -30,6 +33,7 @@ describe('attachments', function () {
   })
 
   after(async function () {
+    await cleanup()
     await jwksMock.stop()
   })
 
@@ -98,21 +102,40 @@ describe('attachments', function () {
     expect(response.status).to.equal(200)
   })
 
-  it('should return 406 when rquesting json from the octet route', async function () {
+  it('should return 406 when requesting json from the octet route', async function () {
     const attachment = '00000000-0000-1000-8000-000000000001'
     const response = await getAttachmentRouteJSON(attachment, app, authToken)
     expect(response.status).to.equal(406)
   })
 
-  it('should return 404 when rquesting incorrect ID', async function () {
+  it('should return 404 when requesting incorrect ID', async function () {
     const attachment = '00000000-0000-1000-8000-000000000002'
     const response = await getAttachmentRouteOctet(attachment, app, authToken)
     expect(response.status).to.equal(404)
   })
 
-  it('should return 400 when rquesting incorrect ID', async function () {
+  it('should return 400 when requesting invalid ID', async function () {
     const attachment = 'invalid'
     const response = await getAttachmentRouteOctet(attachment, app, authToken)
     expect(response.status).to.equal(400)
+  })
+})
+
+describeNoAuthOnly('attachments - no auth', function () {
+  let app
+
+  before(async function () {
+    app = await createHttpServer()
+  })
+
+  it('should return 201 - file uploaded', async function () {
+    const size = 100
+    const filename = 'test.pdf'
+    const response = await postAttachment(app, Buffer.from('a'.repeat(size)), filename, null)
+
+    expect(response.status).to.equal(201)
+    expect(response.body).to.have.property('id')
+    expect(response.body.filename).to.equal(filename)
+    expect(response.body.size).to.equal(size)
   })
 })

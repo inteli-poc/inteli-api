@@ -8,6 +8,7 @@ config:
   identityServiceHost: localhost
   identityServicePort: 80
   auth:
+    type: NONE
     jwksUri: https://inteli.eu.auth0.com/.well-known/jwks.json
     audience: inteli-dev
     issuer: https://inteli.eu.auth0.com/
@@ -26,7 +27,7 @@ ingress:
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.21.3'
+  tag: 'v1.22.0'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:

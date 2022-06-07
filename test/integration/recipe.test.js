@@ -3,15 +3,18 @@ const { describe, before, it } = require('mocha')
 const { expect } = require('chai')
 
 const { createHttpServer } = require('../../app/server')
-const seed = require('../seeds/recipes')
+const { seed, cleanup } = require('../seeds/recipes')
 const { postRecipeRoute, getRecipeRoute, getRecipeByIdRoute } = require('../helper/routeHelper')
 const { setupIdentityMock } = require('../helper/identityHelper')
 const recipesFixture = require('../fixtures/recipes')
-const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
+const { AUTH_ISSUER, AUTH_AUDIENCE, AUTH_TYPE } = require('../../app/env')
 
 const logger = require('../../app/utils/Logger')
 
-describe('Recipes', function () {
+const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
+const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
+
+describeAuthOnly('recipes - authenticated', function () {
   describe('POST recipes', function () {
     this.timeout(5000)
     let app
@@ -32,6 +35,7 @@ describe('Recipes', function () {
     setupIdentityMock()
 
     after(async function () {
+      await cleanup()
       await jwksMock.stop()
     })
 
@@ -147,6 +151,7 @@ describe('Recipes', function () {
     setupIdentityMock()
 
     after(async function () {
+      await cleanup()
       await jwksMock.stop()
     })
 
@@ -197,6 +202,62 @@ describe('Recipes', function () {
     it('should return a 400 with an incorrect ID format', async function () {
       const response = await getRecipeByIdRoute(app, '63248be7b884', authToken)
       expect(response.status).to.equal(400)
+    })
+  })
+})
+
+describeNoAuthOnly('recipes - no auth', function () {
+  describe('POST + GET recipes', function () {
+    let app
+
+    before(async () => {
+      await seed()
+      app = await createHttpServer()
+    })
+
+    after(async function () {
+      await cleanup()
+    })
+
+    setupIdentityMock()
+
+    it('should get recipe by id - 200', async function () {
+      const newRecipe = {
+        externalId: 'foobar3000',
+        name: 'foobar3000',
+        imageAttachmentId: '00000000-0000-1000-8000-000000000000',
+        material: 'foobar3000',
+        alloy: 'foobar3000',
+        price: 'foobar3000',
+        requiredCerts: [{ description: 'foobar3000' }],
+        supplier: 'valid-1',
+      }
+
+      const recipe = await postRecipeRoute(newRecipe, app, null)
+      const response = await getRecipeByIdRoute(app, recipe.body.id, null)
+      expect(response.status).to.equal(200)
+    })
+
+    it('should get recipe list - 200', async function () {
+      const recipes = await Promise.all(
+        recipesFixture.map(async (newRecipe) => {
+          const { body: recipe } = await postRecipeRoute(newRecipe, app, null)
+          return recipe
+        })
+      )
+
+      const { status, body } = await getRecipeRoute(app, null)
+      expect(status).to.equal(200)
+      expect(body).to.be.an('array')
+      const ids = recipes.map(({ id }) => id)
+      body
+        .filter(({ id }) => ids.includes(id))
+        .map((recipe, i) => {
+          expect(recipes[i]).to.deep.contains({
+            ...recipe,
+            owner: 'valid-2',
+          })
+        })
     })
   })
 })

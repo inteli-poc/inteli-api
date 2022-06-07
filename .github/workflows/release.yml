@@ -143,6 +143,9 @@ jobs:
       - name: Dependency Check
         run: npm run depcheck
   tests:
+    strategy:
+      matrix:
+        auth: [NONE, JWT]
     name: Run tests
     runs-on: ubuntu-latest
     needs: [preconditions]
@@ -163,6 +166,8 @@ jobs:
         run: npm ci
       - name: Setup dependencies
         run: docker-compose up -d
+        env: 
+          AUTH_TYPE: ${{ matrix.auth }}
       - name: Sleep
         uses: kibertoad/wait-action@1.0.1
         with:
@@ -172,6 +177,7 @@ jobs:
       - name: Run tests
         run: npm run test
         env:
+          AUTH_TYPE: ${{ matrix.auth }}
           AUTH_TEST_USERNAME: ${{ secrets.AUTH_TEST_USERNAME }}
           AUTH_TEST_PASSWORD: ${{ secrets.AUTH_TEST_PASSWORD }}
           AUTH_TEST_CLIENT_ID: ${{ secrets.AUTH_TEST_CLIENT_ID }}

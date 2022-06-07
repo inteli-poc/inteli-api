@@ -1,3 +1,4 @@
+const { getDefaultSecurity } = require('../../../../utils/auth')
 const orderController = require('../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
@@ -43,7 +44,7 @@ module.exports = function (orderService) {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['order'],
     }),
     POST: buildValidatedJsonHandler(orderController.transaction.create, {
@@ -91,7 +92,7 @@ module.exports = function (orderService) {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['order'],
     }),
   }

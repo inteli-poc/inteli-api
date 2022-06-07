@@ -1,3 +1,4 @@
+const { getDefaultSecurity } = require('../../../utils/auth')
 const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
@@ -62,7 +63,7 @@ module.exports = function (recipeService, identityService) {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['recipe'],
       }
     ),

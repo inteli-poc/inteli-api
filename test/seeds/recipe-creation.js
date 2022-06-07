@@ -8,8 +8,8 @@ const cleanup = async () => {
 }
 const attachmentId = '10000000-0000-1000-8000-000000000000'
 
-module.exports = async () => {
-  await cleanup() // no need to export, it call it anyway...
+const seed = async () => {
+  await cleanup()
 
   await db.client('attachments').insert([
     {
@@ -52,4 +52,9 @@ module.exports = async () => {
     status: 'Submitted',
     created_at: '2021-10-10',
   })
+}
+
+module.exports = {
+  cleanup,
+  seed,
 }

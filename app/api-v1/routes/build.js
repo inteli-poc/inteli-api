@@ -1,3 +1,4 @@
+const { getDefaultSecurity } = require('../../utils/auth')
 const buildController = require('../controllers/Build')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 
@@ -21,7 +22,7 @@ module.exports = function () {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['build'],
     }),
     POST: buildValidatedJsonHandler(buildController.create, {
@@ -57,7 +58,7 @@ module.exports = function () {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['build'],
     }),
   }

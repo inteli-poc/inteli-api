@@ -1,3 +1,4 @@
+const { getDefaultSecurity } = require('../../../utils/auth')
 const buildController = require('../../controllers/Build')
 const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator')
 
@@ -43,7 +44,7 @@ module.exports = function (buildService) {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['build'],
     }),
   }

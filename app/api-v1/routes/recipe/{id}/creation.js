@@ -1,5 +1,6 @@
 const { transaction } = require('../../../controllers/Recipe')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
+const { getDefaultSecurity } = require('../../../../utils/auth')
 
 module.exports = function () {
   const doc = {
@@ -94,7 +95,7 @@ module.exports = function () {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['recipe'],
       }
     ),

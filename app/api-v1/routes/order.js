@@ -1,6 +1,7 @@
 const orderController = require('../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 const { BadRequestError } = require('../../utils/errors')
+const { getDefaultSecurity } = require('../../utils/auth')
 
 module.exports = function (orderService, identityService) {
   const doc = {
@@ -22,7 +23,7 @@ module.exports = function (orderService, identityService) {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['order'],
     }),
     POST: buildValidatedJsonHandler(
@@ -84,7 +85,7 @@ module.exports = function (orderService, identityService) {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['order'],
       }
     ),

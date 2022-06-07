@@ -1,6 +1,7 @@
 const logger = require('../../utils/Logger')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 const { BadRequestError } = require('../../utils/errors')
+const { getDefaultSecurity } = require('../../utils/auth')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService, identityService) {
@@ -47,7 +48,7 @@ module.exports = function (recipeService, identityService) {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['recipe'],
       }
     ),
@@ -119,7 +120,7 @@ module.exports = function (recipeService, identityService) {
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        security: getDefaultSecurity(),
         tags: ['recipe'],
       }
     ),
