@@ -9,7 +9,6 @@ const cleanup = async () => {
 const seed = async () => {
   await cleanup()
 
-  // create thing types
   await client('attachments').insert([
     {
       id: '00000000-0000-1000-8000-000000000000',

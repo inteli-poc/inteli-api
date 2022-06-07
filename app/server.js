@@ -8,7 +8,7 @@ const multer = require('multer')
 const path = require('path')
 const bodyParser = require('body-parser')
 const compression = require('compression')
-const { PORT, API_VERSION, API_MAJOR_VERSION, FILE_UPLOAD_SIZE_LIMIT_BYTES } = require('./env')
+const { PORT, API_VERSION, API_MAJOR_VERSION, FILE_UPLOAD_SIZE_LIMIT_BYTES, AUTH_TYPE } = require('./env')
 const logger = require('./utils/Logger')
 const v1ApiDoc = require('./api-v1/api-doc')
 const v1RecipeService = require('./api-v1/services/recipeService')
@@ -44,6 +44,13 @@ async function createHttpServer() {
     storage: multer.diskStorage({}),
   }
 
+  const securityHandlers =
+    AUTH_TYPE === 'JWT'
+      ? {
+          bearerAuth: (req) => verifyJwks(req),
+        }
+      : {}
+
   initialize({
     app,
     apiDoc: v1ApiDoc,
@@ -55,9 +62,7 @@ async function createHttpServer() {
         })
       },
     },
-    securityHandlers: {
-      bearerAuth: (req) => verifyJwks(req),
-    },
+    securityHandlers: securityHandlers,
     dependencies: {
       recipeService: v1RecipeService,
       attachmentService: v1AttachmentService,

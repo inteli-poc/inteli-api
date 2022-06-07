@@ -12,9 +12,12 @@ data:
   dbHost: {{ include "inteli-api.postgresql.fullname" . }}
   dbPort: {{ .Values.config.dbPort | quote }}
   dbName: {{ .Values.config.dbName }}
+  {{- if eq .Values.config.auth.type "JWT" }}
   authJwksUri: {{ .Values.config.auth.jwksUri }}
   authAudience: {{ .Values.config.auth.audience }}
   authIssuer: {{ .Values.config.auth.issuer }}
   authTokenUrl: {{ .Values.config.auth.tokenUrl }}
+  {{- end }}
   identityServiceHost: {{ .Values.config.identityServiceHost }}
   identityServicePort: {{ .Values.config.identityServicePort | quote }}
+  authType: {{ .Values.config.auth.type }}

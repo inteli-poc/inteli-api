@@ -1,17 +1,19 @@
 {
   "name": "@digicatapult/inteli-api",
-  "version": "1.21.3",
+  "version": "1.22.0",
   "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
     "db:migrate": "npx knex migrate:latest --env test",
     "test": "NODE_ENV=test mocha --config ./test/mocharc.js ./test",
     "test:unit": "NODE_ENV=test mocha --config ./test/mocharc.js ./app",
+    "test:jwt": "NODE_ENV=test AUTH_TYPE=JWT mocha --config ./test/mocharc.js ./test",
     "lint": "eslint .",
     "depcheck": "depcheck",
     "start": "NODE_ENV=production node app/index.js",
     "dev": "NODE_ENV=development nodemon app/index.js | pino-colada",
-    "coverage": "nyc npm run test",
+    "coverage": "LOG_LEVEL=fatal NODE_ENV=development nyc mocha --recursive ./test/integration --timeout 60000 --slow 20000 --exit",
+    "coverage:merge": "LOG_LEVEL=fatal NODE_ENV=development docker compose up -d && nyc --no-clean npm run test && AUTH_TYPE=JWT docker compose up -d && nyc --no-clean npm run test:jwt && docker compose down && nyc merge .nyc_output --timeout 60000 --slow 20000 --exit ",
     "migrate": "knex migrate:latest"
   },
   "repository": {

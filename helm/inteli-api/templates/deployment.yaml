@@ -105,6 +105,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-secret
                   key: dbPassword
+            {{- if eq .Values.config.auth.type "JWT" }}
             - name: AUTH_JWKS_URI
               valueFrom:
                 configMapKeyRef:
@@ -125,6 +126,7 @@ spec:
                 configMapKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-config
                   key: authTokenUrl
+            {{- end }}
             - name: IDENTITY_SERVICE_HOST
               valueFrom:
                 configMapKeyRef:
@@ -135,3 +137,8 @@ spec:
                 configMapKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-config
                   key: identityServicePort
+            - name: AUTH_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: authType

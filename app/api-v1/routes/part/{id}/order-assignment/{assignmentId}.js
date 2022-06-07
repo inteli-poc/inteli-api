@@ -1,3 +1,4 @@
+const { getDefaultSecurity } = require('../../../../../utils/auth')
 const partController = require('../../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
@@ -50,7 +51,7 @@ module.exports = function (partService) {
           },
         },
       },
-      security: [{ bearerAuth: [] }],
+      security: getDefaultSecurity(),
       tags: ['part'],
     }),
   }

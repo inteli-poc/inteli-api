@@ -6,9 +6,12 @@ const { createHttpServer } = require('../../app/server')
 const { postOrderRoute } = require('../helper/routeHelper')
 const { setupIdentityMock } = require('../helper/identityHelper')
 const { seed, cleanup } = require('../seeds/orders')
-const { AUTH_ISSUER, AUTH_AUDIENCE } = require('../../app/env')
+const { AUTH_ISSUER, AUTH_AUDIENCE, AUTH_TYPE } = require('../../app/env')
 
-describe('order', function () {
+const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
+const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
+
+describeAuthOnly('order - authenticated', function () {
   describe('valid order', function () {
     this.timeout(3000)
     let app
@@ -128,6 +131,37 @@ describe('order', function () {
 
       const response = await postOrderRoute(newProject, app, authToken)
       expect(response.status).to.equal(400)
+    })
+  })
+})
+
+describeNoAuthOnly('order - no auth', function () {
+  describe('valid order', function () {
+    this.timeout(3000)
+    let app
+
+    before(async function () {
+      await seed()
+      app = await createHttpServer()
+    })
+
+    after(async function () {
+      await cleanup()
+    })
+
+    setupIdentityMock()
+
+    test('POST Order - Check ID & Manufacturer', async function () {
+      const newOrder = {
+        supplier: 'valid-1',
+        requiredBy: new Date().toISOString(),
+        items: ['10000000-0000-1000-8000-000000000000'],
+      }
+      const response = await postOrderRoute(newOrder, app, null)
+      expect(response.body.supplier).to.equal('valid-1')
+      expect(response.body.purchaser).to.equal('valid-2')
+      expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
+      expect(response.status).to.equal(201)
     })
   })
 })
