@@ -33,7 +33,7 @@ const getMemberBySelf = async (req) => {
 
   if (res.ok) {
     const member = await res.json()
-    return member
+    return member.address
   }
 
   throw new InternalError({ message: 'Internal server error' })

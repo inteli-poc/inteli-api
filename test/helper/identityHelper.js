@@ -28,7 +28,10 @@ const setupIdentityMock = function () {
         address: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       })
       .get('/v1/self')
-      .reply(200, '"5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY"')
+      .reply(200, {
+        alias: 'valid-2',
+        address: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
+      })
       .get('/v1/members/invalid')
       .reply(404, {})
       .get('/v1/members/error')
