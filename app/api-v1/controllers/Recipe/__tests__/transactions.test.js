@@ -3,10 +3,12 @@ const { expect } = require('chai')
 const { stub } = require('sinon')
 
 const { BadRequestError, NotFoundError } = require('../../../../utils/errors')
-const { client } = require('../../../../db')
 const db = require('../../../../db')
 const { transaction } = require('..')
 const { recipeExample, transactionsExample, listResponse, recipeId } = require('./transaction_fixtures')
+const { DSCP_API_HOST, DSCP_API_PORT } = require('../../../../env')
+
+const dscpApiUrl = `http://${DSCP_API_HOST}:${DSCP_API_PORT}`
 
 const postPayload = {
   params: {
@@ -17,8 +19,8 @@ const postPayload = {
 
 const getPayload = {
   params: {
-    id: 'recipe-id',
-    creationId: 'transaction-id',
+    id: '10000000-0000-1000-9000-000000000001',
+    creationId: '00000000-0000-1000-9000-000000000001',
   },
   token: 'some-auth-token',
 }
@@ -48,39 +50,28 @@ const getTransaction = async (req) => {
 }
 
 describe('recipe controller', () => {
+  let stubs = {}
   let response
-  let insertTransactionStub = stub().returnsThis()
-  let selectStub = stub().returnsThis()
-  let whereRecipeStub = stub().resolves([recipeExample])
+  let runProcessBody
 
   before(async () => {
-    nock('http://localhost:3001').post('/v3/run-process').reply(200, [20])
-    stub(client, 'from').callsFake(() => {
-      return {
-        select: selectStub,
-        returning: stub().resolves([{ id: 'transaction-uuid' }]),
-        insert: insertTransactionStub,
-        where: whereRecipeStub,
-      }
-    })
+    nock(dscpApiUrl).post('/v3/run-process').reply(200, [20])
   })
 
-  afterEach(() => nock.cleanAll)
+  afterEach(() => {
+    stubs = {}
+    nock.cleanAll()
+  })
 
   describe('transactions /getAll', () => {
-    const context = {}
-    const withGetTransactionsStub = (context, returnVal) => {
-      beforeEach(async () => {
-        context.getAllRecipeTransactionsStub = stub(db, 'getAllRecipeTransactions').resolves(returnVal)
-      })
-      afterEach(() => {
-        context.getAllRecipeTransactionsStub.restore()
-      })
-    }
+    beforeEach(async () => {
+      stubs.getAllRecipeTransactionsStub = stub(db, 'getAllRecipeTransactions').resolves([])
+    })
+    afterEach(() => {
+      stubs.getAllRecipeTransactionsStub.restore()
+    })
 
     describe('if req.params.id is not provided', () => {
-      withGetTransactionsStub(context, transactionsExample)
-
       beforeEach(async () => {
         response = await getAllTransactions({ params: {} })
       })
@@ -91,13 +82,11 @@ describe('recipe controller', () => {
       })
 
       it('does not perform any database calls and does not create transaction', () => {
-        expect(context.getAllRecipeTransactionsStub.calledOnce).to.equal(false)
+        expect(stubs.getAllRecipeTransactionsStub.calledOnce).to.equal(false)
       })
     })
 
     describe('if none transactions found', () => {
-      withGetTransactionsStub({}, [])
-
       beforeEach(async () => {
         response = await getAllTransactions({ params: { id: 'RECIPE00-9000-1000-8000-000000000000' } })
       })
@@ -110,10 +99,9 @@ describe('recipe controller', () => {
     })
 
     describe('happy path', () => {
-      const context = {}
-      withGetTransactionsStub(context, transactionsExample)
-
       beforeEach(async () => {
+        stubs.getAllRecipeTransactionsStub.restore()
+        stubs.getAllRecipeTransactionsStub = stub(db, 'getAllRecipeTransactions').resolves(transactionsExample)
         response = await getAllTransactions({ params: { id: recipeId } })
       })
 
@@ -126,9 +114,17 @@ describe('recipe controller', () => {
   })
 
   describe('transactions /create', () => {
+    beforeEach(async () => {
+      stubs.getRecipe = stub(db, 'getRecipe').resolves([])
+      stubs.insertTransaction = stub(db, 'insertRecipeTransaction').resolves({ id: 'transaction-uuid' })
+    })
+    afterEach(() => {
+      stubs.insertTransaction.restore()
+      stubs.getRecipe.restore()
+    })
+
     describe('if req.params.id is not provided', () => {
       beforeEach(async () => {
-        whereRecipeStub.reset()
         response = await submitTransaction({ params: {} })
       })
 
@@ -138,15 +134,14 @@ describe('recipe controller', () => {
       })
 
       it('does not perform any database calls and does not create transaction', () => {
-        expect(whereRecipeStub.calledOnce).to.equal(false)
-        expect(insertTransactionStub.calledOnce).to.equal(false)
+        expect(stubs.getRecipe.calledOnce).to.equal(false)
+        expect(stubs.insertTransaction.calledOnce).to.equal(false)
       })
     })
 
     describe('if recipe does not exists in local db', () => {
       beforeEach(async () => {
-        whereRecipeStub = stub().resolves([])
-        response = await submitTransaction({ params: { id: 'RECIPE00-9000-1000-8000-000000000000' } })
+        response = await submitTransaction({ params: { id: '10000000-9000-1000-8000-000000000000' } })
       })
 
       it('throws not found error along with the message', () => {
@@ -155,37 +150,91 @@ describe('recipe controller', () => {
       })
 
       it('does not create a transaction', () => {
-        expect(insertTransactionStub.calledOnce).to.equal(false)
+        expect(stubs.insertTransaction.calledOnce).to.equal(false)
       })
     })
 
     describe('happy path', () => {
       beforeEach(async () => {
-        nock('http://localhost:3001').post('/v3/run-process').reply(200, [20])
-        whereRecipeStub = stub().resolves([recipeExample])
+        nock(dscpApiUrl)
+          .post('/v3/run-process', function (body) {
+            runProcessBody = body
+            return true
+          })
+          .reply(200, [20])
+        stubs.getRecipe.restore()
+        stubs.insertTransaction.restore()
+        stubs.getRecipe = stub(db, 'getRecipe').resolves([recipeExample])
+        stubs.insertTransaction = stub(db, 'insertRecipeTransaction').resolves({ id: 'transaction-uuid' })
         response = await submitTransaction(postPayload)
       })
 
-      it('validates req params', () => {})
-
-      it('checks if recipe is in local db', () => {
-        expect(whereRecipeStub.getCall(0).args[0]).to.deep.equal({ id: 'recipe-id' })
+      afterEach(() => {
+        stubs.getRecipe.restore()
+        nock.cleanAll()
       })
 
-      it('inserts new transaction to local db', async () => {
-        expect(insertTransactionStub.getCall(0).args).to.be.deep.equal([
-          {
-            recipe_id: 'recipe-id',
-            status: 'Submitted',
-            type: 'Creation',
-          },
-        ])
+      it('checks if recipe is in local db', () => {
+        expect(stubs.getRecipe.getCall(0).args[0]).to.deep.equal('recipe-id')
+      })
+
+      it('calls runProcess with correct data', () => {
+        const splitReqBody = runProcessBody.split('\n')
+        const dataHeader = splitReqBody[1]
+        const { inputs, outputs } = JSON.parse(splitReqBody[3])
+        const { roles, metadata } = outputs[0]
+
+        expect(dataHeader).to.equal('Content-Disposition: form-data; name="request"\r')
+        expect(inputs).to.deep.equal([])
+        expect(roles).to.deep.contain({
+          Owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+        })
+        expect(metadata).to.deep.contain({
+          externalId: { type: 'LITERAL', value: 'TEST-externalId' },
+          name: { type: 'LITERAL', value: 'TEST-name' },
+          material: { type: 'LITERAL', value: 'TEST-material' },
+          alloy: { type: 'LITERAL', value: 'TEST-alloy' },
+          requiredCerts: { type: 'FILE', value: 'required_certs.json' },
+          type: { type: 'LITERAL', value: 'RECIPE' },
+          image: { type: 'FILE', value: 'foo.jpg' },
+          transactionId: { type: 'LITERAL', value: 'transaction-uuid' },
+        })
+      })
+
+      it('calls runProcess with certificate data', async () => {
+        const splitReqBody = runProcessBody.split('\n')
+        const certificatesHeader1 = splitReqBody[5]
+        const certificatesHeader2 = splitReqBody[6]
+        const certificatesRequestBody = splitReqBody[8]
+
+        expect(certificatesHeader1).to.equal(
+          'Content-Disposition: form-data; name="file"; filename="required_certs.json"\r'
+        )
+        expect(certificatesHeader2).to.equal('Content-Type: application/json\r')
+        expect(certificatesRequestBody).to.equal('[{"description":"TEST-certificate"}]\r')
+      })
+
+      it('calls runProcess with image data', async () => {
+        const splitReqBody = runProcessBody.split('\n')
+
+        const imageHeader1 = splitReqBody[10]
+        const imageHeader2 = splitReqBody[11]
+        const imageRequestBody = splitReqBody[13]
+
+        expect(imageHeader1).to.equal('Content-Disposition: form-data; name="file"; filename="foo.jpg"\r')
+        expect(imageHeader2).to.equal('Content-Type: image/jpeg\r')
+        expect(imageRequestBody).to.equal('\x00\r')
+      })
+
+      it('inserts new transaction to local db', () => {
+        expect(stubs.insertTransaction.getCall(0).args).to.be.deep.equal(['recipe-id'])
       })
 
       it('returns 200 along with the transaction id', () => {
         expect(response).to.deep.equal({
           status: 200,
           message: 'transaction transaction-uuid has been created',
+          transactionId: 'transaction-uuid',
         })
       })
     })
@@ -193,7 +242,14 @@ describe('recipe controller', () => {
 
   describe('transactions /get', () => {
     beforeEach(async () => {
+      stubs.getRecipe = stub(db, 'getRecipe').resolves([])
+      stubs.getTransaction = stub(db, 'getRecipeTransaction').resolves([transactionsExample[0]])
       response = await getTransaction(getPayload)
+    })
+
+    afterEach(() => {
+      stubs.getRecipe.restore()
+      stubs.getTransaction.restore()
     })
 
     describe('if req.params.id is not provided', () => {
@@ -207,13 +263,14 @@ describe('recipe controller', () => {
       })
 
       it('does not perform any database calls and does not create transaction', () => {
-        expect(whereRecipeStub.calledOnce).to.equal(false)
+        expect(stubs.getRecipe.calledOnce).to.equal(false)
       })
     })
 
     describe('if recipe does not exists in local db', () => {
       beforeEach(async () => {
-        whereRecipeStub = stub().resolves([])
+        stubs.getTransaction.restore()
+        stubs.getTransaction = stub(db, 'getRecipeTransaction').resolves([])
         response = await getTransaction(getPayload)
       })
 
@@ -227,10 +284,13 @@ describe('recipe controller', () => {
       expect(response).to.deep.equal({
         status: 200,
         creation: {
-          id: 'RECIPE00-9000-1000-8000-000000000000',
-          price: '99.99',
-          material: 'iron',
-          supplier: 'supplier-address',
+          created_at: '2022-05-22T08:04:29.316Z',
+          updated_at: '2022-05-22T08:04:29.316Z',
+          id: '00000000-1000-1000-8000-0000000000000',
+          recipe_id: '10000000-0000-1000-8000-0000000000000',
+          status: 'Accepted',
+          token_id: 2,
+          type: 'Creation',
         },
       })
     })
