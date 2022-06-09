@@ -1,10 +1,12 @@
 const mapRecipeData = (data) => ({
+  externalId: { type: 'LITERAL', value: data.external_id },
   name: { type: 'LITERAL', value: data.name },
   material: { type: 'LITERAL', value: data.material },
   alloy: { type: 'LITERAL', value: data.alloy },
-  price: { type: 'LITERAL', value: data.price },
-  requiredCerts: { type: 'LITERAL', value: data.required_certs },
-  supplier: { type: 'LITERAL', value: data.supplier },
+  requiredCerts: { type: 'FILE', value: 'required_certs.json' },
+  transactionId: { type: 'LITERAL', value: data.transaction.id },
+  type: { type: 'LITERAL', value: 'RECIPE' },
+  image: { type: 'FILE', value: data.filename },
 })
 
 module.exports = {

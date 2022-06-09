@@ -59,8 +59,33 @@ async function getAttachmentByIdDb(id) {
   return client('attachments').select(['filename', 'binary_blob']).where({ id })
 }
 
+async function getRecipe(id) {
+  return client('recipes')
+    .join('attachments', 'recipes.image_attachment_id', 'attachments.id')
+    .select()
+    .where({ 'recipes.id': id })
+}
+
+async function insertRecipeTransaction(id) {
+  return client('recipe_transactions')
+    .insert({
+      recipe_id: id,
+      status: 'Submitted',
+      type: 'Creation',
+    })
+    .returning(['id'])
+    .then((t) => t[0])
+}
+
+async function getRecipeTransaction(id, recipe_id) {
+  return client('recipe_transactions').select().where({ id, recipe_id })
+}
+
 module.exports = {
   client,
+  getRecipe,
+  getRecipeTransaction,
+  insertRecipeTransaction,
   getAllRecipeTransactions,
   postOrderDb,
   getAttachment,
