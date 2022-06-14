@@ -1,4 +1,4 @@
-const mapRecipeData = (data) => ({
+exports.mapRecipeData = (data) => ({
   externalId: { type: 'LITERAL', value: data.external_id },
   name: { type: 'LITERAL', value: data.name },
   material: { type: 'LITERAL', value: data.material },
@@ -8,7 +8,3 @@ const mapRecipeData = (data) => ({
   type: { type: 'LITERAL', value: 'RECIPE' },
   image: { type: 'FILE', value: data.filename },
 })
-
-module.exports = {
-  mapRecipeData,
-}
