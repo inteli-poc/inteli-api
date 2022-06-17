@@ -9,7 +9,7 @@ const { NoTokenError, NothingToProcess } = require('../../../../utils/errors')
 const payload = {
   items: recipesExample.map((el) => el.id),
   status: 'Submitted',
-  requiredBy: '2022-06-13T11:20:35.466Z',
+  required_by: '2022-06-13T11:20:35.466Z',
   selfAddress: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
   supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
   transaction: {

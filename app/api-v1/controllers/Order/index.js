@@ -1,7 +1,7 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
 const { mapOrderData } = require('./helpers')
-const idenity = require('../../services/identityService')
+const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError } = require('../../../utils/errors')
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
       const [order] = await db.getOrder(id)
       if (!order) throw new NotFoundError('order')
 
-      const selfAddress = await idenity.getMemberBySelf()
+      const selfAddress = await identity.getMemberBySelf(req)
       if (!selfAddress) throw new IdentityError()
 
       const transaction = await db.insertOrderTransaction(id)
@@ -35,7 +35,11 @@ module.exports = {
 
       return {
         status: 201,
-        transaction,
+        response: {
+          id: transaction.id,
+          submittedAt: new Date(transaction.created_at).toISOString(),
+          status: transaction.status,
+        },
       }
     },
   },

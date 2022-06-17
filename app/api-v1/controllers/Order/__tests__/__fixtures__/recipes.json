@@ -2,16 +2,16 @@
   {
     "id": "50000000-0000-1000-5500-000000000001",
     "supplier": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-    "token_id": 20
+    "latest_token_id": 20
   },
   {
     "id": "50000000-0000-1000-5600-000000000001",
     "supplier": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-    "token_id": null
+    "latest_token_id": null
   },
   {
     "id": "50000000-0000-1000-5700-000000000001",
     "supplier": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-    "token_id": 2
+    "latest_token_id": 2
   }
 ]

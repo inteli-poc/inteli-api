@@ -47,17 +47,20 @@ module.exports = {
         inputs: [],
         outputs: [
           {
-            roles: { Owner: recipe.supplier },
+            roles: { Owner: recipe.owner, Buyer: recipe.owner, Supplier: recipe.supplier },
             metadata: mapRecipeData({ ...recipe, transaction }),
           },
         ],
       }
       runProcess(payload, req.token)
-
       return {
         status: 200,
-        transactionId: transaction.id,
         message: `transaction ${transaction.id} has been created`,
+        response: {
+          id: transaction.id,
+          submittedAt: new Date(transaction.created_at).toISOString(),
+          status: transaction.status,
+        },
       }
     },
   },

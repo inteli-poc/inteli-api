@@ -12,15 +12,15 @@ const dscpApiUrl = `http://${DSCP_API_HOST}:${DSCP_API_PORT}`
 const recipeExamples = [
   {
     id: '50000000-0000-1000-5500-000000000001',
-    token_id: 20,
+    latest_token_id: 20,
   },
   {
     id: '50000000-0000-1000-5600-000000000001',
-    token_id: null,
+    latest_token_id: null,
   },
   {
     id: '50000000-0000-1000-5700-000000000001',
-    token_id: 2,
+    latest_token_id: 2,
   },
 ]
 const createTransaction = async (req) => {
@@ -207,7 +207,7 @@ describe('Order controller', () => {
           stubs.insertTransaction.resolves({
             id: '50000000-0000-1000-3000-000000000001',
             status: 'Submitted',
-            createdAt: '2022-06-11T08:47:23.397Z',
+            created_at: '2022-06-11T08:47:23.397Z',
           })
           stubs.getOrder.resolves([
             {
@@ -233,7 +233,6 @@ describe('Order controller', () => {
 
         it('calls run process with formatted body', () => {
           expect(runProcessReq.isDone()).to.equal(true)
-          expect(runProcessBody).to.be.undefined
         })
 
         it('call database method to insert a new entry in order_transactions', () => {
@@ -241,11 +240,12 @@ describe('Order controller', () => {
         })
 
         it('returns 201 along with other details as per api-doc', () => {
-          expect(response.status).to.equal(201)
-          expect(response.transaction).to.deep.equal({
+          const { status, response: body } = response
+          expect(status).to.equal(201)
+          expect(body).to.deep.equal({
             id: '50000000-0000-1000-3000-000000000001',
             status: 'Submitted',
-            createdAt: '2022-06-11T08:47:23.397Z',
+            submittedAt: '2022-06-11T08:47:23.397Z',
           })
         })
       })

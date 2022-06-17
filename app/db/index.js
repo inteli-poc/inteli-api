@@ -77,14 +77,14 @@ async function insertRecipeTransaction(id) {
       status: 'Submitted',
       type: 'Creation',
     })
-    .returning(['id'])
+    .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
 }
 
 async function insertOrderTransaction(id) {
   return client('order_transactions')
     .insert({
-      id,
+      order_id: id,
       status: 'Submitted',
       type: 'Submission',
     })

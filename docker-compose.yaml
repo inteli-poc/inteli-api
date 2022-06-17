@@ -46,7 +46,7 @@ services:
       - DB_NAME=dscp
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
-      - SELF_ADDRESS=5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
+      - SELF_ADDRESS=5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
       - AUTH_TYPE=${AUTH_TYPE:-NONE}
 
   dscp-node:
@@ -87,7 +87,7 @@ services:
       - API_HOST=dscp-node
       - API_PORT=9944
       - USER_URI=//Alice
-      - IPFS_HOST=dscp-ipfs
+      - IPFS_HOST=ipfs
       - IPFS_PORT=5001
       - LOG_LEVEL=trace
       - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
