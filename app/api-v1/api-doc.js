@@ -217,12 +217,6 @@ const apiDoc = {
             description: 'id of the recipe that describes the design of this part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          orderId: {
-            description: 'local id of the order the part is assigned to',
-            type: 'string',
-            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-            nullable: true,
-          },
         },
       },
       Part: {

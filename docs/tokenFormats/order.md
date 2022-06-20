@@ -28,7 +28,7 @@ So that each recipe is available to be used again, a new token for each recipe i
 | Buyer: `BAE`         |                            |
 | Supplier:`SupplierX` |                            |
 
-The `ORDER` token. Each `recipeN: <TokenId>` matches a` <TokenId>` from the `inputs`.
+The `Order` token. Each `recipeN: <TokenId>` matches a `<TokenId>` from the `inputs`.
 
 | Roles                | Metadata                                                          |
 | :------------------- | :---------------------------------------------------------------- |
@@ -163,7 +163,7 @@ So that each recipe is available to be used again, a new token for each recipe i
 | Buyer: `BAE`         |                            |
 | Supplier:`SupplierX` |                            |
 
-The `ORDER` token. Each `recipeN: <TokenId>` matches a `<TokenId>`from the `inputs`.
+The `Order` token. Each `recipeN: <TokenId>` matches a `<TokenId>`from the `inputs`.
 
 | Roles                | Metadata                             |
 | :------------------- | :----------------------------------- |
