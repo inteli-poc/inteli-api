@@ -87,9 +87,7 @@ The new `Order` token will have the following restrictions:
       "index": 0,
       "metadata_key": "transactionId",
       "metadata_value_type": "Literal"
-    }
-  ],
-  "FixedOutputMetadataValueType": [
+    },
     {
       "index": 0,
       "metadata_key": "recipe0",
