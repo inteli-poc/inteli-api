@@ -299,7 +299,7 @@ describe('recipe controller', () => {
           id: '00000000-1000-1000-8000-0000000000000',
           recipe_id: '10000000-0000-1000-8000-0000000000000',
           status: 'Accepted',
-          token_id: 2,
+          latest_token_id: 2,
           type: 'Creation',
         },
       })

@@ -13,7 +13,7 @@ const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
 
 describeAuthOnly('order - authenticated', function () {
   describe('valid order', function () {
-    this.timeout(3000)
+    this.timeout(5000)
     let app
     let authToken
     let jwksMock

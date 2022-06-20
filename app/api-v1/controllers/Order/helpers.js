@@ -1,5 +1,24 @@
 const db = require('../../../db')
-const { NoTokenError, NothingToProcess } = require('../../../utils/errors')
+const { NoTokenError, NothingToProcess, BadRequestError } = require('../../../utils/errors')
+
+exports.validate = async (body) => {
+  // Will add a get function at a later date to check for duplication
+  // This section checks if the order supplier does not match the supplier
+  const uniqueRecipeIDs = [...new Set(body.items)]
+
+  const recipes = await db.getRecipeByIDs(uniqueRecipeIDs)
+  if (recipes.length != uniqueRecipeIDs.length) {
+    throw new BadRequestError('recipe not found')
+  } else {
+    recipes.map((recipeItem) => {
+      if (recipeItem.supplier != body.supplier) {
+        throw new BadRequestError('invalid supplier')
+      }
+    })
+  }
+
+  return body
+}
 
 /*eslint-disable */
 const buildRecipeOutputs = (data, recipes) =>

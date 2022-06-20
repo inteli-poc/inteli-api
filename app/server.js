@@ -15,7 +15,6 @@ const v1RecipeService = require('./api-v1/services/recipeService')
 const v1AttachmentService = require('./api-v1/services/attachmentService')
 const v1BuildService = require('./api-v1/services/buildService')
 const v1DscpApiService = require('./api-v1/services/dscpApiService')
-const v1OrderService = require('./api-v1/services/orderService')
 const v1PartService = require('./api-v1/services/partService')
 const v1IdentityService = require('./api-v1/services/identityService')
 const { handleErrors } = require('./utils/errors')
@@ -69,7 +68,6 @@ async function createHttpServer() {
       buildService: v1BuildService,
       dscpApiService: v1DscpApiService,
       partService: v1PartService,
-      orderService: v1OrderService,
       identityService: v1IdentityService,
     },
     paths: [path.resolve(__dirname, `api-${API_MAJOR_VERSION}/routes`)],

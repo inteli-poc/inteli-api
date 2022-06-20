@@ -50,18 +50,6 @@ class UnauthorizedError extends HttpResponseError {
   }
 }
 
-class IncorrectSupplierError extends HttpResponseError {
-  constructor({ message }) {
-    super({ code: 400, message })
-  }
-}
-
-class RecipeDoesNotExistError extends HttpResponseError {
-  constructor({ message }) {
-    super({ code: 400, message })
-  }
-}
-
 class ItemNotFoundError extends HttpResponseError {
   constructor({ message }) {
     super({ code: 404, message })
@@ -105,9 +93,7 @@ module.exports = {
   UnauthorizedError,
   NotFoundError,
   IdentityError,
-  IncorrectSupplierError,
   InternalError,
-  RecipeDoesNotExistError,
   ItemNotFoundError,
   NotAcceptableError,
 }

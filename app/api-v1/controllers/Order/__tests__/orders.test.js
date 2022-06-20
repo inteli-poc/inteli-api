@@ -1,7 +1,6 @@
 const nock = require('nock')
 const { expect } = require('chai')
 const { stub } = require('sinon')
-
 const orderController = require('../index')
 const db = require('../../../../db')
 const identifyService = require('../../../services/identityService')
@@ -13,19 +12,30 @@ const recipeExamples = [
   {
     id: '50000000-0000-1000-5500-000000000001',
     latest_token_id: 20,
+    supplier: 'supplier-address',
   },
   {
     id: '50000000-0000-1000-5600-000000000001',
     latest_token_id: null,
+    supplier: 'supplier-address',
   },
   {
     id: '50000000-0000-1000-5700-000000000001',
     latest_token_id: 2,
+    supplier: 'supplier-address',
   },
 ]
 const createTransaction = async (req) => {
   try {
     return await orderController.transaction.create(req)
+  } catch (err) {
+    return err
+  }
+}
+
+const postOrder = async (req) => {
+  try {
+    return await orderController.post(req)
   } catch (err) {
     return err
   }
@@ -49,6 +59,242 @@ describe('Order controller', () => {
   afterEach(() => {
     stubs = {}
     nock.cleanAll()
+  })
+
+  describe('order.post', () => {
+    beforeEach(async () => {
+      stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
+      stubs.identityByAlias = stub(identifyService, 'getMemberByAlias')
+        .onFirstCall()
+        .resolves({ address: 'supplier-address' })
+        .onSecondCall()
+        .resolves({ alias: 'self-address' })
+      stubs.identitySelf = stub(identifyService, 'getMemberBySelf').resolves('self-address')
+      stubs.insertOrder = stub(db, 'postOrderDb').resolves([
+        {
+          id: 'order-id',
+          items: recipeExamples.map((el) => el.id),
+        },
+      ])
+    })
+
+    afterEach(() => {
+      stubs.getRecipeIds.restore()
+      stubs.identityByAlias.restore()
+      stubs.identitySelf.restore()
+      stubs.insertOrder.restore()
+    })
+
+    describe('if req.body is missing', () => {
+      beforeEach(async () => {
+        response = await postOrder({ key: 'req without a body key' })
+      })
+
+      it('throws BadRequestError and returns 400', () => {
+        expect(response).to.be.an.instanceOf(BadRequestError)
+        expect(response.message).to.be.equal('Bad Request: missing req.body')
+      })
+
+      it('and does not make any calls to the identity service', () => {
+        expect(stubs.identityByAlias.calledOnce).to.equal(false)
+        expect(stubs.identitySelf.calledOnce).to.equal(false)
+      })
+
+      it('and does not attempt to persist order', () => {
+        expect(stubs.insertOrder.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('if identity service is unavailable or returned an error', () => {
+      beforeEach(async () => {
+        stubs.identityByAlias.restore()
+        stubs.identitySelf.throws('some error - identity self')
+        stubs.identityByAlias.rejects('some error - identity alias')
+        response = await postOrder({
+          body: {
+            supplier: 'supplier-address-req',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: recipeExamples.map((el) => el.id),
+          },
+        })
+      })
+
+      it('and does not call insert order db method', () => {
+        expect(stubs.insertOrder.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('when payload validation fails', () => {
+      describe('due to recipes not found', () => {
+        beforeEach(async () => {
+          stubs.insertOrder.restore()
+          stubs.getRecipeIds.resolves([])
+          response = await postOrder({
+            body: {
+              supplier: 'supplier-address-req',
+              description: 'some description - test',
+              requiredBy: '2022-06-17T07:31:37.602Z',
+              items: recipeExamples.map((el) => el.id),
+            },
+          })
+        })
+
+        afterEach(() => {
+          stubs.getRecipeIds.restore()
+        })
+
+        it('throws NotFoundError and returns 400 with the message', () => {
+          expect(response).to.be.an.instanceOf(BadRequestError)
+          expect(response.message).to.be.equal('Bad Request: recipe not found')
+        })
+
+        it('does not attempt to insert order', () => {
+          expect(stubs.insertOrder.calledOnce).to.equal(false)
+        })
+      })
+
+      describe('due to mismatch of supplier that is in req.body', () => {
+        beforeEach(async () => {
+          stubs.getRecipeIds.resolves([{ supplier: 'a' }, { supplier: 'a' }, { supplier: 'a' }])
+          stubs.identityByAlias.returns('a-missmatched-alias')
+
+          response = await postOrder({
+            body: {
+              supplier: 'supplier-address-req-mismatch',
+              description: 'some description - test',
+              requiredBy: '2022-06-17T07:31:37.602Z',
+              items: recipeExamples.map((el) => el.id),
+            },
+          })
+        })
+
+        afterEach(() => {
+          stubs.getRecipeIds.restore()
+        })
+
+        it('throws BadRequestError and returns 400 with the message', () => {
+          expect(response).to.be.an.instanceOf(BadRequestError)
+          expect(response.message).to.be.equal('Bad Request: invalid supplier')
+        })
+
+        it('does not attempt to insert order', () => {
+          expect(stubs.insertOrder.calledOnce).to.equal(false)
+        })
+      })
+    })
+
+    describe('if persisting order fails', () => {
+      beforeEach(async () => {
+        stubs.getRecipeIds.resolves(recipeExamples)
+        stubs.insertOrder.rejects('some error - insert order')
+
+        response = await postOrder({
+          body: {
+            supplier: 'supplier-address-req',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: recipeExamples.map((el) => el.id),
+          },
+        })
+      })
+
+      it('returns insert error and allows middleware to handle the response', () => {
+        expect(response.toString()).to.be.equal('some error - insert order')
+      })
+    })
+
+    describe('happy path', () => {
+      beforeEach(async () => {
+        stubs.getRecipeIds.resolves([...recipeExamples])
+
+        response = await postOrder({
+          body: {
+            supplier: 'supplier-address-req-mismatch',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: recipeExamples.map((el) => el.id),
+          },
+        })
+      })
+
+      afterEach(() => {
+        stubs.getRecipeIds.restore()
+      })
+
+      it('gets aliases from identity service', () => {
+        expect(stubs.identityByAlias.getCall(0).args[0]).to.deep.equal({
+          body: {
+            supplier: 'supplier-address-req-mismatch',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: [
+              '50000000-0000-1000-5500-000000000001',
+              '50000000-0000-1000-5600-000000000001',
+              '50000000-0000-1000-5700-000000000001',
+            ],
+          },
+        })
+        expect(stubs.identityByAlias.getCall(1).args[0]).to.deep.equal({
+          body: {
+            supplier: 'supplier-address-req-mismatch',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: [
+              '50000000-0000-1000-5500-000000000001',
+              '50000000-0000-1000-5600-000000000001',
+              '50000000-0000-1000-5700-000000000001',
+            ],
+          },
+        })
+      })
+
+      it('retrieves self address', () => {
+        expect(stubs.identitySelf.getCall(0).args[0]).to.deep.equal({
+          body: {
+            supplier: 'supplier-address-req-mismatch',
+            description: 'some description - test',
+            requiredBy: '2022-06-17T07:31:37.602Z',
+            items: [
+              '50000000-0000-1000-5500-000000000001',
+              '50000000-0000-1000-5600-000000000001',
+              '50000000-0000-1000-5700-000000000001',
+            ],
+          },
+        })
+      })
+
+      it('validates properties by calling a helper method [validate]', () => {
+        expect(stubs.insertOrder.getCall(0).args[0]).to.deep.equal({
+          supplier: 'supplier-address',
+          description: 'some description - test',
+          requiredBy: '2022-06-17T07:31:37.602Z',
+          items: [
+            '50000000-0000-1000-5500-000000000001',
+            '50000000-0000-1000-5600-000000000001',
+            '50000000-0000-1000-5700-000000000001',
+          ],
+          purchaserAddress: 'self-address',
+          status: 'Created',
+          purchaser: 'self-address',
+        })
+      })
+
+      it('persist order and returns 201 along with other details', () => {
+        expect(response.status).to.equal(201)
+        expect(response.response).to.deep.equal({
+          id: 'order-id',
+          supplier: 'supplier-address-req-mismatch',
+          description: 'some description - test',
+          requiredBy: '2022-06-17T07:31:37.602Z',
+          items: [
+            '50000000-0000-1000-5500-000000000001',
+            '50000000-0000-1000-5600-000000000001',
+            '50000000-0000-1000-5700-000000000001',
+          ],
+        })
+      })
+    })
   })
 
   describe('order.getAll', () => {
