@@ -29,6 +29,31 @@ module.exports = {
     )
     return { status: 200, response: result }
   },
+  getById: async function (req) {
+    const { id } = req.params
+    if (!id) throw new BadRequestError('missing params')
+
+    const [result] = await db.getRecipeByIDdb(id)
+    if (!result) throw new NotFoundError('Recipe Not Found')
+    const { alias: supplierAlias } = await identity.getMemberByAddress(req, result.supplier)
+    const { alias: ownerAlias } = await identity.getMemberByAddress(req, result.owner)
+
+    return {
+      status: 200,
+      response: {
+        id: result.id,
+        externalId: result.external_id,
+        name: result.name,
+        imageAttachmentId: result.image_attachment_id,
+        material: result.material,
+        alloy: result.alloy,
+        price: result.price,
+        requiredCerts: result.required_certs,
+        supplier: supplierAlias,
+        owner: ownerAlias,
+      },
+    }
+  },
   transaction: {
     getAll: async (req) => {
       const { id } = req.params

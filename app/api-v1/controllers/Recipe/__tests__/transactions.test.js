@@ -63,7 +63,7 @@ describe('recipe transactions controller', () => {
     nock.cleanAll()
   })
 
-  describe('transactions /getAll', () => {
+  describe('/recipes/{id}/creation - get all recipe transactions', () => {
     beforeEach(async () => {
       stubs.getAllRecipeTransactionsStub = stub(db, 'getAllRecipeTransactions').resolves([])
     })
@@ -250,7 +250,7 @@ describe('recipe transactions controller', () => {
     })
   })
 
-  describe('transactions /get', () => {
+  describe('/recipe/{id}/creation/{id} - get by id recipe transaction', () => {
     beforeEach(async () => {
       stubs.getRecipe = stub(db, 'getRecipe').resolves([])
       stubs.getTransaction = stub(db, 'getRecipeTransaction').resolves([transactionsExample[0]])
