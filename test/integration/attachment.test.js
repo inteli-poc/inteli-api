@@ -102,16 +102,49 @@ describeAuthOnly('attachments - authenticated', function () {
     expect(response.status).to.equal(200)
   })
 
-  it('should return 406 when requesting json from the octet route', async function () {
-    const attachment = '00000000-0000-1000-8000-000000000001'
-    const response = await getAttachmentRouteJSON(attachment, app, authToken)
-    expect(response.status).to.equal(406)
+  it('returns octet if file is JSON', async function () {
+    const attachment = '00000000-0000-1000-9000-000000000001'
+    const { status, body, header } = await getAttachmentRouteOctet(attachment, app, authToken)
+
+    expect(status).to.equal(200)
+    expect(body).to.be.instanceof(Buffer)
+    expect(header).to.deep.contain({
+      immutable: 'true',
+      maxage: '31536000000',
+      'content-disposition': 'attachment; filename="json"',
+      'access-control-expose-headers': 'content-disposition',
+      'content-type': 'application/octet-stream',
+      'content-length': '26',
+    })
+  })
+
+  it('returns JSON', async function () {
+    const attachment = '00000000-0000-1000-9000-000000000001'
+    const { status, body, header } = await getAttachmentRouteJSON(attachment, app, authToken)
+
+    expect(status).to.equal(200)
+    expect(body).to.deep.equal({ 'First Item': 'Test Data' })
+    expect(header).to.deep.contain({
+      'content-type': 'application/json; charset=utf-8',
+    })
   })
 
   it('should return 404 when requesting incorrect ID', async function () {
     const attachment = '00000000-0000-1000-8000-000000000002'
     const response = await getAttachmentRouteOctet(attachment, app, authToken)
     expect(response.status).to.equal(404)
+  })
+
+  it('should return 406 if requested for JSON and mime type is not JSON', async function () {
+    const attachment = '00000000-0000-1000-8000-000000000001'
+    const { status, body, header } = await getAttachmentRouteJSON(attachment, app, authToken)
+
+    expect(status).to.equal(406)
+    expect(body.message).to.be.equal('Client file request not supported')
+    expect(header).to.deep.contain({
+      'content-type': 'application/json; charset=utf-8',
+      vary: 'Accept-Encoding',
+    })
   })
 
   it('should return 400 when requesting invalid ID', async function () {
