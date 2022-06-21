@@ -49,7 +49,7 @@ const getTransaction = async (req) => {
   }
 }
 
-describe('recipe controller', () => {
+describe('recipe transactions controller', () => {
   let stubs = {}
   let response
   let runProcessBody
