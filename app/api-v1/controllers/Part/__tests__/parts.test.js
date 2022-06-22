@@ -18,7 +18,7 @@ describe('part.get', () => {
 describe('part.transaction', () => {
   describe('getAll', () => {
     it('should resolve 500 error', async () => {
-      const result = await partController.transaction.getAll()
+      const result = await partController.transaction.get()
       expect(result.status).to.equal(500)
     })
   })

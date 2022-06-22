@@ -1,10 +1,10 @@
 const { getDefaultSecurity } = require('../../utils/auth')
-const attachmentController = require('../controllers/Attachment')
+const attachment = require('../controllers/Attachment')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(attachmentController.getAll, {
+    GET: buildValidatedJsonHandler(attachment.get, {
       summary: 'List attachments',
       parameters: [],
       responses: {
@@ -25,7 +25,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['attachment'],
     }),
-    POST: buildValidatedJsonHandler(attachmentController.create, {
+    POST: buildValidatedJsonHandler(attachment.create, {
       summary: 'Create Attachment',
       requestBody: {
         content: {

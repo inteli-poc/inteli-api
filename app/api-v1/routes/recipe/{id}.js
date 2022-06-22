@@ -1,12 +1,12 @@
 const { getDefaultSecurity } = require('../../../utils/auth')
 const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator')
 
-const controller = require('../../controllers/Recipe')
+const recipe = require('../../controllers/Recipe')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService, identityService) {
   const doc = {
-    GET: buildValidatedJsonHandler(controller.getById, {
+    GET: buildValidatedJsonHandler(recipe.getById, {
       summary: 'Get Recipe by ID',
       parameters: [
         {

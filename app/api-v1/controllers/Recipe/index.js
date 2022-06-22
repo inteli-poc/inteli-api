@@ -55,7 +55,7 @@ module.exports = {
     }
   },
   transaction: {
-    getAll: async (req) => {
+    get: async (req) => {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')
       const transactions = await db.getAllRecipeTransactions(id)
@@ -69,7 +69,7 @@ module.exports = {
         })),
       }
     },
-    get: async (req) => {
+    getById: async (req) => {
       const { creationId, id } = req.params
       if (!id || !creationId) throw new BadRequestError('missing params')
 

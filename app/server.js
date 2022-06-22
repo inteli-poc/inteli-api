@@ -34,7 +34,6 @@ async function createHttpServer() {
 
   app.get('/health', async (req, res) => {
     res.status(200).send({ version: API_VERSION, status: 'ok' })
-    return
   })
 
   const multerOptions = {

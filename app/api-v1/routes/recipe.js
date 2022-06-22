@@ -1,13 +1,13 @@
 const logger = require('../../utils/Logger')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
-const controller = require('../controllers/Recipe')
+const recipe = require('../controllers/Recipe')
 const { BadRequestError } = require('../../utils/errors')
 const { getDefaultSecurity } = require('../../utils/auth')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService, identityService) {
   const doc = {
-    GET: buildValidatedJsonHandler(controller.get, {
+    GET: buildValidatedJsonHandler(recipe.get, {
       summary: 'List Recipes',
       parameters: [],
       responses: {

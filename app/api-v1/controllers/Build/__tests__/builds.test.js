@@ -25,7 +25,7 @@ describe('build.create', () => {
 describe('build.transaction', () => {
   describe('getAll', () => {
     it('should resolve 500 error', async () => {
-      const result = await buildController.transaction.getAll()
+      const result = await buildController.transaction.get()
       expect(result.status).to.equal(500)
     })
   })

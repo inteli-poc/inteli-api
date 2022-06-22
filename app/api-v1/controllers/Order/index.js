@@ -33,10 +33,10 @@ module.exports = {
       },
     }
   },
-  getAll: _tmp,
-  get: _tmp,
+  getById: _tmp, // TODO - mark
+  get: _tmp, // TODO - mark
   transaction: {
-    getAll: _tmp,
+    getById: _tmp,
     get: _tmp,
     create: async (req) => {
       const { id } = req.params
