@@ -8,6 +8,24 @@ class HttpResponseError extends Error {
   }
 }
 
+class NothingToProcess extends HttpResponseError {
+  constructor() {
+    super({ code: 400, message: `This request requires tokens to be burned.` })
+  }
+}
+
+class NoTokenError extends HttpResponseError {
+  constructor(msg = 'unknown') {
+    super({ code: 500, message: `Token for ${msg} has not been created yet.` })
+  }
+}
+
+class IdentityError extends HttpResponseError {
+  constructor(msg = undefined) {
+    super({ code: 400, message: 'Unable to retrieve an identity address', msg })
+  }
+}
+
 class NotFoundError extends HttpResponseError {
   constructor(msg) {
     super({ code: 404, message: `Not Found: ${msg}` })
@@ -29,18 +47,6 @@ class InternalError extends HttpResponseError {
 class UnauthorizedError extends HttpResponseError {
   constructor({ message }) {
     super({ code: 401, message })
-  }
-}
-
-class IncorrectSupplierError extends HttpResponseError {
-  constructor({ message }) {
-    super({ code: 400, message })
-  }
-}
-
-class RecipeDoesNotExistError extends HttpResponseError {
-  constructor({ message }) {
-    super({ code: 400, message })
   }
 }
 
@@ -81,12 +87,13 @@ const handleErrors = (err, req, res, next) => {
 module.exports = {
   handleErrors,
   BadRequestError,
+  NoTokenError,
+  NothingToProcess,
   HttpResponseError,
   UnauthorizedError,
   NotFoundError,
-  IncorrectSupplierError,
+  IdentityError,
   InternalError,
-  RecipeDoesNotExistError,
   ItemNotFoundError,
   NotAcceptableError,
 }

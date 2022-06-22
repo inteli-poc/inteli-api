@@ -43,6 +43,7 @@ async function postOrderRoute(order, { app }, token) {
     })
     .catch((err) => {
       console.error(`postOrderErr ${err}`)
+      return err
     })
 }
 
@@ -144,6 +145,7 @@ async function getAttachmentRouteJSON(id, { app }, token) {
   return request(app)
     .get(`/${API_MAJOR_VERSION}/attachment/${id}`)
     .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
     .set('Authorization', `Bearer ${token}`)
     .send()
     .then((response) => {

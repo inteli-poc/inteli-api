@@ -6,24 +6,28 @@ Token formats and restrictions for the `Recipe` type
 
 A buyer submitted a recipe that describes how a part will be built by a supplier.
 
+| Inputs | Outputs |
+| :----: | :------ |
+|   -    | Recipe  |
+
 ### Request body
 
 #### Inputs
 
-`[]`
+`-`
 
 #### Outputs
 
-| Roles                | Metadata                                                        |
-| :------------------- | :-------------------------------------------------------------- |
-| Owner: `BAE`         | <Literal> type: `RECIPE`                                        |
-| Buyer: `BAE`         | <Literal> externalId: `34-396589-2`                             |
-| Supplier:`SupplierX` | <Literal> transactionId: `09000000-0000-1000-8000-000000000000` |
-|                      | <Literal> name: `Low-pressure compressor`                       |
-|                      | <Literal> material: `Titanium`                                  |
-|                      | <Literal> alloy: `Ti-6Al-4V`                                    |
-|                      | <File> image: `image.svg`                                       |
-|                      | <File> requiredCerts: `requiredCerts.json`                      |
+| Roles                | Metadata                                                          |
+| :------------------- | :---------------------------------------------------------------- |
+| Owner: `BAE`         | `<Literal>` type: `RECIPE`                                        |
+| Buyer: `BAE`         | `<Literal>` externalId: `34-396589-2`                             |
+| Supplier:`SupplierX` | `<Literal>` transactionId: `09000000-0000-1000-8000-000000000000` |
+|                      | `<Literal>` name: `Low-pressure compressor`                       |
+|                      | `<Literal>` material: `Titanium`                                  |
+|                      | `<Literal>` alloy: `Ti-6Al-4V`                                    |
+|                      | `<File>` image: `image.svg`                                       |
+|                      | `<File>` requiredCerts: `requiredCerts.json`                      |
 
 ### Restrictions
 

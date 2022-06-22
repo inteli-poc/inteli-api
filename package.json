@@ -1,6 +1,6 @@
 {
   "name": "@digicatapult/inteli-api",
-  "version": "1.22.3",
+  "version": "1.25.9",
   "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "test": "NODE_ENV=test mocha --config ./test/mocharc.js ./test",
     "test:unit": "NODE_ENV=test mocha --config ./test/mocharc.js ./app",
     "test:jwt": "NODE_ENV=test AUTH_TYPE=JWT mocha --config ./test/mocharc.js ./test",
+    "test:dev": "NODE_ENV=test ./node_modules/.bin/mocha --watch --verbose test/integration/*.*",
     "lint": "eslint .",
     "depcheck": "depcheck",
     "start": "NODE_ENV=production node app/index.js",

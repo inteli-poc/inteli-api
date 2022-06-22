@@ -1,57 +1,33 @@
 const logger = require('../../utils/Logger')
 const { buildValidatedJsonHandler } = require('../../utils/routeResponseValidator')
+const controller = require('../controllers/Recipe')
 const { BadRequestError } = require('../../utils/errors')
 const { getDefaultSecurity } = require('../../utils/auth')
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (recipeService, identityService) {
   const doc = {
-    GET: buildValidatedJsonHandler(
-      async function (req) {
-        const recipes = await recipeService.getRecipes()
-        const result = await Promise.all(
-          recipes.map(async (recipe) => {
-            const { alias: supplierAlias } = await identityService.getMemberByAddress(req, recipe.supplier)
-            const { alias: ownerAlias } = await identityService.getMemberByAddress(req, recipe.owner)
-            const { id, external_id, name, image_attachment_id, material, alloy, price, required_certs } = recipe
-            return {
-              id,
-              externalId: external_id,
-              name,
-              imageAttachmentId: image_attachment_id,
-              material,
-              alloy,
-              price,
-              requiredCerts: required_certs,
-              supplier: supplierAlias,
-              owner: ownerAlias,
-            }
-          })
-        )
-        return { status: 200, response: result }
-      },
-      {
-        summary: 'List Recipes',
-        parameters: [],
-        responses: {
-          200: {
-            description: 'Return Recipes',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/Recipe',
-                  },
+    GET: buildValidatedJsonHandler(controller.get, {
+      summary: 'List Recipes',
+      parameters: [],
+      responses: {
+        200: {
+          description: 'Return Recipes',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/Recipe',
                 },
               },
             },
           },
         },
-        security: getDefaultSecurity(),
-        tags: ['recipe'],
-      }
-    ),
+      },
+      security: getDefaultSecurity(),
+      tags: ['recipe'],
+    }),
     POST: buildValidatedJsonHandler(
       async function (req) {
         if (!req.body) {

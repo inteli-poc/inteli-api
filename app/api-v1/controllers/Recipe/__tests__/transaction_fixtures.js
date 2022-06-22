@@ -20,7 +20,7 @@ module.exports = {
     {
       id: '00000000-1000-1000-8000-0000000000000',
       recipe_id: '10000000-0000-1000-8000-0000000000000',
-      token_id: 2,
+      latest_token_id: 2,
       status: 'Accepted',
       created_at: '2022-05-22T08:04:29.316Z',
       updated_at: '2022-05-22T08:04:29.316Z',
@@ -29,7 +29,7 @@ module.exports = {
     {
       id: '00000000-2000-1000-8000-0000000000000',
       recipe_id: '10000000-0000-1000-8000-0000000000000',
-      token_id: 1,
+      latest_token_id: 1,
       status: 'Accepted',
       created_at: '2022-05-23T11:00:29.316Z',
       updated_at: '2022-05-22T11:04:29.316Z',

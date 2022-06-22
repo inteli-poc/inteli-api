@@ -8,6 +8,11 @@ const { exampleDoc } = require('./response_validator_fixtures')
 const commonApiDoc = require('../../api-v1/api-doc')
 
 const mkContext = () => ({ stubs: {} })
+const mkExampleControllerCustomHeader = (context) => {
+  context.stubs.controller = sinon
+    .stub()
+    .resolves({ status: 200, response: { foo: 'bar' }, headers: { custom: 'test' } })
+}
 const mkExampleController = (context) => {
   context.stubs.controller = sinon.stub().resolves({ status: 200, response: { foo: 'bar' } })
 }
@@ -29,13 +34,15 @@ const withMockedValidator = (context, validateRes) => {
 
 const mkResponseMock = (context) => {
   const resJson = sinon.stub()
-  const resStatus = sinon.stub().returns({ json: resJson })
   Object.assign(context.stubs, {
     resJson,
-    resStatus,
+    resSet: sinon.stub(),
+    resStatus: sinon.stub().returns({ send: resJson }),
   })
+
   return {
-    status: resStatus,
+    status: context.stubs.resStatus,
+    set: context.stubs.resSet,
   }
 }
 
@@ -111,6 +118,41 @@ describe('buildValidatedJsonHandler.handler', () => {
       const stub = context.stubs.resJson
       expect(stub.calledOnce).to.equal(true)
       expect(stub.firstCall.args[0]).to.deep.equal({ foo: 'bar' })
+    })
+  })
+
+  describe('header', () => {
+    let context = mkContext()
+    withMockedValidator(context, null)
+
+    before(() => {
+      mkExampleControllerCustomHeader(context)
+      context.handler = buildValidatedJsonHandler(context.stubs.controller, exampleDoc)
+      context.req = {}
+      context.res = mkResponseMock(context)
+      context.handler(context.req, context.res)
+    })
+
+    describe('if headers argument is undefined', () => {
+      before(() => {
+        mkExampleController(context)
+        context.handler = buildValidatedJsonHandler(sinon.stub().resolves({ status: 200, response: {} }), exampleDoc)
+        context.req = {}
+        context.res = mkResponseMock(context)
+        context.handler(context.req, context.res)
+      })
+
+      it('returns default headers', () => {
+        const stub = context.stubs.resSet
+        expect(stub.calledOnce).to.equal(true)
+        expect(stub.firstCall.args[0]).to.deep.equal({ 'content-type': 'application/json' })
+      })
+    })
+
+    it('returns a custom header', () => {
+      const stub = context.stubs.resSet
+      expect(stub.calledOnce).to.equal(true)
+      expect(stub.firstCall.args[0]).to.deep.equal({ custom: 'test' })
     })
   })
 

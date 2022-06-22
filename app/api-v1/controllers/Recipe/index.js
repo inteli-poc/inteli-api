@@ -1,11 +1,59 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
+const identity = require('../../services/identityService')
 const { mapRecipeData } = require('./helpers')
 const { BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
-  // TODO abstranct to transactions controller and first path e.g. /recipe /order is database model
-  // do this along with order
+  get: async function (req) {
+    const recipes = await db.getRecipes()
+    const result = await Promise.all(
+      recipes.map(async (recipe) => {
+        const { alias: supplierAlias } = await identity.getMemberByAddress(req, recipe.supplier)
+        const { alias: ownerAlias } = await identity.getMemberByAddress(req, recipe.owner)
+        const { id, external_id, name, image_attachment_id, material, alloy, price, required_certs } = recipe
+
+        return {
+          id,
+          externalId: external_id,
+          name,
+          imageAttachmentId: image_attachment_id,
+          material,
+          alloy,
+          price,
+          requiredCerts: required_certs,
+          supplier: supplierAlias,
+          owner: ownerAlias,
+        }
+      })
+    )
+    return { status: 200, response: result }
+  },
+  getById: async function (req) {
+    const { id } = req.params
+    if (!id) throw new BadRequestError('missing params')
+
+    const [result] = await db.getRecipeByIDdb(id)
+    if (!result) throw new NotFoundError('Recipe Not Found')
+    const { alias: supplierAlias } = await identity.getMemberByAddress(req, result.supplier)
+    const { alias: ownerAlias } = await identity.getMemberByAddress(req, result.owner)
+
+    return {
+      status: 200,
+      response: {
+        id: result.id,
+        externalId: result.external_id,
+        name: result.name,
+        imageAttachmentId: result.image_attachment_id,
+        material: result.material,
+        alloy: result.alloy,
+        price: result.price,
+        requiredCerts: result.required_certs,
+        supplier: supplierAlias,
+        owner: ownerAlias,
+      },
+    }
+  },
   transaction: {
     getAll: async (req) => {
       const { id } = req.params
@@ -47,17 +95,21 @@ module.exports = {
         inputs: [],
         outputs: [
           {
-            roles: { Owner: recipe.supplier },
+            roles: { Owner: recipe.owner, Buyer: recipe.owner, Supplier: recipe.supplier },
             metadata: mapRecipeData({ ...recipe, transaction }),
           },
         ],
       }
       runProcess(payload, req.token)
-
       return {
         status: 200,
         transactionId: transaction.id,
         message: `transaction ${transaction.id} has been created`,
+        response: {
+          id: transaction.id,
+          submittedAt: new Date(transaction.created_at).toISOString(),
+          status: transaction.status,
+        },
       }
     },
   },

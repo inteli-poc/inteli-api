@@ -3,7 +3,7 @@ const orderController = require('../../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (orderService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(orderController.transaction.get, {
       summary: 'Get Purchase Orders Rejection Action',

@@ -66,6 +66,10 @@ async function getRecipe(id) {
     .where({ 'recipes.id': id })
 }
 
+async function getOrder(id) {
+  return client('orders').select().where({ id })
+}
+
 async function insertRecipeTransaction(id) {
   return client('recipe_transactions')
     .insert({
@@ -73,7 +77,18 @@ async function insertRecipeTransaction(id) {
       status: 'Submitted',
       type: 'Creation',
     })
-    .returning(['id'])
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
+async function insertOrderTransaction(id) {
+  return client('order_transactions')
+    .insert({
+      order_id: id,
+      status: 'Submitted',
+      type: 'Submission',
+    })
+    .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
 }
 
@@ -95,4 +110,6 @@ module.exports = {
   getRecipeByIDs,
   getRecipeByIDdb,
   getAttachmentByIdDb,
+  getOrder,
+  insertOrderTransaction,
 }
