@@ -7,6 +7,8 @@ module.exports = function (partService) {
   const doc = {
     GET: buildValidatedJsonHandler(partController.transaction.get, {
       summary: 'Get Part Order Assignment Action',
+      description:
+        'Returns the details of the on-chain transaction {assignmentId} to assign the part {id} to an order.',
       parameters: [
         {
           description: 'Id of the part',

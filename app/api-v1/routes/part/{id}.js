@@ -7,6 +7,7 @@ module.exports = function (partService) {
   const doc = {
     GET: buildValidatedJsonHandler(partController.get, {
       summary: 'Get Part',
+      description: 'Returns the part {id}.',
       parameters: [
         {
           description: 'Id of the part to get',

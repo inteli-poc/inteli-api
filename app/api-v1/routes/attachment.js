@@ -6,6 +6,7 @@ module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(attachment.get, {
       summary: 'List attachments',
+      description: 'Returns the file metadata (e.g. filename, size) of all uploaded attachments.',
       parameters: [],
       responses: {
         200: {
@@ -27,6 +28,7 @@ module.exports = function () {
     }),
     POST: buildValidatedJsonHandler(attachment.create, {
       summary: 'Create Attachment',
+      description: `Uploads a file to later use in a request (such as the image of a recipe). Content can either be a file (multipart/form-data) or JSON (application/json). Attachments are not viewable to other members`,
       requestBody: {
         content: {
           'multipart/form-data': {

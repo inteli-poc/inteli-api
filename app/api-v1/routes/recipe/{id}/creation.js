@@ -6,6 +6,7 @@ module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(transaction.get, {
       summary: 'List Recipe Creation Actions',
+      description: 'Returns the details of all on-chain transactions to create the recipe {id}.',
       parameters: [
         {
           description: 'Id of the recipe',
@@ -47,6 +48,7 @@ module.exports = function () {
     }),
     POST: buildValidatedJsonHandler(transaction.create, {
       summary: 'Create Recipe Creation Action',
+      description: 'A buyer creates the recipe {id}. Recipe is now viewable to other members',
       parameters: [
         {
           description: 'Id of the recipe',

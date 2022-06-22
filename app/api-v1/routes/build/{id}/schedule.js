@@ -7,6 +7,7 @@ module.exports = function (buildService) {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'List Build Schedule Actions',
+      description: 'Returns the details of all on-chain transactions to schedule the build {id}.',
       parameters: [
         {
           description: 'Id of the build',
@@ -48,6 +49,8 @@ module.exports = function (buildService) {
       tags: ['build'],
     }),
     POST: buildValidatedJsonHandler(buildController.transaction.create, {
+      description:
+        'A Supplier schedules the build {id}. Build must be in `Created` state. Also creates the parts that are being specified by recipes in the build. Build is now viewable to other members.',
       summary: 'Create Build Schedule Action',
       parameters: [
         {

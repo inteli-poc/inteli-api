@@ -2,11 +2,11 @@ const { getDefaultSecurity } = require('../../../../../utils/auth')
 const order = require('../../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(order.transaction.get, {
       summary: 'Get Purchase Orders Rejection Action',
+      description: 'Returns the details of the on-chain transaction {rejectionId} to reject the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',

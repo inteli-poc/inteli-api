@@ -7,6 +7,7 @@ module.exports = function (buildService) {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'List Build Completion Actions',
+      description: 'Returns the details of all on-chain transactions to complete the build {id}.',
       parameters: [
         {
           description: 'Id of the build',
@@ -49,6 +50,7 @@ module.exports = function (buildService) {
     }),
     POST: buildValidatedJsonHandler(buildController.transaction.create, {
       summary: 'Create Build Completion Action',
+      description: 'A Supplier completes the build {id}. Build must be in `Started` state.',
       parameters: [
         {
           description: 'Id of the build. Must be in Started state',

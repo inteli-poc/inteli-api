@@ -7,6 +7,7 @@ module.exports = function (buildService) {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'Get Build Completion Action',
+      description: 'Returns the details of the on-chain transaction {completionId} to complete the build {id}.',
       parameters: [
         {
           description: 'Id of the build',

@@ -426,7 +426,7 @@ const apiDoc = {
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
           certificationIndex: {
-            description: 'Index in the certification requirement list of the order-part to assign this part to',
+            description: 'Index in the certification requirement list of the recipe to assign this part to',
             type: 'integer',
             minimum: 0,
             maximum: 9,

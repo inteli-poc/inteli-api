@@ -7,6 +7,7 @@ module.exports = function (buildService) {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'Get Build Progress Update Action',
+      description: 'Returns the details of the on-chain transaction {updateId} to update progress of the build {id}.',
       parameters: [
         {
           description: 'Id of the build',

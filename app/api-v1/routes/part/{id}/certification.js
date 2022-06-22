@@ -7,6 +7,7 @@ module.exports = function (partService) {
   const doc = {
     GET: buildValidatedJsonHandler(partController.transaction.get, {
       summary: 'List Part Certification Actions',
+      description: 'Returns the details of all on-chain transactions to add certification to the part {id}.',
       parameters: [
         {
           description: 'Id of the part',
@@ -48,6 +49,7 @@ module.exports = function (partService) {
     }),
     POST: buildValidatedJsonHandler(partController.transaction.create, {
       summary: 'Create Part Certification Action',
+      description: 'A Supplier adds a certificate file to the part {id}.',
       parameters: [
         {
           description: 'Id of the part',

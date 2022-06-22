@@ -9,6 +9,7 @@ module.exports = function (recipeService, identityService) {
   const doc = {
     GET: buildValidatedJsonHandler(recipe.get, {
       summary: 'List Recipes',
+      description: 'Returns all recipes.',
       parameters: [],
       responses: {
         200: {
