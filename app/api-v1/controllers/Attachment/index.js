@@ -19,10 +19,10 @@ const returnOctet = ({ filename, binary_blob }) => ({
 })
 
 module.exports = {
-  getAll: async function () {
+  get: async function () {
     return { status: 500, response: { message: 'Not Implemented' } }
   },
-  get: async function (req) {
+  getById: async function (req) {
     const { id } = req.params
     if (!id) throw new BadRequestError('missing params')
 

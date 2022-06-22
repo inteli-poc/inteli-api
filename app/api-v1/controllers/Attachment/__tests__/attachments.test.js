@@ -8,7 +8,7 @@ const db = require('../../../../db')
 
 const getAttachment = async (req) => {
   try {
-    return await attachmentController.get(req)
+    return await attachmentController.getById(req)
   } catch (err) {
     return err
   }
@@ -105,9 +105,9 @@ describe('Attachment controller', () => {
       })
     })
 
-    describe('attachment.getAll', () => {
+    describe('attachment.get', () => {
       it('should resolve 500 error', async () => {
-        const result = await attachmentController.getAll()
+        const result = await attachmentController.get()
         expect(result.status).to.equal(500)
       })
     })

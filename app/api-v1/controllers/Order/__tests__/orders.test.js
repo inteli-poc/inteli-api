@@ -41,7 +41,7 @@ const postOrder = async (req) => {
   }
 }
 
-describe('Order controller', () => {
+describe('order controller', () => {
   let stubs = {}
   let response
   let runProcessBody
@@ -61,7 +61,7 @@ describe('Order controller', () => {
     nock.cleanAll()
   })
 
-  describe('order.post', () => {
+  describe('/order - post endpoint for creating order in local db', () => {
     beforeEach(async () => {
       stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
       stubs.identityByAlias = stub(identifyService, 'getMemberByAlias')
@@ -297,36 +297,36 @@ describe('Order controller', () => {
     })
   })
 
-  describe('order.getAll', () => {
-    it('should resolve 500 error', async () => {
-      const result = await orderController.getAll()
-      expect(result.status).to.equal(500)
-    })
-  })
-
-  describe('order.get', () => {
+  describe('/order - get all orders', () => {
     it('should resolve 500 error', async () => {
       const result = await orderController.get()
       expect(result.status).to.equal(500)
     })
   })
 
-  describe('order.transaction', () => {
-    describe('getAll', () => {
-      it('should resolve 500 error', async () => {
-        const result = await orderController.transaction.getAll()
-        expect(result.status).to.equal(500)
-      })
+  describe('/order/{id} - get by id', () => {
+    it('should resolve 500 error', async () => {
+      const result = await orderController.get()
+      expect(result.status).to.equal(500)
     })
+  })
 
-    describe('get', () => {
+  describe('order transactions controller', () => {
+    describe('/order/{id}/creation - get all order transactions', () => {
       it('should resolve 500 error', async () => {
         const result = await orderController.transaction.get()
         expect(result.status).to.equal(500)
       })
     })
 
-    describe('transactions /create', () => {
+    describe('/order/{id}/creation/{creationId} - get by id', () => {
+      it('should resolve 500 error', async () => {
+        const result = await orderController.transaction.get()
+        expect(result.status).to.equal(500)
+      })
+    })
+
+    describe('/order/{id}/creation/ - creates order transactiion', () => {
       beforeEach(async () => {
         stubs.insertTransaction = stub(db, 'insertOrderTransaction').resolves([])
         stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
