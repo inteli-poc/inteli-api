@@ -18,9 +18,25 @@ const returnOctet = ({ filename, binary_blob }) => ({
   response: binary_blob,
 })
 
+const getSize = (blob) => {
+  return Buffer.from(JSON.stringify(blob)).length.toString()
+}
+
 module.exports = {
   get: async function () {
-    return { status: 500, response: { message: 'Not Implemented' } }
+    const [result] = await db.getAttachments()
+    if (!result) throw new NotFoundError('Attachments Not Found')
+    const res = result.map((item) => {
+      return {
+        id: item.id,
+        filename: item.filename,
+        size: getSize(item.binary_blob),
+      }
+    })
+    return {
+      status: 200,
+      response: res,
+    }
   },
   getById: async function (req) {
     const { id } = req.params

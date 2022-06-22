@@ -59,6 +59,10 @@ async function getAttachmentByIdDb(id) {
   return client('attachments').select(['filename', 'binary_blob']).where({ id })
 }
 
+async function getAttachments() {
+  return client('attachments').select(['id', 'filename', 'binary_blob'])
+}
+
 async function getRecipe(id) {
   return client('recipes')
     .join('attachments', 'recipes.image_attachment_id', 'attachments.id')
@@ -112,4 +116,5 @@ module.exports = {
   getAttachmentByIdDb,
   getOrder,
   insertOrderTransaction,
+  getAttachments,
 }
