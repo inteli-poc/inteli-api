@@ -3,7 +3,7 @@ const buildController = require('../../../controllers/Build')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (buildService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'List Build Schedule Actions',

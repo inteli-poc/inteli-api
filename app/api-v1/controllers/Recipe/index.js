@@ -54,6 +54,38 @@ module.exports = {
       },
     }
   },
+  create: async (req) => {
+    if (!req.body) {
+      throw new BadRequestError('no body provided')
+    }
+
+    const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
+    const selfAddress = await identity.getMemberBySelf(req)
+    const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
+
+    const { externalId, requiredCerts, imageAttachmentId, ...rest } = req.body
+    const [attachment] = await db.getAttachment(imageAttachmentId)
+    if (!attachment) {
+      throw new BadRequestError('Attachment id not found')
+    }
+    const [recipe] = await db.addRecipe({
+      ...rest,
+      external_id: externalId,
+      image_attachment_id: attachment.id,
+      required_certs: JSON.stringify(requiredCerts),
+      owner: selfAddress,
+      supplier: supplierAddress,
+    })
+
+    return {
+      status: 201,
+      response: {
+        id: recipe.id,
+        owner: selfAlias,
+        ...req.body,
+      },
+    }
+  },
   transaction: {
     get: async (req) => {
       const { id } = req.params

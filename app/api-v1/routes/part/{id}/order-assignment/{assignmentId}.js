@@ -3,7 +3,7 @@ const partController = require('../../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (partService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(partController.transaction.get, {
       summary: 'Get Part Order Assignment Action',

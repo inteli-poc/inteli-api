@@ -3,9 +3,31 @@ const { stub } = require('sinon')
 
 const db = require('../../../../db')
 const identity = require('../../../services/identityService')
-const { get, getById } = require('..')
+const { get, getById, create } = require('..')
 const { recipeExample } = require('./transaction_fixtures')
+const { fileAttachment } = require('../../Attachment/__tests__/attachments_fixtures')
 const { BadRequestError, NotFoundError } = require('../../../../utils/errors')
+
+const recipeCreatePayload = {
+  body: {
+    externalId: 'some-ext-id',
+    name: 'recipe-name',
+    imageAttachmentId: 'attachment-id',
+    material: 'iron',
+    alloy: 'metal',
+    price: '1000.99',
+    requiredCerts: { description: 'some descripton about this recipe' },
+    supplier: 'supplier-alias',
+  },
+}
+
+const createRecipe = async (req) => {
+  try {
+    return await create(req)
+  } catch (err) {
+    return err
+  }
+}
 
 const getRecipes = async () => {
   try {
@@ -26,6 +48,148 @@ const getRecipeByID = async (req) => {
 describe('recipe controller', () => {
   let stubs = {}
   let response
+
+  describe('/recipe - create new recipe locally', () => {
+    beforeEach(async () => {
+      stubs.getMemberByAlias = stub(identity, 'getMemberByAlias').resolves({ address: 'supplier-address' })
+      stubs.getMemberBySelf = stub(identity, 'getMemberBySelf').resolves('self-address')
+      stubs.getMemberByAddress = stub(identity, 'getMemberByAddress').resolves({ alias: 'self-alias' })
+      stubs.getAttachment = stub(db, 'getAttachment').resolves([fileAttachment])
+      stubs.addRecipe = stub(db, 'addRecipe').resolves([recipeExample])
+
+      response = await createRecipe(recipeCreatePayload)
+    })
+
+    afterEach(() => {
+      stubs.getMemberByAlias.restore()
+      stubs.getMemberBySelf.restore()
+      stubs.getMemberByAddress.restore()
+      stubs.getAttachment.restore()
+      stubs.addRecipe.restore()
+    })
+
+    describe('if req.body is not provided', () => {
+      beforeEach(async () => {
+        stubs.getMemberByAlias.restore()
+        stubs.getMemberBySelf.restore()
+        stubs.getMemberByAddress.restore()
+        stubs.getAttachment.restore()
+        stubs.addRecipe.restore()
+        stubs.getMemberByAlias = stub(identity, 'getMemberByAlias')
+        stubs.getMemberBySelf = stub(identity, 'getMemberBySelf')
+        stubs.getMemberByAddress = stub(identity, 'getMemberByAddress')
+        stubs.getAttachment = stub(db, 'getAttachment')
+        stubs.addRecipe = stub(db, 'addRecipe')
+        response = await createRecipe({})
+      })
+
+      it('throws bad request error', () => {
+        expect(response).to.be.instanceOf(BadRequestError)
+        expect(response.message).to.equal('Bad Request: no body provided')
+      })
+
+      it('does not call identity service', () => {
+        expect(stubs.getMemberByAddress.calledOnce).to.equal(false)
+        expect(stubs.getMemberBySelf.calledOnce).to.equal(false)
+        expect(stubs.getMemberByAddress.calledOnce).to.equal(false)
+      })
+
+      it('does not attempt to retrieve an attachement', () => {
+        expect(stubs.getAttachment.calledOnce).to.equal(false)
+      })
+
+      it('does not call addRecipe() database method', () => {
+        expect(stubs.addRecipe.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('if identity service fails', () => {
+      beforeEach(async () => {
+        stubs.getAttachment.restore()
+        stubs.addRecipe.restore()
+        stubs.getAttachment = stub(db, 'getAttachment')
+        stubs.addRecipe = stub(db, 'addRecipe')
+        stubs.getMemberByAlias.rejects(new Error('some identity servive error'))
+        response = await createRecipe(recipeCreatePayload)
+      })
+
+      it('throws and allows middle ware to take it from there', () => {
+        expect(response).to.be.instanceOf(Error)
+        expect(response.message).to.equal('some identity servive error')
+      })
+
+      it('does not attempt to retrieve an attachement', () => {
+        expect(stubs.getAttachment.calledOnce).to.equal(false)
+      })
+
+      it('does not call addRecipe() database method', () => {
+        expect(stubs.addRecipe.calledOnce).to.equal(false)
+      })
+    })
+
+    describe('if getting attachment', () => {
+      beforeEach(async () => {
+        stubs.addRecipe.restore()
+        stubs.getAttachment.rejects(new Error('some attachment db query error'))
+        stubs.addRecipe = stub(db, 'addRecipe')
+
+        response = await createRecipe(recipeCreatePayload)
+      })
+
+      it('throws and allows middle ware to take it from there', () => {
+        expect(response).to.be.instanceOf(Error)
+        expect(response.message).to.equal('some attachment db query error')
+      })
+
+      it('does not write to the database', () => {
+        expect(stubs.addRecipe.calledOnce).to.equal(false)
+      })
+    })
+
+    it('retrieves supplier alias from identity service', () => {
+      expect(stubs.getMemberByAlias.getCall(0).args[1]).to.equal('supplier-alias')
+    })
+
+    it('retreves self address from identity service', () => {
+      expect(stubs.getMemberBySelf.calledOnce).to.equal(true)
+    })
+
+    it('retrieves self alias from identity service', () => {
+      expect(stubs.getMemberByAddress.getCall(0).args[1]).to.equal('self-address')
+    })
+
+    it('gets attachements from a local db', () => {
+      expect(stubs.getAttachment.getCall(0).args[0]).to.equal('attachment-id')
+    })
+
+    it('persists recipe and returns 201 along with details', () => {
+      const { status, response: body } = response
+      expect(stubs.addRecipe.getCall(0).args[0]).to.deep.equal({
+        name: 'recipe-name',
+        image_attachment_id: '00000000-0000-1000-8000-000000000001',
+        material: 'iron',
+        alloy: 'metal',
+        price: '1000.99',
+        supplier: 'supplier-address',
+        external_id: 'some-ext-id',
+        required_certs: '{"description":"some descripton about this recipe"}',
+        owner: 'self-address',
+      })
+      expect(status).to.equal(201)
+      expect(body).to.deep.equal({
+        id: '10000000-0000-1000-8000-0000000000000',
+        externalId: 'some-ext-id',
+        imageAttachmentId: 'attachment-id',
+        owner: 'self-alias',
+        name: 'recipe-name',
+        requiredCerts: { description: 'some descripton about this recipe' },
+        material: 'iron',
+        alloy: 'metal',
+        price: '1000.99',
+        supplier: 'supplier-alias',
+      })
+    })
+  })
 
   describe('/recipe - get all recipes endpoint', () => {
     beforeEach(async () => {

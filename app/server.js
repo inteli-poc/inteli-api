@@ -11,10 +11,7 @@ const compression = require('compression')
 const { PORT, API_VERSION, API_MAJOR_VERSION, FILE_UPLOAD_SIZE_LIMIT_BYTES, AUTH_TYPE } = require('./env')
 const logger = require('./utils/Logger')
 const v1ApiDoc = require('./api-v1/api-doc')
-const v1RecipeService = require('./api-v1/services/recipeService')
-const v1BuildService = require('./api-v1/services/buildService')
 const v1DscpApiService = require('./api-v1/services/dscpApiService')
-const v1PartService = require('./api-v1/services/partService')
 const v1IdentityService = require('./api-v1/services/identityService')
 const { handleErrors } = require('./utils/errors')
 const { verifyJwks } = require('./utils/auth')
@@ -61,10 +58,7 @@ async function createHttpServer() {
     },
     securityHandlers: securityHandlers,
     dependencies: {
-      recipeService: v1RecipeService,
-      buildService: v1BuildService,
       dscpApiService: v1DscpApiService,
-      partService: v1PartService,
       identityService: v1IdentityService,
     },
     paths: [path.resolve(__dirname, `api-${API_MAJOR_VERSION}/routes`)],
