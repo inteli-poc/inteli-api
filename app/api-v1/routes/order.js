@@ -33,16 +33,16 @@ const docs = {
           schema: {
             $ref: '#/components/schemas/NewOrder',
           },
-        }
+        },
       },
-      {
-        summary: 'Create Purchase Order',
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/NewOrder',
-              },
+    },
+    responses: {
+      201: {
+        description: 'Purchase Order Created',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/Order',
             },
           },
         },
