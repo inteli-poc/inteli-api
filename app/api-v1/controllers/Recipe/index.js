@@ -102,7 +102,7 @@ module.exports = {
       }
       runProcess(payload, req.token)
       return {
-        status: 200,
+        status: 201,
         message: `transaction ${transaction.id} has been created`,
         response: {
           id: transaction.id,
