@@ -41,7 +41,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Rejection action not found',
+          description: 'Order or Rejection Action not found',
           content: {
             'application/json': {
               schema: {

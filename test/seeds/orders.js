@@ -75,7 +75,7 @@ const seed = async () => {
   ])))
   /* eslint-enable */
 
-  // with reciope that does not have a token_id
+  // with recipe that does not have a token_id
   await client('orders').insert([
     {
       id: '36345f4f-6535-42e2-83f9-79e2e195e101',

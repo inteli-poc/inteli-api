@@ -41,7 +41,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Acceptance action not found',
+          description: 'Order or Acceptance Action not found',
           content: {
             'application/json': {
               schema: {

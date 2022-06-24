@@ -42,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Build Completion Action not found',
+          description: 'Build or Completion Action not found',
           content: {
             'application/json': {
               schema: {

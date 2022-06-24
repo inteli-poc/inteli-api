@@ -41,7 +41,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Amendment action not found',
+          description: 'Order or Amendment Action not found',
           content: {
             'application/json': {
               schema: {

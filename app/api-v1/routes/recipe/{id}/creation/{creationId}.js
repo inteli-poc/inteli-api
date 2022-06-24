@@ -42,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Recipe Creation Action not found',
+          description: 'Recipe or Creation Action not found',
           content: {
             'application/json': {
               schema: {

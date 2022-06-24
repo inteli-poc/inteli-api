@@ -43,7 +43,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Part not found',
+          description: 'Part or Certification Action not found',
           content: {
             'application/json': {
               schema: {

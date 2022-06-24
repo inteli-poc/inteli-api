@@ -41,7 +41,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Submission action not found',
+          description: 'Order or Submission Action not found',
           content: {
             'application/json': {
               schema: {

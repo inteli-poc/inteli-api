@@ -42,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Order not found',
+          description: 'Build or Start Action not found',
           content: {
             'application/json': {
               schema: {

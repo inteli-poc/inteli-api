@@ -43,7 +43,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Part Order Assignment not found',
+          description: 'Part or Order Assignment Action not found',
           content: {
             'application/json': {
               schema: {

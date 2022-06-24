@@ -27,7 +27,7 @@ ingress:
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.26.1'
+  tag: 'v1.27.0'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:

@@ -42,16 +42,16 @@ module.exports = function () {
               anyOf: [
                 {
                   type: 'object',
-                  properties: {},
-                  additionalProperties: true,
+                  example: { some: 'example JSON' },
                 },
                 {
                   type: 'array',
-                  items: {},
+                  items: {
+                    example: { some: 'example JSON' },
+                  },
                 },
               ],
             },
-            example: {},
           },
         },
       },

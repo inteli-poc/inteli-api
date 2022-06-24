@@ -42,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Part Metadata Update not found',
+          description: 'Part or Metadata Update Action not found',
           content: {
             'application/json': {
               schema: {

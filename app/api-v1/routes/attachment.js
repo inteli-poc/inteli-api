@@ -28,7 +28,7 @@ module.exports = function () {
     }),
     POST: buildValidatedJsonHandler(attachment.create, {
       summary: 'Create Attachment',
-      description: `Uploads a file to later use in a request (such as the image of a recipe). Content can either be a file (multipart/form-data) or JSON (application/json). Attachments are not viewable to other members`,
+      description: `Uploads a file to later use in a request (such as the image of a recipe). Content can either be a file (multipart/form-data) or JSON (application/json). Attachments are not viewable to other members.`,
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -47,16 +47,16 @@ module.exports = function () {
               anyOf: [
                 {
                   type: 'object',
-                  properties: {},
-                  additionalProperties: true,
+                  example: { some: 'example JSON' },
                 },
                 {
                   type: 'array',
-                  items: {},
+                  items: {
+                    example: { some: 'example JSON' },
+                  },
                 },
               ],
             },
-            example: {},
           },
         },
       },

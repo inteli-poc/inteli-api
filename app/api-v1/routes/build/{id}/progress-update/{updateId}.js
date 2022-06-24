@@ -42,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Build progress update not found',
+          description: 'Build or Progress Update Action not found',
           content: {
             'application/json': {
               schema: {

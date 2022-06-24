@@ -29,7 +29,7 @@ module.exports = function () {
     POST: buildValidatedJsonHandler(buildController.create, {
       summary: 'Create Build',
       description:
-        'A Supplier creates a new build containing a list of recipes that will generate parts. One part is created per recipe. Multiple parts can be built by listing the same recipe ID multiple times. The Supplier must be the `supplier` on each recipe. The build is not yet viewable to other members',
+        'A Supplier creates a new build containing a list of recipes that will generate parts. One part is created per recipe. Multiple parts can be built by listing the same recipe ID multiple times. The Supplier must be the `supplier` on each recipe. The build is not yet viewable to other members.',
       requestBody: {
         content: {
           'application/json': {
