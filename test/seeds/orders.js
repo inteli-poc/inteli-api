@@ -63,17 +63,20 @@ const seed = async () => {
     },
   ])
 
-  /* eslint-disable */
-  await Promise.all(['Created', 'Submitted', 'Rejected', 'Accepted', 'Amended'].map((status, i) => client('orders').insert([{
-      id: `36345f4f-6535-42e2-83f9-79e2e195e11${i}`,
-      supplier: '36345f4f-0000-42e2-83f9-79e2e195e000',
-      items: ['10000000-0000-1000-9000-000000000000'],
-      purchaser: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
-      status,
-      required_by: '2022-10-21T10:10:10.919Z',
-    },
-  ])))
-  /* eslint-enable */
+  await Promise.all(
+    ['Created', 'Submitted', 'Rejected', 'Accepted', 'Amended'].map((status, i) =>
+      client('orders').insert([
+        {
+          id: `36345f4f-6535-42e2-83f9-79e2e195e11${i}`,
+          supplier: '36345f4f-0000-42e2-83f9-79e2e195e000',
+          items: ['10000000-0000-1000-9000-000000000000'],
+          buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
+          status,
+          required_by: '2022-10-21T10:10:10.919Z',
+        },
+      ])
+    )
+  )
 
   // with recipe that does not have a token_id
   await client('orders').insert([
@@ -81,7 +84,7 @@ const seed = async () => {
       id: '36345f4f-6535-42e2-83f9-79e2e195e101',
       supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
       items: ['10000000-0000-1000-9000-000000000000'],
-      purchaser: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
+      buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       status: 'Created',
       required_by: '2022-10-21T11:45:46.919Z',
     },

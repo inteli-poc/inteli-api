@@ -18,13 +18,13 @@ const client = knex({
 async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
-      supplier: reqBody.supplier,
+      supplier: reqBody.supplierAddress,
       required_by: reqBody.requiredBy,
       items: reqBody.items,
-      purchaser: reqBody.purchaserAddress,
+      buyer: reqBody.buyerAddress,
       status: reqBody.status,
     })
-    .returning('*')
+    .returning(['id', 'status'])
 }
 
 async function getAttachment(id) {

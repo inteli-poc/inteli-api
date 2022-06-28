@@ -117,7 +117,7 @@ const apiDoc = {
               'Name of the OEM who owns the design of the recipe. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
-            example: 'PurchaserAlias',
+            example: 'BuyerAlias',
           },
         },
       },
@@ -322,12 +322,12 @@ const apiDoc = {
             description: 'local id of the purchase-order',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          purchaser: {
+          buyer: {
             description:
               'Name of the submitter of the purchase-order. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
-            example: 'PurchaserAlias',
+            example: 'BuyerAlias',
           },
           status: {
             type: 'string',

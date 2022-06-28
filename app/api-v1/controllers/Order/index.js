@@ -14,14 +14,13 @@ module.exports = {
 
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
-    const { alias: selfAlias } = await identity.getMemberByAlias(req, selfAddress)
+    const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
 
     const validated = await validate({
       ...req.body,
-      supplier: supplierAddress,
-      purchaserAddress: selfAlias,
+      supplierAddress: supplierAddress,
       status: 'Created',
-      purchaser: selfAddress,
+      buyerAddress: selfAddress,
     })
     const [result] = await db.postOrderDb(validated)
 
@@ -29,6 +28,7 @@ module.exports = {
       status: 201,
       response: {
         ...result,
+        buyer: selfAlias,
         ...req.body,
       },
     }

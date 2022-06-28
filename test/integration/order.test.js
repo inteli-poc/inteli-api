@@ -56,7 +56,7 @@ describeAuthOnly('order - authenticated', function () {
       }
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.body.supplier).to.equal('valid-1')
-      expect(response.body.purchaser).to.equal('valid-2')
+      expect(response.body.buyer).to.equal('valid-2')
       expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
       expect(response.status).to.equal(201)
     })
@@ -159,7 +159,7 @@ describeNoAuthOnly('order - no auth', function () {
       }
       const response = await postOrderRoute(newOrder, app, null)
       expect(response.body.supplier).to.equal('valid-1')
-      expect(response.body.purchaser).to.equal('valid-2')
+      expect(response.body.buyer).to.equal('valid-2')
       expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
       expect(response.status).to.equal(201)
     })

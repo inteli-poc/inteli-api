@@ -3,7 +3,7 @@ const { expect } = require('chai')
 const { stub } = require('sinon')
 const orderController = require('../index')
 const db = require('../../../../db')
-const identifyService = require('../../../services/identityService')
+const identityService = require('../../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, NoTokenError } = require('../../../../utils/errors')
 const { DSCP_API_HOST, DSCP_API_PORT } = require('../../../../env')
 
@@ -64,12 +64,9 @@ describe('order controller', () => {
   describe('/order - post endpoint for creating order in local db', () => {
     beforeEach(async () => {
       stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
-      stubs.identityByAlias = stub(identifyService, 'getMemberByAlias')
-        .onFirstCall()
-        .resolves({ address: 'supplier-address' })
-        .onSecondCall()
-        .resolves({ alias: 'self-address' })
-      stubs.identitySelf = stub(identifyService, 'getMemberBySelf').resolves('self-address')
+      stubs.identityByAlias = stub(identityService, 'getMemberByAlias').resolves({ address: 'supplier-address' })
+      stubs.identityByAddress = stub(identityService, 'getMemberByAddress').resolves({ alias: 'self-alias' })
+      stubs.identitySelf = stub(identityService, 'getMemberBySelf').resolves('self-address')
       stubs.insertOrder = stub(db, 'postOrderDb').resolves([
         {
           id: 'order-id',
@@ -81,6 +78,7 @@ describe('order controller', () => {
     afterEach(() => {
       stubs.getRecipeIds.restore()
       stubs.identityByAlias.restore()
+      stubs.identityByAddress.restore()
       stubs.identitySelf.restore()
       stubs.insertOrder.restore()
     })
@@ -112,7 +110,7 @@ describe('order controller', () => {
         stubs.identityByAlias.rejects('some error - identity alias')
         response = await postOrder({
           body: {
-            supplier: 'supplier-address-req',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: recipeExamples.map((el) => el.id),
@@ -132,7 +130,7 @@ describe('order controller', () => {
           stubs.getRecipeIds.resolves([])
           response = await postOrder({
             body: {
-              supplier: 'supplier-address-req',
+              supplier: 'supplier-alias',
               description: 'some description - test',
               requiredBy: '2022-06-17T07:31:37.602Z',
               items: recipeExamples.map((el) => el.id),
@@ -161,7 +159,7 @@ describe('order controller', () => {
 
           response = await postOrder({
             body: {
-              supplier: 'supplier-address-req-mismatch',
+              supplier: 'supplier-alias-mismatch',
               description: 'some description - test',
               requiredBy: '2022-06-17T07:31:37.602Z',
               items: recipeExamples.map((el) => el.id),
@@ -191,7 +189,7 @@ describe('order controller', () => {
 
         response = await postOrder({
           body: {
-            supplier: 'supplier-address-req',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: recipeExamples.map((el) => el.id),
@@ -210,7 +208,7 @@ describe('order controller', () => {
 
         response = await postOrder({
           body: {
-            supplier: 'supplier-address-req-mismatch',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: recipeExamples.map((el) => el.id),
@@ -225,7 +223,7 @@ describe('order controller', () => {
       it('gets aliases from identity service', () => {
         expect(stubs.identityByAlias.getCall(0).args[0]).to.deep.equal({
           body: {
-            supplier: 'supplier-address-req-mismatch',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: [
@@ -235,9 +233,9 @@ describe('order controller', () => {
             ],
           },
         })
-        expect(stubs.identityByAlias.getCall(1).args[0]).to.deep.equal({
+        expect(stubs.identityByAddress.getCall(0).args[0]).to.deep.equal({
           body: {
-            supplier: 'supplier-address-req-mismatch',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: [
@@ -252,7 +250,7 @@ describe('order controller', () => {
       it('retrieves self address', () => {
         expect(stubs.identitySelf.getCall(0).args[0]).to.deep.equal({
           body: {
-            supplier: 'supplier-address-req-mismatch',
+            supplier: 'supplier-alias',
             description: 'some description - test',
             requiredBy: '2022-06-17T07:31:37.602Z',
             items: [
@@ -266,7 +264,8 @@ describe('order controller', () => {
 
       it('validates properties by calling a helper method [validate]', () => {
         expect(stubs.insertOrder.getCall(0).args[0]).to.deep.equal({
-          supplier: 'supplier-address',
+          supplier: 'supplier-alias',
+          supplierAddress: 'supplier-address',
           description: 'some description - test',
           requiredBy: '2022-06-17T07:31:37.602Z',
           items: [
@@ -274,9 +273,8 @@ describe('order controller', () => {
             '50000000-0000-1000-5600-000000000001',
             '50000000-0000-1000-5700-000000000001',
           ],
-          purchaserAddress: 'self-address',
           status: 'Created',
-          purchaser: 'self-address',
+          buyerAddress: 'self-address',
         })
       })
 
@@ -284,9 +282,10 @@ describe('order controller', () => {
         expect(response.status).to.equal(201)
         expect(response.response).to.deep.equal({
           id: 'order-id',
-          supplier: 'supplier-address-req-mismatch',
+          supplier: 'supplier-alias',
           description: 'some description - test',
           requiredBy: '2022-06-17T07:31:37.602Z',
+          buyer: 'self-alias',
           items: [
             '50000000-0000-1000-5500-000000000001',
             '50000000-0000-1000-5600-000000000001',
@@ -331,7 +330,7 @@ describe('order controller', () => {
         stubs.insertTransaction = stub(db, 'insertOrderTransaction').resolves([])
         stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
         stubs.getOrder = stub(db, 'getOrder').resolves([])
-        stubs.getSelf = stub(identifyService, 'getMemberBySelf').resolves(null)
+        stubs.getSelf = stub(identityService, 'getMemberBySelf').resolves(null)
       })
       afterEach(() => {
         stubs.getSelf.restore()
