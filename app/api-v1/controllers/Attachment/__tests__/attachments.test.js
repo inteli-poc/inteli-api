@@ -91,10 +91,6 @@ describe('Attachment controller', () => {
       })
     })
 
-    afterEach(() => {
-      stubs.getAttachment.restore()
-    })
-
     describe('happy path - json attachment', () => {
       beforeEach(async () => {
         stubs.getAttachment.resolves([jsonAttachment])
@@ -117,53 +113,41 @@ describe('Attachment controller', () => {
   })
 
   describe('/attachment/ - get all endpoint', () => {
-    beforeEach(() => {
-      stubs.getAttachments.restore()
-      stubs.getAttachments = stub(db, 'getAttachments').resolves([])
-    })
-    afterEach(() => {
-      stubs.getAttachments.restore()
-    })
     describe('if no attachments are found', () => {
       beforeEach(async () => {
-        stubs.getAttachments.restore()
-        stubs.getAttachments = stub(db, 'getAttachments').resolves([])
+        stubs.getAttachments.resolves([])
         response = await getAttachments()
       })
-      it('performs a database call too check for attachments', () => {
+      it('performs a database call to check for attachments', () => {
         expect(stubs.getAttachments.calledOnce).to.equal(true)
       })
 
-      it('throws an error', async () => {
-        expect(response).to.be.an.instanceOf(NotFoundError)
-        expect(response.message).to.be.equal('Not Found: Attachments Not Found')
+      it('returns empty list', async () => {
+        expect(response.response).to.deep.equal([])
       })
     })
 
     describe('attachments are found', () => {
       beforeEach(async () => {
-        stubs.getAttachments.restore()
-        stubs.getAttachments = stub(db, 'getAttachments').resolves([allAttachments])
+        stubs.getAttachments.resolves(allAttachments)
         response = await getAttachments()
       })
-      afterEach(() => {
-        stubs.getAttachments.restore()
-      })
+
       it('returns a 200 status', async () => {
         expect(response.status).to.be.equal(200)
       })
 
-      it('resturns a list of attachments', async () => {
+      it('returns a list of attachments', async () => {
         expect(response.response).to.deep.equal([
           {
             id: '00000000-0000-1000-8000-000000000001',
             filename: 'foo1.jpg',
-            size: '7',
+            size: 7,
           },
           {
             id: '00000000-0000-1000-9000-000000000001',
             filename: 'json',
-            size: '35',
+            size: 29,
           },
         ])
       })

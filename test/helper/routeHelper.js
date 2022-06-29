@@ -152,7 +152,7 @@ async function getAttachmentRouteJSON(id, { app }, token) {
       return response
     })
     .catch((err) => {
-      console.error(`postAttachmentErr ${err}`)
+      console.error(`getAttachmentRouteJSONErr ${err}`)
       return err
     })
 }
@@ -167,7 +167,21 @@ async function getAttachmentRouteOctet(id, { app }, token) {
       return response
     })
     .catch((err) => {
-      console.error(`postAttachmentErr ${err}`)
+      console.error(`getAttachmentRouteOctetErr ${err}`)
+      return err
+    })
+}
+
+async function getAttachments({ app }, token) {
+  return request(app)
+    .get(`/${API_MAJOR_VERSION}/attachment`)
+    .set('Authorization', `Bearer ${token}`)
+    .send()
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`getAttachmentsErr ${err}`)
       return err
     })
 }
@@ -199,4 +213,5 @@ module.exports = {
   postAttachmentJSON,
   getAttachmentRouteJSON,
   getAttachmentRouteOctet,
+  getAttachments,
 }
