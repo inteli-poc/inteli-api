@@ -36,13 +36,19 @@ The following environment variables are additionally used when `AUTH_TYPE : 'JWT
 
 ## Getting started
 
-To start dependencies
+Start dependencies:
 
 ```
 docker compose up -d
 ```
 
-Run DB migrations
+Install packages:
+
+```
+npm i
+```
+
+Run DB migrations:
 
 ```
 npx knex migrate:latest --env test
@@ -51,7 +57,6 @@ npx knex migrate:latest --env test
 Run the application in development mode:
 
 ```sh
-npm i
 npm run dev
 ```
 

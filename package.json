@@ -1,6 +1,6 @@
 {
   "name": "@digicatapult/inteli-api",
-  "version": "1.27.3",
+  "version": "1.27.4",
   "description": "Insert repo description",
   "main": "app/index.js",
   "scripts": {
