@@ -51,8 +51,17 @@ npx knex migrate:latest --env test
 Run the application in development mode:
 
 ```sh
+npm i
 npm run dev
 ```
+
+Assuming `devDefault` environment variables, view OpenAPI documentation for all routes with Swagger:
+
+```
+localhost:3000/v1/swagger/
+```
+
+The Swagger route is constructed as `localhost:{PORT}/{API_MAJOR_VERSION}/swagger`. OpenAPI docs can also be viewed as JSON `localhost:{PORT}/{API_MAJOR_VERSION}/api-docs`.
 
 ## Authentication
 
