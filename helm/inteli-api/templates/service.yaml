@@ -1,14 +1,20 @@
 {{- $fullName := include "inteli-api.fullname" . -}}
+{{- if .Values.service.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "inteli-api.fullname" . }}
   labels:
-    {{- include "inteli-api.labels" . | nindent 4 }}
+  {{- include "inteli-api.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     name: {{ include "inteli-api.fullname" . }}
   ports:
     - protocol: 'TCP'
-      port: 80
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.config.port }}
+{{- end }}
