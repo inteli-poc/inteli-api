@@ -7,6 +7,7 @@ module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(recipe.transaction.getById, {
       summary: 'Get Recipe Creation Action',
+      description: 'Returns the details of the on-chain transaction {creationId} to create the recipe {id}.',
       parameters: [
         {
           description: 'Id of the recipe',
@@ -41,7 +42,7 @@ module.exports = function () {
           },
         },
         404: {
-          description: 'Recipe Creation Action not found',
+          description: 'Recipe or Creation Action not found',
           content: {
             'application/json': {
               schema: {

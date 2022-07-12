@@ -20,7 +20,18 @@ const returnOctet = ({ filename, binary_blob }) => ({
 
 module.exports = {
   get: async function () {
-    return { status: 500, response: { message: 'Not Implemented' } }
+    const attachments = await db.getAttachments()
+    const res = attachments.map((item) => {
+      return {
+        id: item.id,
+        filename: item.filename,
+        size: item.binary_blob.length,
+      }
+    })
+    return {
+      status: 200,
+      response: res,
+    }
   },
   getById: async function (req) {
     const { id } = req.params

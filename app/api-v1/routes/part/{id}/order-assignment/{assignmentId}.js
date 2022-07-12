@@ -3,10 +3,12 @@ const partController = require('../../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (partService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(partController.transaction.get, {
       summary: 'Get Part Order Assignment Action',
+      description:
+        'Returns the details of the on-chain transaction {assignmentId} to assign the part {id} to an order.',
       parameters: [
         {
           description: 'Id of the part',
@@ -41,7 +43,7 @@ module.exports = function (partService) {
           },
         },
         404: {
-          description: 'Part Order Assignment not found',
+          description: 'Part or Order Assignment Action not found',
           content: {
             'application/json': {
               schema: {

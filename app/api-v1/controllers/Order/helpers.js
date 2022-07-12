@@ -11,7 +11,7 @@ exports.validate = async (body) => {
     throw new BadRequestError('recipe not found')
   } else {
     recipes.map((recipeItem) => {
-      if (recipeItem.supplier != body.supplier) {
+      if (recipeItem.supplier != body.supplierAddress) {
         throw new BadRequestError('invalid supplier')
       }
     })

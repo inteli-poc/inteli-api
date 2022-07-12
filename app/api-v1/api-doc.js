@@ -1,4 +1,17 @@
-const { PORT, API_VERSION, API_MAJOR_VERSION } = require('../env')
+const { PORT, API_VERSION, API_MAJOR_VERSION, AUTH_TYPE } = require('../env')
+
+const securitySchemes =
+  AUTH_TYPE === 'JWT'
+    ? {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      }
+    : {}
 
 const apiDoc = {
   openapi: '3.0.3',
@@ -21,21 +34,25 @@ const apiDoc = {
             type: 'string',
           },
         },
+        example: { message: 'An error occured' },
       },
       NotFoundError: {
         description: 'This resource cannot be found',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/Error' }],
+        example: { message: 'This resource cannot be found' },
       },
       BadRequestError: {
         description: 'The request is invalid',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/Error' }],
+        example: { message: 'The request is invalid' },
       },
       UnauthorizedError: {
         description: 'Access token is missing or invalid',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/Error' }],
+        example: { message: 'An error occurred during jwks verification' },
       },
       NewRecipe: {
         type: 'object',
@@ -43,29 +60,35 @@ const apiDoc = {
           externalId: {
             description: 'id of the recipe in an external ERP',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
           },
           name: {
             description: 'Name of the recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'Low-pressure compressor',
           },
           imageAttachmentId: {
             description: 'Example image of the item uploaded as an attachment',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           material: {
             description: 'Primary material of the constructed recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'Aluminium',
           },
           alloy: {
             description: 'Primary alloy present in the constructed recipe',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'Ti-6Al-4V',
           },
           price: {
             description: 'Price of the recipe. This information is not stored on-chain.',
             type: 'string',
+            example: '1200',
           },
           requiredCerts: {
-            description: 'Certification requirements ',
+            description: 'Certification requirements',
             type: 'array',
             maxItems: 10,
             items: {
@@ -77,6 +100,7 @@ const apiDoc = {
               'Name of the supplier who is contracted to build the recipe. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'SupplierAlias',
           },
         },
       },
@@ -93,6 +117,7 @@ const apiDoc = {
               'Name of the OEM who owns the design of the recipe. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'BuyerAlias',
           },
         },
       },
@@ -102,6 +127,7 @@ const apiDoc = {
           description: {
             description: 'Description of the certification requirement',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'tensionTest',
           },
         },
       },
@@ -129,6 +155,7 @@ const apiDoc = {
             type: 'string',
             maxLength: 255,
             minLength: 1,
+            example: 'recipeImage.png',
           },
           size: {
             description: 'size of the uploaded attachment',
@@ -144,9 +171,10 @@ const apiDoc = {
           externalId: {
             description: 'id of the build in an external system',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
           },
           parts: {
-            description: 'Parts created by this build ',
+            description: 'List of recipes describing parts to be created by this build',
             type: 'array',
             maxItems: 10,
             items: {
@@ -170,6 +198,7 @@ const apiDoc = {
           externalId: {
             description: 'id of the build in an external system',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
           },
           partIds: {
             description: 'Parts created by this build ',
@@ -184,6 +213,7 @@ const apiDoc = {
             description: 'Name of the supplier who ran the build. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'SupplierAlias',
           },
           status: {
             description: 'Status of the build',
@@ -216,6 +246,7 @@ const apiDoc = {
           recipeId: {
             description: 'id of the recipe that describes the design of this part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
           },
         },
       },
@@ -236,6 +267,7 @@ const apiDoc = {
             description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'SupplierAlias',
           },
           certifications: {
             type: 'array',
@@ -263,6 +295,7 @@ const apiDoc = {
               'Name of the supplier who will supply parts from this purchase-order. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'SupplierAlias',
           },
           requiredBy: {
             description: 'Date and time at which the purchase-order must be completed',
@@ -271,11 +304,12 @@ const apiDoc = {
           },
           items: {
             type: 'array',
-            description: 'List of parts to be supplied',
+            description: 'List of parts to be supplied, identified by their recipe id',
             maxItems: 10,
             items: {
               description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
             },
           },
         },
@@ -288,11 +322,12 @@ const apiDoc = {
             description: 'local id of the purchase-order',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          purchaser: {
+          buyer: {
             description:
               'Name of the submitter of the purchase-order. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
+            example: 'BuyerAlias',
           },
           status: {
             type: 'string',
@@ -308,6 +343,7 @@ const apiDoc = {
           id: {
             description: 'local id of the chain action',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           status: {
             description: 'Status of the action',
@@ -319,11 +355,6 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
-        },
-        example: {
-          id: '36345f4f-6535-42e2-83f9-79e2e195ec22',
-          status: 'InBlock',
-          submittedAt: new Date().toISOString(),
         },
       },
       NewOrderSubmission: {
@@ -357,11 +388,12 @@ const apiDoc = {
           },
           items: {
             type: 'array',
-            description: 'List of parts to be supplied',
+            description: 'List of parts to be supplied, identified by their recipe id',
             maxItems: 10,
             items: {
               description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
             },
           },
         },
@@ -382,11 +414,12 @@ const apiDoc = {
           },
           items: {
             type: 'array',
-            description: 'List of parts to be supplied',
+            description: 'List of parts to be supplied, identified by their recipe id',
             maxItems: 10,
             items: {
               description: 'id of the recipe to be built',
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
             },
           },
         },
@@ -403,6 +436,7 @@ const apiDoc = {
           orderId: {
             description: 'id of the order to attach this part to',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           itemIndex: {
             description: 'Index in the item list of the order to assign this part to',
@@ -424,9 +458,10 @@ const apiDoc = {
           attachmentId: {
             description: 'id of the attachment containing the certification evidence',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           certificationIndex: {
-            description: 'Index in the certification requirement list of the order-part to assign this part to',
+            description: 'Index in the certification requirement list of the recipe to assign this part to',
             type: 'integer',
             minimum: 0,
             maximum: 9,
@@ -483,9 +518,10 @@ const apiDoc = {
         properties: {
           attachmentId: {
             description: 'Id of an attachment containing build data to register',
-            type: 'string',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            type: 'string',
             nullable: true,
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           completionEstimate: {
             description: 'Updated Date and time at which the build is estimated to finish',
@@ -508,6 +544,7 @@ const apiDoc = {
             type: 'string',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             nullable: true,
+            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
           },
           completedAt: {
             description: 'Finalised completion date and time',
@@ -557,13 +594,7 @@ const apiDoc = {
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
       },
     },
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-    },
+    ...securitySchemes,
   },
   paths: {},
 }

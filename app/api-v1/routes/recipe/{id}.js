@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValid
 const recipe = require('../../controllers/Recipe')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (recipeService, identityService) {
+module.exports = function (identityService) {
   const doc = {
     GET: buildValidatedJsonHandler(recipe.getById, {
       summary: 'Get Recipe by ID',

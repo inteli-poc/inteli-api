@@ -12,6 +12,7 @@ module.exports = function () {
 
   doc.GET.apiDoc = {
     summary: 'GET attachment by id',
+    description: `Downloads a file {id}. Content can either be a file (application/octet-stream) or JSON (application/json).`,
     parameters: [
       {
         description: 'Id of the attachment to get',
@@ -41,16 +42,16 @@ module.exports = function () {
               anyOf: [
                 {
                   type: 'object',
-                  properties: {},
-                  additionalProperties: true,
+                  example: { some: 'example JSON' },
                 },
                 {
                   type: 'array',
-                  items: {},
+                  items: {
+                    example: { some: 'example JSON' },
+                  },
                 },
               ],
             },
-            example: {},
           },
         },
       },

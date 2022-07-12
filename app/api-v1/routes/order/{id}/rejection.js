@@ -2,11 +2,11 @@ const { getDefaultSecurity } = require('../../../../utils/auth')
 const order = require('../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(order.transaction.get, {
       summary: 'List Purchase Orders Rejection Actions',
+      description: 'Returns the details of all on-chain transactions to reject the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',
@@ -48,6 +48,7 @@ module.exports = function () {
     }),
     POST: buildValidatedJsonHandler(order.transaction.create, {
       summary: 'Create Purchase Order Rejection Action',
+      description: 'A Supplier rejects the order {id}. Order must be in `Submitted` state.',
       parameters: [
         {
           description: 'Id of the purchase-order. Must be in "Submitted" state',

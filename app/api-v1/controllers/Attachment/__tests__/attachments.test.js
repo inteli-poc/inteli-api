@@ -1,14 +1,22 @@
 const { expect } = require('chai')
 const { stub } = require('sinon')
 
-const attachmentController = require('../index')
+const attachment = require('../index')
 const { BadRequestError, NotFoundError } = require('../../../../utils/errors')
-const { jsonAttachment, fileAttachment } = require('../__tests__/attachments_fixtures')
+const { jsonAttachment, fileAttachment, allAttachments } = require('../__tests__/attachments_fixtures')
 const db = require('../../../../db')
 
 const getAttachment = async (req) => {
   try {
-    return await attachmentController.getById(req)
+    return await attachment.getById(req)
+  } catch (err) {
+    return err
+  }
+}
+
+const getAttachments = async () => {
+  try {
+    return await attachment.get()
   } catch (err) {
     return err
   }
@@ -23,14 +31,16 @@ describe('Attachment controller', () => {
       name: jsonAttachment.filename,
     })
     stubs.getAttachment = stub(db, 'getAttachment').resolves([])
+    stubs.getAttachments = stub(db, 'getAttachments').resolves([])
   })
 
   afterEach(() => {
     stubs.getAttachment.restore()
+    stubs.getAttachments.restore()
     stubs.insertAttachment.restore()
   })
 
-  describe('Attachment /GET', () => {
+  describe('/attachment/{id} - get by id endpoint', () => {
     describe('if req.params.id is not provided', () => {
       beforeEach(async () => {
         response = await getAttachment({ params: {} })
@@ -81,10 +91,6 @@ describe('Attachment controller', () => {
       })
     })
 
-    afterEach(() => {
-      stubs.getAttachment.restore()
-    })
-
     describe('happy path - json attachment', () => {
       beforeEach(async () => {
         stubs.getAttachment.resolves([jsonAttachment])
@@ -104,11 +110,46 @@ describe('Attachment controller', () => {
         expect(body).to.deep.equal({ 'First Item': 'Test Data' })
       })
     })
+  })
 
-    describe('attachment.get', () => {
-      it('should resolve 500 error', async () => {
-        const result = await attachmentController.get()
-        expect(result.status).to.equal(500)
+  describe('/attachment/ - get all endpoint', () => {
+    describe('if no attachments are found', () => {
+      beforeEach(async () => {
+        stubs.getAttachments.resolves([])
+        response = await getAttachments()
+      })
+      it('performs a database call to check for attachments', () => {
+        expect(stubs.getAttachments.calledOnce).to.equal(true)
+      })
+
+      it('returns empty list', async () => {
+        expect(response.response).to.deep.equal([])
+      })
+    })
+
+    describe('attachments are found', () => {
+      beforeEach(async () => {
+        stubs.getAttachments.resolves(allAttachments)
+        response = await getAttachments()
+      })
+
+      it('returns a 200 status', async () => {
+        expect(response.status).to.be.equal(200)
+      })
+
+      it('returns a list of attachments', async () => {
+        expect(response.response).to.deep.equal([
+          {
+            id: '00000000-0000-1000-8000-000000000001',
+            filename: 'foo1.jpg',
+            size: 7,
+          },
+          {
+            id: '00000000-0000-1000-9000-000000000001',
+            filename: 'json',
+            size: 29,
+          },
+        ])
       })
     })
   })

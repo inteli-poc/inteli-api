@@ -2,11 +2,11 @@ const { getDefaultSecurity } = require('../../../../utils/auth')
 const order = require('../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(order.transaction.get, {
       summary: 'List Purchase Orders Submission Actions',
+      description: 'Returns the details of all on-chain transactions to submit the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',
@@ -48,6 +48,8 @@ module.exports = function () {
     }),
     POST: buildValidatedJsonHandler(order.transaction.create, {
       summary: 'Create Purchase Order Submission Action',
+      description:
+        'A Buyer submits the order {id}. Order must be in `Created` state. Order is now viewable to other members.',
       parameters: [
         {
           description: 'Id of the purchase-order. Must be in "Created" state',

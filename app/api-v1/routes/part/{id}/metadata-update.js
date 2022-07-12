@@ -3,10 +3,11 @@ const partController = require('../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (partService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(partController.transaction.get, {
       summary: 'List Part Metadata Update Actions',
+      description: 'Returns the details of all on-chain transactions to update metadata for the part {id}.',
       parameters: [
         {
           description: 'Id of the part',
@@ -49,6 +50,7 @@ module.exports = function (partService) {
     }),
     POST: buildValidatedJsonHandler(partController.transaction.create, {
       summary: 'Create Part Metadata Update Action',
+      description: 'A Supplier updates metadata for the part {id}.',
       parameters: [
         {
           description: 'Id of the part',

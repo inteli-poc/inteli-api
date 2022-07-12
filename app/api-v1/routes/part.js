@@ -6,6 +6,7 @@ module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(partController.getAll, {
       summary: 'List Parts',
+      description: 'Returns all parts.',
       parameters: [],
       responses: {
         200: {

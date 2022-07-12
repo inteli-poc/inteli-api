@@ -3,10 +3,11 @@ const buildController = require('../../../../controllers/Build')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
 // eslint-disable-next-line no-unused-vars
-module.exports = function (buildService) {
+module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(buildController.transaction.get, {
       summary: 'Get Build Start Action',
+      description: 'Returns the details of the on-chain transaction {startId} to start the build {id}.',
       parameters: [
         {
           description: 'Id of the build',
@@ -41,7 +42,7 @@ module.exports = function (buildService) {
           },
         },
         404: {
-          description: 'Order not found',
+          description: 'Build or Start Action not found',
           content: {
             'application/json': {
               schema: {

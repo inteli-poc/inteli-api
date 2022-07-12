@@ -11,6 +11,7 @@ const {
   postAttachmentJSON,
   getAttachmentRouteJSON,
   getAttachmentRouteOctet,
+  getAttachments,
 } = require('../helper/routeHelper')
 
 const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
@@ -158,7 +159,12 @@ describeNoAuthOnly('attachments - no auth', function () {
   let app
 
   before(async function () {
+    await cleanup()
     app = await createHttpServer()
+  })
+
+  afterEach(async function () {
+    await cleanup()
   })
 
   it('should return 201 - file uploaded', async function () {
@@ -170,5 +176,19 @@ describeNoAuthOnly('attachments - no auth', function () {
     expect(response.body).to.have.property('id')
     expect(response.body.filename).to.equal(filename)
     expect(response.body.size).to.equal(size)
+  })
+
+  it('should return 200 - list attachments', async function () {
+    const size = 100
+    const filename = 'test.pdf'
+    await postAttachment(app, Buffer.from('a'.repeat(size)), filename, null)
+
+    const response = await getAttachments(app, null)
+
+    expect(response.status).to.equal(200)
+    expect(response.body).to.have.length(1)
+    expect(response.body[0]).to.have.property('id')
+    expect(response.body[0].filename).to.equal(filename)
+    expect(response.body[0].size).to.equal(size)
   })
 })
