@@ -14,9 +14,16 @@ config:
     issuer: https://inteli.eu.auth0.com/
     tokenUrl: https://inteli.eu.auth0.com/oauth/token
 
+deployment:
+  annotations: {}
+  livenessProbe:
+    enabled: true
+  replicaCount: 1
+
 ingress:
-  # annotations: {}
+  annotations: {}
   # className: ""
+  enabled: true
   paths:
     - /v1/attachment
     - /v1/build
@@ -24,10 +31,15 @@ ingress:
     - /v1/part
     - /v1/recipe
 
+service:
+  annotations: {}
+  enabled: true
+  port: 80
+
 image:
   repository: ghcr.io/digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.27.4'
+  tag: 'v1.28.0'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:
