@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get, {
+    GET: buildValidatedJsonHandler(order.transaction.get('Submission'), {
       summary: 'List Purchase Orders Submission Actions',
       description: 'Returns the details of all on-chain transactions to submit the order {id}.',
       parameters: [
@@ -46,7 +46,7 @@ module.exports = function () {
       },
       tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create, {
+    POST: buildValidatedJsonHandler(order.transaction.create('Submission'), {
       summary: 'Create Purchase Order Submission Action',
       description:
         'A Buyer submits the order {id}. Order must be in `Created` state. Order is now viewable to other members.',

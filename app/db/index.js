@@ -21,7 +21,7 @@ async function postOrderDb(reqBody) {
       supplier: reqBody.supplierAddress,
       required_by: reqBody.requiredBy,
       items: reqBody.items,
-      buyer: reqBody.buyerAddress,
+      purchaser: reqBody.buyerAddress,
       status: reqBody.status,
     })
     .returning(['id', 'status'])
@@ -74,6 +74,16 @@ async function getOrder(id) {
   return client('orders').select().where({ id })
 }
 
+async function getOrderTransactions(order_id,type){
+  return client('order_transactions').select().where({order_id, type})
+}
+async function getOrderTransactionsById(id,order_id,type){
+  return client('order_transactions').select().where({order_id, type,id})
+}
+
+async function getOrders(){
+  return client('orders').select()
+}
 async function insertRecipeTransaction(id) {
   return client('recipe_transactions')
     .insert({
@@ -85,12 +95,12 @@ async function insertRecipeTransaction(id) {
     .then((t) => t[0])
 }
 
-async function insertOrderTransaction(id) {
+async function insertOrderTransaction(id,type) {
   return client('order_transactions')
     .insert({
       order_id: id,
       status: 'Submitted',
-      type: 'Submission',
+      type: type,
     })
     .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
@@ -117,4 +127,7 @@ module.exports = {
   getOrder,
   insertOrderTransaction,
   getAttachments,
+  getOrders,
+  getOrderTransactions,
+  getOrderTransactionsById
 }

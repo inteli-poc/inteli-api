@@ -33,34 +33,122 @@ module.exports = {
       },
     }
   },
-  getById: _tmp, // TODO - mark
-  get: _tmp, // TODO - mark
+  getById: async function (req) {
+    let { id } = req.params
+    const result = await db.getOrder(id)
+    const promises = result.map(async (item) => {
+      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.purchaser)
+      const newItem = {}
+      newItem['buyer'] = buyerAlias
+      newItem['supplier'] = supplierAlias
+      newItem['id'] = item['id']
+      newItem['status'] = item['status']
+      newItem['items'] = item['items']
+      newItem['requiredBy'] = item['required_by'].toISOString()
+      return newItem
+    })
+    const modifiedResult = []
+    for await (let val of promises){
+      modifiedResult.push(val)
+    }
+    return { 
+      status: 200,
+      response: modifiedResult
+    }
+  },
+  get: async function (req) {
+    const result = await db.getOrders()
+    const promises = result.map(async (item) => {
+      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.purchaser)
+      const newItem = {}
+      newItem['buyer'] = buyerAlias
+      newItem['supplier'] = supplierAlias
+      newItem['id'] = item['id']
+      newItem['status'] = item['status']
+      newItem['items'] = item['items']
+      newItem['requiredBy'] = item['required_by'].toISOString()
+      return newItem
+    })
+    const modifiedResult = []
+    for await (let val of promises){
+      modifiedResult.push(val)
+    }
+    return {
+      status: 200,
+      response: modifiedResult
+    }
+  },
   transaction: {
-    getById: _tmp,
-    get: _tmp,
-    create: async (req) => {
-      const { id } = req.params
-      if (!id) throw new BadRequestError('missing params')
-
-      const [order] = await db.getOrder(id)
-      if (!order) throw new NotFoundError('order')
-
-      const selfAddress = await identity.getMemberBySelf(req)
-      if (!selfAddress) throw new IdentityError()
-
-      const transaction = await db.insertOrderTransaction(id)
-      const payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
-
-      runProcess(payload, req.token)
-
-      return {
-        status: 201,
-        response: {
-          id: transaction.id,
-          submittedAt: new Date(transaction.created_at).toISOString(),
-          status: transaction.status,
-        },
+    getById: (type) => {
+      return async (req) => {
+        const { id,submissionId } = req.params
+        if (!id) throw new BadRequestError('missing params')
+        const orderTransactions = await db.getOrderTransactionsById(submissionId,id,type)
+        const modifiedOrderTransactions = orderTransactions.map((item,index) => {
+          const newItem = {}
+          newItem['id'] = item['id']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          newItem['status'] = item['status']
+          return newItem
+        })
+        return {
+          status: 200,
+          response: modifiedOrderTransactions[0]
+        }
       }
     },
+    get: (type) => {
+      return async (req) => {
+        const { id } = req.params
+        if (!id) throw new BadRequestError('missing params')
+        const orderTransactions = await db.getOrderTransactions(id,type)
+        let results = null
+        if(type == 'Rejection' || type == 'Amendment'){
+          results = await db.getOrder(id)
+        }
+        const modifiedOrderTransactions = orderTransactions.map((item,index) => {
+          const newItem = {}
+          newItem['id'] = item['id']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          newItem['status'] = item['status']
+          if(results){
+            newItem['items'] = results[0].items
+          }
+          return newItem
+        })
+        return {
+          status: 200,
+          response: modifiedOrderTransactions
+        }
+      }
+    },
+    create: (type) => {
+      return async (req) => {
+        const { id } = req.params
+        if (!id) throw new BadRequestError('missing params')
+  
+        const [order] = await db.getOrder(id)
+        if (!order) throw new NotFoundError('order')
+  
+        const selfAddress = await identity.getMemberBySelf(req)
+        if (!selfAddress) throw new IdentityError()
+  
+        const transaction = await db.insertOrderTransaction(id,type)
+        const payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
+  
+        runProcess(payload, req.token)
+  
+        return {
+          status: 201,
+          response: {
+            id: transaction.id,
+            submittedAt: new Date(transaction.created_at).toISOString(),
+            status: transaction.status,
+          },
+        }
+      }
+    }
   },
 }
