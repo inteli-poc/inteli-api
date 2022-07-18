@@ -86,11 +86,19 @@ module.exports = {
         const { id,submissionId } = req.params
         if (!id) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactionsById(submissionId,id,type)
+        let results = null
+        if(type == 'Rejection' || type == 'Amendment'){
+          results = await db.getOrder(id)
+        }
         const modifiedOrderTransactions = orderTransactions.map((item,index) => {
           const newItem = {}
           newItem['id'] = item['id']
           newItem['submittedAt'] = item['created_at'].toISOString()
           newItem['status'] = item['status']
+          if(results){
+            newItem['items'] = results[0].items
+            newItem['requiredBy'] = results[0].required_by.toISOString()
+          }
           return newItem
         })
         return {
@@ -115,6 +123,7 @@ module.exports = {
           newItem['status'] = item['status']
           if(results){
             newItem['items'] = results[0].items
+            newItem['requiredBy'] = results[0].required_by.toISOString()
           }
           return newItem
         })
