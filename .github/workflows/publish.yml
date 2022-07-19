@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REPO_NAME: ${{ github.repository }}
   GIT_SHA: ${{ github.sha }}
 
 jobs:
@@ -38,4 +38,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE_NAME }}:${{ env.GIT_SHA }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/inteli-api:${{ env.GIT_SHA }}
