@@ -27,6 +27,11 @@ async function postOrderDb(reqBody) {
     .returning(['id', 'status'])
 }
 
+async function updateOrderDb(reqBody){
+  const updated_at = new Date().toISOString()
+  return client('orders')
+    .update({status: reqBody.status,updated_at}).where({id : reqBody.id})
+}
 async function getAttachment(id) {
   return client('attachments').select(['id', 'filename', 'binary_blob']).where({ id })
 }
@@ -77,8 +82,8 @@ async function getOrder(id) {
 async function getOrderTransactions(order_id,type){
   return client('order_transactions').select().where({order_id, type})
 }
-async function getOrderTransactionsById(id,order_id,type){
-  return client('order_transactions').select().where({order_id, type,id})
+async function getOrderTransactionsById(transaction_id,order_id,type){
+  return client('order_transactions').select().where({order_id, type,id : transaction_id})
 }
 
 async function getOrders(){
@@ -129,5 +134,6 @@ module.exports = {
   getAttachments,
   getOrders,
   getOrderTransactions,
-  getOrderTransactionsById
+  getOrderTransactionsById,
+  updateOrderDb
 }

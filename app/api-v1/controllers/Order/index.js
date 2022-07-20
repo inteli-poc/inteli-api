@@ -2,7 +2,7 @@ const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
 const { validate, mapOrderData } = require('./helpers')
 const identity = require('../../services/identityService')
-const { BadRequestError, NotFoundError, IdentityError } = require('../../../utils/errors')
+const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 
 const _tmp = () => ({ status: 500, response: { message: 'Not Implemented' } })
 
@@ -140,7 +140,43 @@ module.exports = {
   
         const [order] = await db.getOrder(id)
         if (!order) throw new NotFoundError('order')
-  
+        if(type == 'Submission')
+        {
+          if(order.status != 'Created'){
+            throw new InternalError({ message: 'Order not in Created state'})
+          }
+          else{
+            order.status = 'Submitted'
+            await db.updateOrderDb(order)
+          }
+        }
+        else if(type == 'Rejection'){
+          if(order.status != 'Submitted'){
+            throw new InternalError({ message: 'Order not in Submitted state'})
+          }
+          else{
+            order.status = 'Rejected'
+            await db.updateOrderDb(order)
+          }
+        }
+        else if(type == 'Amendment'){
+          if(order.status != 'Rejected'){
+            throw new InternalError({ message: 'Order not in Rejected state'})
+          }
+          else{
+            order.status = 'Amended'
+            await db.updateOrderDb(order)
+          }
+        }
+        else if(type == 'Acceptance'){
+          if(order.status != 'Submitted' || order.status != 'Amended'){
+            throw new InternalError({ message : 'Order not in Submitted or Amended state'})
+          }
+          else{
+            order.status = 'Accepted'
+            await db.updateOrderDb(order)
+          }
+        }
         const selfAddress = await identity.getMemberBySelf(req)
         if (!selfAddress) throw new IdentityError()
   
