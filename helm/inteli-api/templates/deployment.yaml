@@ -71,6 +71,20 @@ spec:
                 configMapKeyRef:
                   name: {{ include "inteli-api.fullname" . }}-config
                   key: port
+            {{- if .Values.config.externalOrigin }}
+            - name: EXTERNAL_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: externalOrigin
+            {{- end }}
+            {{- if .Values.config.externalPathPrefix }}
+            - name: EXTERNAL_PATH_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "inteli-api.fullname" . }}-config
+                  key: externalPathPrefix
+            {{- end }}
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
