@@ -83,9 +83,23 @@ module.exports = {
   transaction: {
     getById: (type) => {
       return async (req) => {
-        const { id,submissionId } = req.params
+        let id
+        let transactionId
+        id = req.params.id
+        if(type == 'Submission'){
+          transactionId = req.params.submissionId
+        }
+        else if(type == 'Rejection'){
+          transactionId = req.params.rejectionId
+        }
+        else if(type == 'Acceptance'){
+          transactionId = req.params.acceptanceId
+        }
+        else if(type == 'Amendment'){
+          transactionId = req.params.amendmentId
+        }
         if (!id) throw new BadRequestError('missing params')
-        const orderTransactions = await db.getOrderTransactionsById(submissionId,id,type)
+        const orderTransactions = await db.getOrderTransactionsById(transactionId,id,type)
         let results = null
         if(type == 'Rejection' || type == 'Amendment'){
           results = await db.getOrder(id)
@@ -147,7 +161,6 @@ module.exports = {
           }
           else{
             order.status = 'Submitted'
-            await db.updateOrderDb(order)
           }
         }
         else if(type == 'Rejection'){
@@ -156,7 +169,6 @@ module.exports = {
           }
           else{
             order.status = 'Rejected'
-            await db.updateOrderDb(order)
           }
         }
         else if(type == 'Amendment'){
@@ -165,7 +177,6 @@ module.exports = {
           }
           else{
             order.status = 'Amended'
-            await db.updateOrderDb(order)
           }
         }
         else if(type == 'Acceptance'){
@@ -174,17 +185,28 @@ module.exports = {
           }
           else{
             order.status = 'Accepted'
-            await db.updateOrderDb(order)
           }
         }
         const selfAddress = await identity.getMemberBySelf(req)
         if (!selfAddress) throw new IdentityError()
   
         const transaction = await db.insertOrderTransaction(id,type)
-        const payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
-  
-        runProcess(payload, req.token)
-  
+        let payload
+        try{
+          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
+        }
+        catch(err){
+          await db.removeTransaction(transaction.id)
+          throw err
+        }
+        try{
+          runProcess(payload, req.token)
+        }
+        catch(err){
+          await db.removeTransaction(transaction.id)
+          throw err
+        }
+        await db.updateOrderDb(order)
         return {
           status: 201,
           response: {

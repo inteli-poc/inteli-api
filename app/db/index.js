@@ -111,6 +111,11 @@ async function insertOrderTransaction(id,type) {
     .then((t) => t[0])
 }
 
+async function removeTransaction(id){
+  return client('order_transactions')
+    .delete().where({id})
+}
+
 async function getRecipeTransaction(id, recipe_id) {
   return client('recipe_transactions').select().where({ id, recipe_id })
 }
@@ -135,5 +140,6 @@ module.exports = {
   getOrders,
   getOrderTransactions,
   getOrderTransactionsById,
-  updateOrderDb
+  updateOrderDb,
+  removeTransaction
 }
