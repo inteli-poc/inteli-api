@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get, {
+    GET: buildValidatedJsonHandler(order.transaction.get('Rejection'), {
       summary: 'List Purchase Orders Rejection Actions',
       description: 'Returns the details of all on-chain transactions to reject the order {id}.',
       parameters: [
@@ -15,7 +15,8 @@ module.exports = function () {
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid',
           },
         },
       ],
@@ -46,7 +47,7 @@ module.exports = function () {
       },
       tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create, {
+    POST: buildValidatedJsonHandler(order.transaction.create('Rejection'), {
       summary: 'Create Purchase Order Rejection Action',
       description: 'A Supplier rejects the order {id}. Order must be in `Submitted` state.',
       parameters: [
