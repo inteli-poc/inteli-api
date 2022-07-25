@@ -168,7 +168,7 @@ module.exports = {
             order.status = 'Amended'
           }
         } else if (type == 'Acceptance') {
-          if (order.status != 'Submitted' || order.status != 'Amended') {
+          if (order.status != 'Submitted' && order.status != 'Amended') {
             throw new InternalError({ message: 'Order not in Submitted or Amended state' })
           } else {
             order.status = 'Accepted'
@@ -177,21 +177,48 @@ module.exports = {
         const selfAddress = await identity.getMemberBySelf(req)
         if (!selfAddress) throw new IdentityError()
 
-        const transaction = await db.insertOrderTransaction(id, type)
+        const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
           payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
         } catch (err) {
-          await db.removeTransaction(transaction.id)
+          await db.removeTransactionOrder(transaction.id)
           throw err
         }
         try {
-          runProcess(payload, req.token)
+          const result = await runProcess(payload, req.token)
+          if (Array.isArray(result)) {
+            let updateOriginalTokenIdForOrder = false
+            if (type == 'Submission') {
+              updateOriginalTokenIdForOrder = true
+              await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
+            } else {
+              await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
+            }
+            const updateOriginalTokenIdForRecipe = false
+            order.items.forEach(async (element, index) => {
+              await db.updateRecipe(element, result[index + 1], updateOriginalTokenIdForRecipe)
+            })
+          } else {
+            throw new InternalError({ message: result.message })
+          }
         } catch (err) {
-          await db.removeTransaction(transaction.id)
+          await db.removeTransactionOrder(transaction.id)
+          await db.insertOrderTransaction(id, type, 'Failed', 0)
           throw err
         }
-        await db.updateOrderDb(order)
+        if (type == 'Rejection' || type == 'Amendment') {
+          return {
+            status: 201,
+            response: {
+              id: transaction.id,
+              submittedAt: new Date(transaction.created_at).toISOString(),
+              status: transaction.status,
+              requiredBy: order.required_by.toISOString(),
+              items: order.items,
+            },
+          }
+        }
         return {
           status: 201,
           response: {

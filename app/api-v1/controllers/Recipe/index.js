@@ -2,7 +2,7 @@ const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { mapRecipeData } = require('./helpers')
-const { BadRequestError, NotFoundError } = require('../../../utils/errors')
+const { BadRequestError, NotFoundError, InternalError } = require('../../../utils/errors')
 
 module.exports = {
   get: async function (req) {
@@ -120,7 +120,7 @@ module.exports = {
       const [recipe] = await db.getRecipe(id)
       if (!recipe) throw new NotFoundError('recipes')
 
-      const transaction = await db.insertRecipeTransaction(id)
+      const transaction = await db.insertRecipeTransaction(id, 'Submitted', 'Creation')
       const payload = {
         image: recipe.binary_blob,
         requiredCerts: Buffer.from(JSON.stringify(recipe.required_certs)),
@@ -132,15 +132,28 @@ module.exports = {
           },
         ],
       }
-      runProcess(payload, req.token)
-      return {
-        status: 201,
-        message: `transaction ${transaction.id} has been created`,
-        response: {
-          id: transaction.id,
-          submittedAt: new Date(transaction.created_at).toISOString(),
-          status: transaction.status,
-        },
+      try {
+        const result = await runProcess(payload, req.token)
+        if (Array.isArray(result)) {
+          await db.updateRecipeTransactions(transaction.id, result[0])
+          const updateOriginalTokenId = true
+          await db.updateRecipe(id, result[0], updateOriginalTokenId)
+          return {
+            status: 201,
+            message: `transaction ${transaction.id} has been created`,
+            response: {
+              id: transaction.id,
+              submittedAt: new Date(transaction.created_at).toISOString(),
+              status: transaction.status,
+            },
+          }
+        } else {
+          throw new InternalError({ message: result.message })
+        }
+      } catch (err) {
+        await db.removeTransactionRecipe(transaction.id)
+        await db.insertRecipeTransaction(id, 'Failed', 'Creation', 0)
+        throw err
       }
     },
   },

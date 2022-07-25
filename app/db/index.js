@@ -27,9 +27,15 @@ async function postOrderDb(reqBody) {
     .returning(['id', 'status'])
 }
 
-async function updateOrderDb(reqBody) {
+async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
-  return client('orders').update({ status: reqBody.status, updated_at }).where({ id: reqBody.id })
+  if (updateOriginalTokenId) {
+    return client('orders')
+      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .where({ id: reqBody.id })
+  } else {
+    return client('orders').update({ status: reqBody.status, updated_at, latest_token_id }).where({ id: reqBody.id })
+  }
 }
 async function getAttachment(id) {
   return client('attachments').select(['id', 'filename', 'binary_blob']).where({ id })
@@ -88,36 +94,54 @@ async function getOrderTransactionsById(transaction_id, order_id, type) {
 async function getOrders() {
   return client('orders').select()
 }
-async function insertRecipeTransaction(id) {
+async function insertRecipeTransaction(id, status, type, token_id) {
   return client('recipe_transactions')
     .insert({
       recipe_id: id,
-      status: 'Submitted',
-      type: 'Creation',
+      status,
+      type,
+      token_id,
     })
     .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
 }
 
-async function insertOrderTransaction(id, type) {
+async function insertOrderTransaction(id, type, status, token_id) {
   return client('order_transactions')
     .insert({
       order_id: id,
-      status: 'Submitted',
-      type: type,
+      status,
+      type,
+      token_id,
     })
     .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
 }
 
-async function removeTransaction(id) {
+async function removeTransactionOrder(id) {
   return client('order_transactions').delete().where({ id })
+}
+
+async function removeTransactionRecipe(id) {
+  return client('recipe_transactions').delete().where({ id })
 }
 
 async function getRecipeTransaction(id, recipe_id) {
   return client('recipe_transactions').select().where({ id, recipe_id })
 }
 
+async function updateRecipeTransactions(id, token_id) {
+  const updated_at = new Date().toISOString()
+  return client('recipe_transactions').update({ token_id, updated_at }).where({ id })
+}
+async function updateRecipe(id, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  if (updateOriginalTokenId) {
+    return client('recipes').update({ latest_token_id, original_token_id: latest_token_id, updated_at }).where({ id })
+  } else {
+    return client('recipes').update({ latest_token_id, updated_at }).where({ id })
+  }
+}
 module.exports = {
   client,
   getRecipe,
@@ -138,6 +162,9 @@ module.exports = {
   getOrders,
   getOrderTransactions,
   getOrderTransactionsById,
-  updateOrderDb,
-  removeTransaction,
+  updateOrder,
+  removeTransactionOrder,
+  updateRecipeTransactions,
+  removeTransactionRecipe,
+  updateRecipe,
 }

@@ -169,6 +169,8 @@ describe('recipe transactions controller', () => {
         stubs.getRecipe.restore()
         stubs.insertTransaction.restore()
         stubs.getRecipe = stub(db, 'getRecipe').resolves([recipeExample])
+        stubs.updateRecipeTransactions = stub(db, 'updateRecipeTransactions').resolves(null)
+        stubs.updateRecipe = stub(db, 'updateRecipe').resolves(null)
         stubs.insertTransaction = stub(db, 'insertRecipeTransaction').resolves({
           id: '50000000-0000-1000-3000-000000000001',
           status: 'Submitted',
@@ -178,6 +180,8 @@ describe('recipe transactions controller', () => {
       })
 
       afterEach(() => {
+        stubs.updateRecipeTransactions.restore()
+        stubs.updateRecipe.restore()
         stubs.getRecipe.restore()
         nock.cleanAll()
       })
@@ -235,7 +239,7 @@ describe('recipe transactions controller', () => {
       })
 
       it('inserts new transaction to local db', () => {
-        expect(stubs.insertTransaction.getCall(0).args).to.be.deep.equal(['recipe-id'])
+        expect(stubs.insertTransaction.getCall(0).args).to.be.deep.equal(['recipe-id', 'Submitted', 'Creation'])
       })
 
       it('returns 201 along with the transaction id', () => {
