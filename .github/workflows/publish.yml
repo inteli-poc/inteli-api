@@ -38,4 +38,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/inteli-api:v1.0.0
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:v1.0.0
