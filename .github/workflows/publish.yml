@@ -1,7 +1,7 @@
-name: Create and publish a Docker image
+name: Create and publish inteli-api image
 
 on:
-  push:
+  pull_request:
     branches: ['vitalam-dev']
 
 env:
