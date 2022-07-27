@@ -36,7 +36,7 @@ module.exports = {
     const result = await db.getOrder(id)
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.purchaser)
+      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
       const newItem = {}
       newItem['buyer'] = buyerAlias
       newItem['supplier'] = supplierAlias
@@ -59,7 +59,7 @@ module.exports = {
     const result = await db.getOrders()
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.purchaser)
+      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
       const newItem = {}
       newItem['buyer'] = buyerAlias
       newItem['supplier'] = supplierAlias
