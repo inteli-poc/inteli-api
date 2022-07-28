@@ -137,7 +137,7 @@ describeAuthOnly('order - authenticated', function () {
 
 describeNoAuthOnly('order - no auth', function () {
   describe('valid order', function () {
-    this.timeout(3000)
+    this.timeout(5000)
     let app
 
     before(async function () {

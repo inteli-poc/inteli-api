@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../../utils/routeRespons
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get, {
+    GET: buildValidatedJsonHandler(order.transaction.getById('Submission'), {
       summary: 'Get Purchase Orders Submission Action',
       description: 'Returns the details of the on-chain transaction {submissionId} to submit the order {id}.',
       parameters: [
@@ -15,7 +15,8 @@ module.exports = function () {
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid',
           },
         },
         {
