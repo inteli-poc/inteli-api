@@ -1,4 +1,10 @@
-const { PORT, API_VERSION, API_MAJOR_VERSION, AUTH_TYPE } = require('../env')
+const { PORT, API_VERSION, API_MAJOR_VERSION, AUTH_TYPE, EXTERNAL_ORIGIN, EXTERNAL_PATH_PREFIX } = require('../env')
+
+let url = EXTERNAL_ORIGIN || `http://localhost:${PORT}`
+if (EXTERNAL_PATH_PREFIX) {
+  url = `${url}/${EXTERNAL_PATH_PREFIX}`
+}
+url = `${url}/${API_MAJOR_VERSION}`
 
 const securitySchemes =
   AUTH_TYPE === 'JWT'
@@ -21,7 +27,7 @@ const apiDoc = {
   },
   servers: [
     {
-      url: `http://localhost:${PORT}/${API_MAJOR_VERSION}`,
+      url,
     },
   ],
   components: {

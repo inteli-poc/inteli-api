@@ -26,7 +26,7 @@ services:
       - POSTGRES_DB=dscp
 
   dscp-identity-service:
-    image: ghcr.io/digicatapult/dscp-identity-service:v1.5.0
+    image: digicatapult/dscp-identity-service:latest
     container_name: identity-service
     command: /bin/sh -c "
       sleep 30 &&
@@ -37,10 +37,6 @@ services:
     environment:
       - PORT=3002
       - API_HOST=dscp-node
-      - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
-      - AUTH_AUDIENCE=inteli-dev
-      - AUTH_ISSUER=https://inteli.eu.auth0.com/
-      - AUTH_TOKEN_URL=https://inteli.eu.auth0.com/oauth/token
       - DB_HOST=postgres-identity-service
       - DB_PORT=5432
       - DB_NAME=dscp
@@ -50,7 +46,7 @@ services:
       - AUTH_TYPE=${AUTH_TYPE:-NONE}
 
   dscp-node:
-    image: ghcr.io/digicatapult/dscp-node:v3.8.0
+    image: digicatapult/dscp-node:latest
     container_name: node
     command:
       --base-path /data/
@@ -65,7 +61,7 @@ services:
     restart: on-failure
 
   ipfs:
-    image: ipfs/go-ipfs:v0.12.2
+    image: ipfs/go-ipfs:v0.13.1
     container_name: ipfs
     environment:
       - |
@@ -78,7 +74,7 @@ services:
       - 5001:5001
 
   dscp-api:
-    image: ghcr.io/digicatapult/dscp-api:v4.4.0
+    image: digicatapult/dscp-api:latest
     container_name: dscp-api
     ports:
       - 3001:3001
@@ -90,10 +86,6 @@ services:
       - IPFS_HOST=ipfs
       - IPFS_PORT=5001
       - LOG_LEVEL=trace
-      - AUTH_JWKS_URI=https://inteli.eu.auth0.com/.well-known/jwks.json
-      - AUTH_AUDIENCE=inteli-dev
-      - AUTH_ISSUER=https://inteli.eu.auth0.com/
-      - AUTH_TOKEN_URL=https://inteli.eu.auth0.com/oauth/token
       - AUTH_TYPE=${AUTH_TYPE:-NONE}
     restart: on-failure
 volumes:
