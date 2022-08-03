@@ -184,7 +184,7 @@ module.exports = {
         const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body },type)
+          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body }, type)
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
           throw err

@@ -69,7 +69,7 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
 }
 /*eslint-enable */
 
-exports.mapOrderData = async (data,type) => {
+exports.mapOrderData = async (data, type) => {
   if (!data.items || data.items.length < 1) throw new NothingToProcess()
   const records = await db.getRecipeByIDs(data.items)
   const tokenIds = records.map((el) => el.latest_token_id)
@@ -97,8 +97,8 @@ exports.mapOrderData = async (data,type) => {
   return {
     inputs,
     outputs: [
-      buildOrderOutput(data, recipes, parentIndexRequired,type),
-      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset,type),
+      buildOrderOutput(data, recipes, parentIndexRequired, type),
+      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type),
     ],
   }
 }
