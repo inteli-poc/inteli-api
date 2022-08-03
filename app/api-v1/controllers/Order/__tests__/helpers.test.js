@@ -12,6 +12,7 @@ const payload = {
   required_by: '2022-06-13T11:20:35.466Z',
   selfAddress: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
   supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+  buyer: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
   transaction: {
     id: '50000000-e000-1000-5500-000000000001',
   },
@@ -32,7 +33,7 @@ describe('map order data helper function', () => {
   describe('if one of the recipes does not have a token id', () => {
     beforeEach(async () => {
       try {
-        output = await mapOrderData(payload)
+        output = await mapOrderData(payload, 'Submission')
       } catch (e) {
         output = e
       }
@@ -48,7 +49,7 @@ describe('map order data helper function', () => {
   describe('if data does not contain any recipe items', () => {
     beforeEach(async () => {
       try {
-        output = await mapOrderData({ ...payload, items: [] })
+        output = await mapOrderData({ ...payload, items: [] }, 'Submission')
       } catch (e) {
         output = e
       }
@@ -63,7 +64,7 @@ describe('map order data helper function', () => {
 
   it('maps and formats data', async () => {
     stubs.getRecipeIds.resolves([recipesExample[0]])
-    output = await mapOrderData(payload)
+    output = await mapOrderData(payload, 'Submission')
     expect(output).to.deep.equal({
       inputs: [20],
       outputs: [
