@@ -21,23 +21,23 @@ exports.validate = async (body) => {
 }
 
 /*eslint-disable */
-const buildRecipeOutputs = (data, recipes,parentIndexOffset) =>
+const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({
     roles: {
-      Owner: data.selfAddress,
-      Buyer: data.selfAddress,
+      Owner: (type == 'Rejection' || type == 'Amendment') ? data.buyer : data.selfAddress,
+      Buyer: data.buyer,
       Supplier: data.supplier,
     },
     metadata: { type: { type: 'LITERAL', value: 'RECIPE' } },
     parent_index: i + parentIndexOffset,
   }))
 
-const buildOrderOutput = (data, recipes,parentIndexRequired) => {
+const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
   if(parentIndexRequired){
     return {
       roles: {
-        Owner: data.supplier,
-        Buyer: data.selfAddress,
+        Owner: (type == 'Rejection') ? data.buyer : data.supplier,
+        Buyer: data.buyer,
         Supplier: data.supplier,
       },
       metadata: {
@@ -69,14 +69,14 @@ const buildOrderOutput = (data, recipes,parentIndexRequired) => {
 }
 /*eslint-enable */
 
-exports.mapOrderData = async (data) => {
+exports.mapOrderData = async (data,type) => {
   if (!data.items || data.items.length < 1) throw new NothingToProcess()
   const records = await db.getRecipeByIDs(data.items)
   const tokenIds = records.map((el) => el.latest_token_id)
   const orderTokenId = []
   let parentIndexOffset = 0
   let parentIndexRequired = false
-  if (data.latest_token_id) {
+  if (type != 'Submission') {
     orderTokenId.push(data.latest_token_id)
     parentIndexOffset = 1
     parentIndexRequired = true
@@ -97,8 +97,8 @@ exports.mapOrderData = async (data) => {
   return {
     inputs,
     outputs: [
-      buildOrderOutput(data, recipes, parentIndexRequired),
-      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset),
+      buildOrderOutput(data, recipes, parentIndexRequired,type),
+      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset,type),
     ],
   }
 }

@@ -160,12 +160,16 @@ module.exports = {
             throw new InternalError({ message: 'Order not in Submitted state' })
           } else {
             order.status = 'Rejected'
+            order.required_by = req.requiredBy
+            order.items = req.items
           }
         } else if (type == 'Amendment') {
           if (order.status != 'Rejected') {
             throw new InternalError({ message: 'Order not in Rejected state' })
           } else {
             order.status = 'Amended'
+            order.required_by = req.requiredBy
+            order.items = req.items
           }
         } else if (type == 'Acceptance') {
           if (order.status != 'Submitted' && order.status != 'Amended') {
@@ -180,7 +184,7 @@ module.exports = {
         const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body })
+          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body },type)
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
           throw err

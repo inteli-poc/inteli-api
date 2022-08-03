@@ -7,4 +7,5 @@ exports.mapRecipeData = (data) => ({
   transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
   type: { type: 'LITERAL', value: 'RECIPE' },
   image: { type: 'FILE', value: data.filename },
+  price: { type: 'LITERAL', value: data.price}
 })
