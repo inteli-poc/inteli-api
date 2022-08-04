@@ -2,7 +2,7 @@ name: Create and publish inteli-api image
 
 on:
   pull_request:
-    type: [closed]
+    types: [closed]
     branches: ['vitalam-dev']
 
 env:
