@@ -160,8 +160,8 @@ module.exports = {
             throw new InternalError({ message: 'Order not in Submitted state' })
           } else {
             order.status = 'Rejected'
-            order.required_by = req.requiredBy
-            order.items = req.items
+            order.required_by = req.body.requiredBy
+            order.items = req.body.items
           }
         } else if (type == 'Amendment') {
           if (order.status != 'Rejected') {

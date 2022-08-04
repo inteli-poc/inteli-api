@@ -561,6 +561,7 @@ describe('order controller', () => {
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
           response = await createTransaction('AnyType', {
@@ -599,7 +600,7 @@ describe('order controller', () => {
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
-              items: [],
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
           response = await createTransaction('AnyType', {
