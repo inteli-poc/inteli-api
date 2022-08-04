@@ -11,7 +11,7 @@
   },
   "rules": {
     "prettier/prettier": "error",
-    "no-console": "off"
+    "no-console": 2
   },
   "overrides": [
     {

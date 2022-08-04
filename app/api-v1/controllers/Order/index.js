@@ -168,8 +168,8 @@ module.exports = {
             throw new InternalError({ message: 'Order not in Rejected state' })
           } else {
             order.status = 'Amended'
-            order.required_by = req.requiredBy
-            order.items = req.items
+            order.required_by = req.body.requiredBy
+            order.items = req.body.items
           }
         } else if (type == 'Acceptance') {
           if (order.status != 'Submitted' && order.status != 'Amended') {
@@ -184,13 +184,12 @@ module.exports = {
         const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...order, selfAddress, transaction, ...req.body }, type)
+          payload = await mapOrderData({ ...order, selfAddress, transaction }, type)
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
           throw err
         }
         try {
-          console.log('payload for runProcess', JSON.stringify(payload))
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
             let updateOriginalTokenIdForOrder = false
