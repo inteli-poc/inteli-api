@@ -190,7 +190,7 @@ module.exports = {
           throw err
         }
         try {
-          console.log('payload for runProcess', payload)
+          console.log('payload for runProcess', JSON.stringify(payload))
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
             let updateOriginalTokenIdForOrder = false
