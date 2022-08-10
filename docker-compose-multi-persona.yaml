@@ -1,0 +1,202 @@
+version: '3'
+
+services:
+  postgres-inteli-api-alice:
+    image: postgres:14.1-alpine
+    container_name: postgres-inteli-api-alice
+    ports:
+      - 5432:5432
+    volumes:
+      - inteli-api-storage-alice:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=inteli
+  
+  postgres-identity-service-alice:
+    image: postgres:14.1-alpine
+    container_name: postgres-identity-alice
+    ports:
+      - 5433:5432
+    volumes:
+      - identity-storage-alice:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=dscp
+
+  dscp-identity-service-alice:
+    image: digicatapult/dscp-identity-service:latest
+    container_name: identity-service-alice
+    command: /bin/sh -c "
+      sleep 30 &&
+      npx knex migrate:latest &&
+      node app/index.js"
+    ports:
+      - 3002:3002
+    depends_on:
+      - dscp-node-alice
+      - postgres-identity-service-alice
+    environment:
+      - PORT=3002
+      - API_HOST=dscp-node-alice
+      - DB_HOST=postgres-identity-service-alice
+      - DB_PORT=5432
+      - DB_NAME=dscp
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - SELF_ADDRESS=5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
+      - AUTH_TYPE=${AUTH_TYPE:-NONE}
+      - EXTERNAL_ORIGIN=http://localhost:3002
+
+  dscp-node-alice:
+    image: digicatapult/dscp-node:latest
+    container_name: node-alice
+    command:
+      --base-path /data/
+      --alice
+      --unsafe-ws-external
+      --unsafe-rpc-external
+      --rpc-cors all
+      --node-key 0000000000000000000000000000000000000000000000000000000000000001
+    ports:
+      - 30333:30333
+      - 9944:9944
+      - 9933:9933
+    restart: on-failure
+
+  dscp-api-alice:
+    image: digicatapult/dscp-api:latest
+    container_name: dscp-api-alice
+    ports:
+      - 3001:3001
+    depends_on:
+      - dscp-node-alice
+    environment:
+      - PORT=3001
+      - API_HOST=dscp-node-alice
+      - API_PORT=9944
+      - USER_URI=//Alice
+      - IPFS_HOST=ipfs
+      - IPFS_PORT=5001
+      - LOG_LEVEL=trace
+      - AUTH_TYPE=${AUTH_TYPE:-NONE}
+      - EXTERNAL_ORIGIN=http://localhost:3001
+    restart: on-failure
+
+  postgres-inteli-api-bob:
+    image: postgres:14.1-alpine
+    container_name: postgres-inteli-api-bob
+    ports:
+      - 6432:5432
+    volumes:
+      - inteli-api-storage-bob:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=inteli
+  
+  postgres-identity-service-bob:
+    image: postgres:14.1-alpine
+    container_name: postgres-identity-bob
+    ports:
+      - 6433:5432
+    volumes:
+      - identity-storage-bob:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=dscp
+
+  dscp-identity-service-bob:
+    image: digicatapult/dscp-identity-service:latest
+    container_name: identity-service-bob
+    command: /bin/sh -c "
+      sleep 30 &&
+      npx knex migrate:latest &&
+      node app/index.js"
+    ports:
+      - 4002:3002
+    depends_on:
+      - postgres-identity-service-bob
+      - dscp-node-bob
+    environment:
+      - PORT=3002
+      - API_HOST=dscp-node-bob
+      - DB_HOST=postgres-identity-service-bob
+      - DB_PORT=5432
+      - DB_NAME=dscp
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - SELF_ADDRESS=5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y
+      - AUTH_TYPE=${AUTH_TYPE:-NONE}
+      - EXTERNAL_ORIGIN=http://localhost:4002
+
+  dscp-node-bob:
+    image: digicatapult/dscp-node:latest
+    container_name: node-bob
+    command:
+      --base-path /data/
+      --bob
+      --unsafe-ws-external
+      --unsafe-rpc-external
+      --rpc-cors all
+      --node-key 0000000000000000000000000000000000000000000000000000000000000002
+    ports:
+      - 31333:30333
+      - 10044:9944
+      - 10033:9933
+    restart: on-failure
+
+  dscp-api-bob:
+    image: digicatapult/dscp-api:latest
+    container_name: dscp-api-bob
+    ports:
+      - 4001:3001
+    depends_on:
+      - dscp-node-bob
+    environment:
+      - PORT=3001
+      - API_HOST=dscp-node-bob
+      - API_PORT=9944
+      - USER_URI=//Bob
+      - IPFS_HOST=ipfs
+      - IPFS_PORT=5001
+      - LOG_LEVEL=trace
+      - AUTH_TYPE=${AUTH_TYPE:-NONE}
+      - EXTERNAL_ORIGIN=http://localhost:4001
+    restart: on-failure
+
+  dscp-node-charlie:
+    image: digicatapult/dscp-node:latest
+    container_name: node-charlie
+    command:
+      --base-path /data/
+      --charlie
+      --unsafe-ws-external
+      --unsafe-rpc-external
+      --rpc-cors all
+      --node-key 0000000000000000000000000000000000000000000000000000000000000003
+    ports:
+      - 32333:30333
+      - 10144:9944
+      - 10133:9933
+    restart: on-failure
+
+  ipfs:
+    image: ipfs/go-ipfs:v0.13.1
+    container_name: ipfs
+    environment:
+      - |
+        IPFS_SWARM_KEY=/key/swarm/psk/1.0.0/
+        /base16/
+        0000000000000000000000000000000000000000000000000000000000000000
+    ports:
+      - 4000:4001
+      - 8080:8080
+      - 5001:5001
+volumes:
+  inteli-api-storage-alice:
+  identity-storage-alice:
+  inteli-api-storage-bob:
+  identity-storage-bob:
