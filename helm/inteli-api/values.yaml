@@ -1,5 +1,7 @@
 config:
   port: 80
+  # externalOrigin: "http://localhost:3000" # Overrides the server url in the openapi spec
+  # externalPathPrefix: "alice/inteli-api" # Path prefix to be applied to served API routes
   dscpApiHost: dscp-api
   dscpApiPort: 80
   logLevel: info
@@ -37,10 +39,10 @@ service:
   port: 80
 
 image:
-  repository: ghcr.io/digicatapult/inteli-api
+  repository: digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.28.0'
-  pullSecrets: ['ghcr-digicatapult']
+  tag: 'v1.29.1'
+  pullSecrets: []
 
 postgresql:
   enabled: true

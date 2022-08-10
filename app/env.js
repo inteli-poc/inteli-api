@@ -41,6 +41,8 @@ const vars = envalid.cleanEnv(
     FILE_UPLOAD_SIZE_LIMIT_BYTES: envalid.num({ default: 1024 * 1024 * 100, devDefault: 1024 * 1024 * 10 }),
     IDENTITY_SERVICE_HOST: envalid.host({ devDefault: 'localhost' }),
     IDENTITY_SERVICE_PORT: envalid.port({ devDefault: 3002 }),
+    EXTERNAL_ORIGIN: envalid.str({ default: '' }),
+    EXTERNAL_PATH_PREFIX: envalid.str({ default: '' }),
   },
   {
     strict: true,
