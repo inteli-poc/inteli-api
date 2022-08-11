@@ -21,37 +21,66 @@ exports.validate = async (body) => {
 }
 
 /*eslint-disable */
-const buildRecipeOutputs = (data, recipes) =>
+const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({
     roles: {
-      Owner: data.selfAddress,
-      Buyer: data.selfAddress,
+      Owner: (type == 'Rejection' || type == 'Amendment') ? data.buyer : data.selfAddress,
+      Buyer: data.buyer,
       Supplier: data.supplier,
     },
     metadata: { type: { type: 'LITERAL', value: 'RECIPE' } },
-    parent_index: i,
+    parent_index: i + parentIndexOffset,
   }))
 
-const buildOrderOutput = (data, recipes) => ({
-  roles: {
-    Owner: data.supplier,
-    Buyer: data.selfAddress,
-    Supplier: data.supplier,
-  },
-  metadata: {
-    type: { type: 'LITERAL', value: 'ORDER' },
-    status: { type: 'LITERAL', value: data.status },
-    requiredBy: { type: 'LITERAL', value: data.required_by },
-    transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
-    ...recipes,
-  },
-})
+const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
+  if(parentIndexRequired){
+    return {
+      roles: {
+        Owner: (type == 'Rejection') ? data.buyer : data.supplier,
+        Buyer: data.buyer,
+        Supplier: data.supplier,
+      },
+      metadata: {
+        type: { type: 'LITERAL', value: 'ORDER' },
+        status: { type: 'LITERAL', value: data.status },
+        requiredBy: { type: 'LITERAL', value: data.required_by },
+        transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+        ...recipes,
+      },
+      parent_index: 0
+    }
+  }
+  else{
+    return {
+      roles: {
+        Owner: data.supplier,
+        Buyer: data.selfAddress,
+        Supplier: data.supplier,
+      },
+      metadata: {
+        type: { type: 'LITERAL', value: 'ORDER' },
+        status: { type: 'LITERAL', value: data.status },
+        requiredBy: { type: 'LITERAL', value: data.required_by },
+        transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+        ...recipes,
+      },
+    }
+  }
+}
 /*eslint-enable */
 
-exports.mapOrderData = async (data) => {
+exports.mapOrderData = async (data, type) => {
   if (!data.items || data.items.length < 1) throw new NothingToProcess()
   const records = await db.getRecipeByIDs(data.items)
   const tokenIds = records.map((el) => el.latest_token_id)
+  const orderTokenId = []
+  let parentIndexOffset = 0
+  let parentIndexRequired = false
+  if (type != 'Submission') {
+    orderTokenId.push(data.latest_token_id)
+    parentIndexOffset = 1
+    parentIndexRequired = true
+  }
   if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
 
   const recipes = tokenIds.reduce((output, id) => {
@@ -64,9 +93,12 @@ exports.mapOrderData = async (data) => {
 
     return output
   }, {})
-
+  const inputs = orderTokenId.concat(tokenIds)
   return {
-    inputs: tokenIds,
-    outputs: [buildOrderOutput(data, recipes), ...buildRecipeOutputs(data, tokenIds)],
+    inputs,
+    outputs: [
+      buildOrderOutput(data, recipes, parentIndexRequired, type),
+      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type),
+    ],
   }
 }

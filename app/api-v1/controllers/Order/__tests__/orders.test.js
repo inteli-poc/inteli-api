@@ -47,7 +47,7 @@ describe('order controller', () => {
   let runProcessBody
   let runProcessReq
 
-  before(async () => {
+  beforeEach(async () => {
     runProcessReq = nock(dscpApiUrl)
       .post('/v3/run-process', (body) => {
         runProcessBody = body
@@ -458,12 +458,13 @@ describe('order controller', () => {
     })
     describe('creates order transaction', () => {
       beforeEach(async () => {
-        stubs.updateOrderDb = stub(db, 'updateOrderDb').resolves(null)
+        stubs.updateOrder = stub(db, 'updateOrder').resolves(null)
         stubs.insertTransaction = stub(db, 'insertOrderTransaction').resolves([])
         stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
         stubs.getOrder = stub(db, 'getOrder').resolves([])
         stubs.getSelf = stub(identityService, 'getMemberBySelf').resolves(null)
-        stubs.removeTransaction = stub(db, 'removeTransaction').resolves(null)
+        stubs.removeTransaction = stub(db, 'removeTransactionOrder').resolves(null)
+        stubs.updateRecipe = stub(db, 'updateRecipe').resolves(null)
       })
       afterEach(() => {
         stubs.getSelf.restore()
@@ -471,7 +472,8 @@ describe('order controller', () => {
         stubs.insertTransaction.restore()
         stubs.getOrder.restore()
         stubs.removeTransaction.restore()
-        stubs.updateOrderDb.restore()
+        stubs.updateOrder.restore()
+        stubs.updateRecipe.restore()
       })
 
       describe('if invalid parameter supplied', () => {
@@ -559,6 +561,7 @@ describe('order controller', () => {
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
           response = await createTransaction('AnyType', {
@@ -584,7 +587,8 @@ describe('order controller', () => {
       describe('happy path', () => {
         // main reason for wrapping int oths so I can utlise before each
         beforeEach(async () => {
-          stubs.updateOrderDb.resolves(null)
+          stubs.updateRecipe.resolves(null)
+          stubs.updateOrder.resolves(null)
           stubs.getRecipeIds.resolves([recipeExamples[0]])
           stubs.getSelf.resolves('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
           stubs.insertTransaction.resolves({
@@ -596,6 +600,7 @@ describe('order controller', () => {
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
           response = await createTransaction('AnyType', {
