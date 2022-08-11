@@ -24,7 +24,7 @@ exports.validate = async (body) => {
 const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({
     roles: {
-      Owner: (type == 'Rejection' || type == 'Amendment') ? data.buyer : data.selfAddress,
+      Owner: data.buyer,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },
@@ -54,7 +54,7 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
     return {
       roles: {
         Owner: data.supplier,
-        Buyer: data.selfAddress,
+        Buyer: data.buyer,
         Supplier: data.supplier,
       },
       metadata: {
@@ -93,7 +93,7 @@ exports.mapOrderData = async (data, type) => {
 
     return output
   }, {})
-  const inputs = orderTokenId.concat(tokenIds)
+  const inputs = (type != 'Acceptance') ? orderTokenId.concat(tokenIds) : []
   return {
     inputs,
     outputs: [
