@@ -25,9 +25,9 @@ const recipeExamples = [
     supplier: 'supplier-address',
   },
 ]
-const createTransaction = async (req) => {
+const createTransaction = async (type, req) => {
   try {
-    return await orderController.transaction.create(req)
+    return await orderController.transaction.create(type)(req)
   } catch (err) {
     return err
   }
@@ -47,7 +47,7 @@ describe('order controller', () => {
   let runProcessBody
   let runProcessReq
 
-  before(async () => {
+  beforeEach(async () => {
     runProcessReq = nock(dscpApiUrl)
       .post('/v3/run-process', (body) => {
         runProcessBody = body
@@ -296,52 +296,189 @@ describe('order controller', () => {
     })
   })
 
-  describe('/order - get all orders', () => {
-    it('should resolve 500 error', async () => {
-      const result = await orderController.get()
-      expect(result.status).to.equal(500)
+  describe('get order', () => {
+    let req = {}
+    beforeEach(async () => {
+      req.params = { id: '00000000-0000-1000-3000-000000000001' }
+      stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
+      stubs.identityByAddress.onCall(0).resolves({ alias: 'supplier-alias' })
+      stubs.identityByAddress.onCall(1).resolves({ alias: 'buyer-alias' })
+      stubs.getOrder = stub(db, 'getOrder').resolves([
+        {
+          buyer: 'buyer-alias',
+          id: '00000000-0000-1000-3000-000000000001',
+          supplier: 'supplier-alias',
+          status: 'Submitted',
+          description: 'some description - test',
+          required_by: new Date(),
+          items: recipeExamples.map((el) => el.id),
+        },
+      ])
+      stubs.getOrders = stub(db, 'getOrders').resolves([
+        {
+          buyer: 'buyer-alias',
+          id: '00000000-0000-1000-3000-000000000001',
+          supplier: 'supplier-alias',
+          status: 'Submitted',
+          description: 'some description - test',
+          required_by: new Date(),
+          items: recipeExamples.map((el) => el.id),
+        },
+      ])
     })
-  })
-
-  describe('/order/{id} - get by id', () => {
-    it('should resolve 500 error', async () => {
-      const result = await orderController.get()
-      expect(result.status).to.equal(500)
+    afterEach(async () => {
+      stubs.identityByAddress.restore()
+      stubs.getOrder.restore()
+      stubs.getOrders.restore()
+    })
+    it('get all orders', async () => {
+      const result = await orderController.get(req)
+      expect(result.status).to.equal(200)
+    })
+    it('get order by id', async () => {
+      const result = await orderController.getById(req)
+      expect(result.status).to.equal(200)
     })
   })
 
   describe('order transactions controller', () => {
-    describe('/order/{id}/creation - get all order transactions', () => {
-      it('should resolve 500 error', async () => {
-        const result = await orderController.transaction.get()
-        expect(result.status).to.equal(500)
-      })
-    })
-
-    describe('/order/{id}/creation/{creationId} - get by id', () => {
-      it('should resolve 500 error', async () => {
-        const result = await orderController.transaction.get()
-        expect(result.status).to.equal(500)
-      })
-    })
-
-    describe('/order/{id}/creation/ - creates order transactiion', () => {
+    describe('get order by action type and order id', () => {
+      let req = {}
       beforeEach(async () => {
+        req.params = { id: '00000000-0000-1000-3000-000000000001' }
+        stubs.getOrder = stub(db, 'getOrder').resolves([
+          {
+            buyer: 'buyer-alias',
+            id: '00000000-0000-1000-3000-000000000001',
+            supplier: 'supplier-alias',
+            status: 'Submitted',
+            description: 'some description - test',
+            required_by: new Date(),
+            items: recipeExamples.map((el) => el.id),
+          },
+        ])
+        stubs.getOrderTransactions = stub(db, 'getOrderTransactions').resolves([
+          {
+            id: '6908132e-36af-46bf-9758-85e9f95eb542',
+            status: 'Submitted',
+            created_at: new Date(),
+            items: recipeExamples.map((el) => el.id),
+            required_by: new Date(),
+          },
+        ])
+      })
+      afterEach(async () => {
+        stubs.getOrderTransactions.restore()
+        req = {}
+        stubs.getOrder.restore()
+      })
+      describe('/order/{id}/submission - get all order transactions', () => {
+        it('get all submission types of an order', async () => {
+          const result = await orderController.transaction.get('Submission')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/rejection - get all order transactions', () => {
+        it('get all rejection types of an order', async () => {
+          const result = await orderController.transaction.get('Rejection')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/acceptance - get all order transactions', () => {
+        it('get all acceptance types of an order', async () => {
+          const result = await orderController.transaction.get('Acceptance')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/amendment - get all order transactions', () => {
+        it('get all amendment types of an order', async () => {
+          const result = await orderController.transaction.get('Amendment')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+    })
+    describe('get orders by action type , order and action id', () => {
+      let req = {}
+      beforeEach(async () => {
+        req.params = { id: '00000000-0000-1000-3000-000000000001' }
+        stubs.getOrder = stub(db, 'getOrder').resolves([
+          {
+            buyer: 'buyer-alias',
+            id: '00000000-0000-1000-3000-000000000001',
+            supplier: 'supplier-alias',
+            status: 'Submitted',
+            description: 'some description - test',
+            required_by: new Date(),
+            items: recipeExamples.map((el) => el.id),
+          },
+        ])
+        stubs.getOrderTransactionsById = stub(db, 'getOrderTransactionsById').resolves([
+          {
+            id: '6908132e-36af-46bf-9758-85e9f95eb542',
+            status: 'Submitted',
+            created_at: new Date(),
+            items: recipeExamples.map((el) => el.id),
+            required_by: new Date(),
+          },
+        ])
+      })
+      afterEach(async () => {
+        req = {}
+        stubs.getOrderTransactionsById.restore()
+        stubs.getOrder.restore()
+      })
+      describe('/order/{id}/submission/{submissionId} - get by id', () => {
+        it('get submission type transactions by submissionid', async () => {
+          req.params.submissionId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Submission')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/rejection/{rejectionId} - get by id', () => {
+        it('get rejection type transactions by rejectionId', async () => {
+          req.params.rejectionId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Rejection')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/acceptance/{acceptanceId} - get by id', () => {
+        it('get acceptance type transactions by acceptanceId', async () => {
+          req.params.acceptanceId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Acceptance')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+      describe('/order/{id}/amendment/{amendmentId} - get by id', () => {
+        it('get amendment type transactions by amendmentId', async () => {
+          req.params.amendmentID = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Amendment')(req)
+          expect(result.status).to.equal(200)
+        })
+      })
+    })
+    describe('creates order transaction', () => {
+      beforeEach(async () => {
+        stubs.updateOrder = stub(db, 'updateOrder').resolves(null)
         stubs.insertTransaction = stub(db, 'insertOrderTransaction').resolves([])
         stubs.getRecipeIds = stub(db, 'getRecipeByIDs').resolves(recipeExamples)
         stubs.getOrder = stub(db, 'getOrder').resolves([])
         stubs.getSelf = stub(identityService, 'getMemberBySelf').resolves(null)
+        stubs.removeTransaction = stub(db, 'removeTransactionOrder').resolves(null)
+        stubs.updateRecipe = stub(db, 'updateRecipe').resolves(null)
       })
       afterEach(() => {
         stubs.getSelf.restore()
         stubs.getRecipeIds.restore()
         stubs.insertTransaction.restore()
         stubs.getOrder.restore()
+        stubs.removeTransaction.restore()
+        stubs.updateOrder.restore()
+        stubs.updateRecipe.restore()
       })
 
       describe('if invalid parameter supplied', () => {
         beforeEach(async () => {
-          response = await createTransaction({ params: { a: 'a' } })
+          response = await createTransaction('AnyType', { params: { a: 'a' } })
         })
 
         it('returns 400 and an innstance of BadRequestError', () => {
@@ -366,7 +503,7 @@ describe('order controller', () => {
 
       describe('if order can not be found', () => {
         beforeEach(async () => {
-          response = await createTransaction({ params: { id: '00000000-0000-1000-3000-000000000001' } })
+          response = await createTransaction('AnyType', { params: { id: '00000000-0000-1000-3000-000000000001' } })
         })
 
         it('returns 404 along with instance of NotFoundError ', () => {
@@ -396,7 +533,7 @@ describe('order controller', () => {
               requiredBy: '2022-06-11T08:47:23.397Z',
             },
           ])
-          response = await createTransaction({ params: { id: '00000000-0000-1000-3000-000000000001' } })
+          response = await createTransaction('AnyType', { params: { id: '00000000-0000-1000-3000-000000000001' } })
         })
 
         it('returns 400 along with instance of IdentityError', () => {
@@ -416,19 +553,22 @@ describe('order controller', () => {
 
       describe('if contains recipes that have not been created on chain yet', () => {
         beforeEach(async () => {
+          stubs.removeTransaction.resolves(null)
+          stubs.getRecipeIds.resolves([recipeExamples[1]])
           stubs.insertTransaction.resolves({})
           stubs.getSelf.resolves('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
           stubs.getOrder.resolves([
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
-          response = await createTransaction({
+          response = await createTransaction('AnyType', {
             params: {
               id: '00000000-0000-1000-3000-000000000001',
             },
-            body: { items: [20] },
+            body: { items: ['50000000-0000-1000-5500-000000000001'] },
           })
         })
 
@@ -447,6 +587,8 @@ describe('order controller', () => {
       describe('happy path', () => {
         // main reason for wrapping int oths so I can utlise before each
         beforeEach(async () => {
+          stubs.updateRecipe.resolves(null)
+          stubs.updateOrder.resolves(null)
           stubs.getRecipeIds.resolves([recipeExamples[0]])
           stubs.getSelf.resolves('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')
           stubs.insertTransaction.resolves({
@@ -458,9 +600,10 @@ describe('order controller', () => {
             {
               status: 'submitted',
               requiredBy: '2022-06-11T08:47:23.397Z',
+              items: ['50000000-0000-1000-5500-000000000001'],
             },
           ])
-          response = await createTransaction({
+          response = await createTransaction('AnyType', {
             params: { id: '00000000-0000-1000-3000-000000000001' },
             body: {
               items: ['50000000-0000-1000-5500-000000000001'],

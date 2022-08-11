@@ -179,8 +179,25 @@ describeAuthOnly('recipes - authenticated', function () {
           return recipe
         })
       )
-
+      recipes.sort((a, b) => {
+        if (a.id > b.id) {
+          return 1
+        }
+        if (a.id < b.id) {
+          return -1
+        }
+        return 0
+      })
       const { status, body } = await getRecipeRoute(app, authToken)
+      body.sort((a, b) => {
+        if (a.id > b.id) {
+          return 1
+        }
+        if (a.id < b.id) {
+          return -1
+        }
+        return 0
+      })
       expect(status).to.equal(200)
       expect(body).to.be.an('array')
       const ids = recipes.map(({ id }) => id)
@@ -245,8 +262,25 @@ describeNoAuthOnly('recipes - no auth', function () {
           return recipe
         })
       )
-
+      recipes.sort((a, b) => {
+        if (a.id > b.id) {
+          return 1
+        }
+        if (a.id < b.id) {
+          return -1
+        }
+        return 0
+      })
       const { status, body } = await getRecipeRoute(app, null)
+      body.sort((a, b) => {
+        if (a.id > b.id) {
+          return 1
+        }
+        if (a.id < b.id) {
+          return -1
+        }
+        return 0
+      })
       expect(status).to.equal(200)
       expect(body).to.be.an('array')
       const ids = recipes.map(({ id }) => id)

@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get, {
+    GET: buildValidatedJsonHandler(order.transaction.get('Amendment'), {
       summary: 'List Purchase Orders Amendment Actions',
       description: 'Returns the details of all on-chain transactions to amend the order {id}.',
       parameters: [
@@ -15,7 +15,8 @@ module.exports = function () {
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid',
           },
         },
       ],
@@ -47,7 +48,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create, {
+    POST: buildValidatedJsonHandler(order.transaction.create('Amendment'), {
       summary: 'Create Purchase Order Amendment Action',
       description: 'A Buyer amends the order {id}. Order must be in `Rejected` state.',
       parameters: [
