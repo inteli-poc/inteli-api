@@ -93,7 +93,7 @@ exports.mapOrderData = async (data, type) => {
 
     return output
   }, {})
-  const inputs = (type != 'Acceptance') ? orderTokenId.concat(tokenIds) : []
+  const inputs = type != 'Acceptance' ? orderTokenId.concat(tokenIds) : []
   return {
     inputs,
     outputs: [
