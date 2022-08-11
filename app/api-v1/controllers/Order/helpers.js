@@ -45,6 +45,7 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
         status: { type: 'LITERAL', value: data.status },
         requiredBy: { type: 'LITERAL', value: data.required_by },
         transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+        externalId: { type: 'LITERAL', value: data.external_id },
         ...recipes,
       },
       parent_index: 0
