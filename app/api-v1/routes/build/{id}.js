@@ -5,7 +5,7 @@ const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValid
 // eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(buildController.getAll, {
+    GET: buildValidatedJsonHandler(buildController.getById, {
       summary: 'Get Build',
       description: 'Returns the build {id}.',
       parameters: [
@@ -16,7 +16,8 @@ module.exports = function () {
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid'
           },
         },
       ],

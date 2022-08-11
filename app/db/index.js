@@ -27,6 +27,14 @@ async function postOrderDb(reqBody) {
     .returning(['id', 'status'])
 }
 
+async function postBuildDb(build){
+  return client('build').insert(build).returning(['id'])
+}
+
+async function postPartDb(part){
+  return client('parts').insert(part).returning(['id'])
+}
+
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
   if (updateOriginalTokenId) {
@@ -142,6 +150,15 @@ async function updateRecipe(id, latest_token_id, updateOriginalTokenId) {
     return client('recipes').update({ latest_token_id, updated_at }).where({ id })
   }
 }
+
+async function getBuild(){
+  return client('build').select()
+}
+
+async function getBuildById(id){
+  return client('build').select().where({ id })
+}
+
 module.exports = {
   client,
   getRecipe,
@@ -167,4 +184,8 @@ module.exports = {
   updateRecipeTransactions,
   removeTransactionRecipe,
   updateRecipe,
+  getBuild,
+  getBuildById,
+  postBuildDb,
+  postPartDb
 }

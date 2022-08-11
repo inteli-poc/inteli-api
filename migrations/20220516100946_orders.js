@@ -14,6 +14,7 @@ exports.up = async (knex) => {
     def
       .enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'], {
         useNative: true,
+        enumName: 'orderstatus'
       })
       .notNullable()
     def.datetime('required_by').notNullable()
