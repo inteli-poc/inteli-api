@@ -95,12 +95,16 @@ exports.mapOrderData = async (data, type) => {
 
     return output
   }, {})
-  const inputs = type != 'Acceptance' ? orderTokenId.concat(tokenIds) : []
+  const inputs = type != 'Acceptance' ? orderTokenId.concat(tokenIds) : orderTokenId
+  const outputs =
+    type != 'Acceptance'
+      ? [
+          buildOrderOutput(data, recipes, parentIndexRequired, type),
+          ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type),
+        ]
+      : [buildOrderOutput(data, recipes, parentIndexRequired, type)]
   return {
     inputs,
-    outputs: [
-      buildOrderOutput(data, recipes, parentIndexRequired, type),
-      ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type),
-    ],
+    outputs: outputs,
   }
 }
