@@ -16,7 +16,7 @@ const payload = {
   transaction: {
     id: '50000000-e000-1000-5500-000000000001',
   },
-  externalId: 'some-external-id',
+  external_Id: 'some-external-id',
 }
 
 describe('map order data helper function', () => {
