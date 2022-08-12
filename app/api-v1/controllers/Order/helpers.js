@@ -24,7 +24,7 @@ exports.validate = async (body) => {
 const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({
     roles: {
-      Owner: (type == 'Rejection' || type == 'Amendment') ? data.buyer : data.selfAddress,
+      Owner: data.buyer,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },
@@ -45,6 +45,7 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
         status: { type: 'LITERAL', value: data.status },
         requiredBy: { type: 'LITERAL', value: data.required_by },
         transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+        externalId: { type: 'LITERAL', value: data.external_id },
         ...recipes,
       },
       parent_index: 0
@@ -54,7 +55,7 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
     return {
       roles: {
         Owner: data.supplier,
-        Buyer: data.selfAddress,
+        Buyer: data.buyer,
         Supplier: data.supplier,
       },
       metadata: {
@@ -94,7 +95,7 @@ exports.mapOrderData = async (data, type) => {
 
     return output
   }, {})
-  const inputs = orderTokenId.concat(tokenIds)
+  const inputs = type != 'Acceptance' ? orderTokenId.concat(tokenIds) : []
   return {
     inputs,
     outputs: [
