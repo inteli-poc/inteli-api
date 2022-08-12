@@ -98,8 +98,8 @@ describe('map order data helper function', () => {
             },
             externalId: {
               type: 'LITERAL',
-              value: 'some-external-id'
-            }
+              value: 'some-external-id',
+            },
           },
         },
         {
