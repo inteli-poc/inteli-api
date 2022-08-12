@@ -6,7 +6,12 @@ const { BadRequestError, NotFoundError, InternalError } = require('../../../util
 
 module.exports = {
   get: async function (req) {
-    const recipes = await db.getRecipes()
+    let recipes
+    if (req.query.externalId) {
+      recipes = await db.getRecipesByExternalId(req.query.externalId)
+    } else {
+      recipes = await db.getRecipes()
+    }
     const result = await Promise.all(
       recipes.map(async (recipe) => {
         const { alias: supplierAlias } = await identity.getMemberByAddress(req, recipe.supplier)

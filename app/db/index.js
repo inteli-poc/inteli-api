@@ -23,6 +23,7 @@ async function postOrderDb(reqBody) {
       items: reqBody.items,
       buyer: reqBody.buyerAddress,
       status: reqBody.status,
+      external_id: reqBody.externalId,
     })
     .returning(['id', 'status'])
 }
@@ -94,6 +95,15 @@ async function getOrderTransactionsById(transaction_id, order_id, type) {
 async function getOrders() {
   return client('orders').select()
 }
+
+async function getOrdersByExternalId(externalId) {
+  return client('orders').select().where({ external_id: externalId })
+}
+
+async function getRecipesByExternalId(externalId) {
+  return client('recipes').select().where({ external_id: externalId })
+}
+
 async function insertRecipeTransaction(id, status, type, token_id) {
   return client('recipe_transactions')
     .insert({
@@ -167,4 +177,6 @@ module.exports = {
   updateRecipeTransactions,
   removeTransactionRecipe,
   updateRecipe,
+  getOrdersByExternalId,
+  getRecipesByExternalId,
 }

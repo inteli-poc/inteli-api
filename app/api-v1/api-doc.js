@@ -290,6 +290,11 @@ const apiDoc = {
         type: 'object',
         description: 'A new purchase-order to be submitted',
         properties: {
+          externalId: {
+            description: 'id of the order in an external ERP',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
           supplier: {
             description:
               'Name of the supplier who will supply parts from this purchase-order. This information is not stored directly on-chain',
