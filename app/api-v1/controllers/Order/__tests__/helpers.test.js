@@ -96,6 +96,10 @@ describe('map order data helper function', () => {
               type: 'LITERAL',
               value: '50000000e00010005500000000000001',
             },
+            externalId: {
+              type: 'LITERAL',
+              value: 'some-external-id'
+            }
           },
         },
         {
