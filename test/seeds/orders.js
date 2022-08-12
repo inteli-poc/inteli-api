@@ -73,6 +73,7 @@ const seed = async () => {
           buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
           status,
           required_by: '2022-10-21T10:10:10.919Z',
+          external_id: 'some-external-id',
         },
       ])
     )
@@ -87,6 +88,7 @@ const seed = async () => {
       buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       status: 'Created',
       required_by: '2022-10-21T11:45:46.919Z',
+      external_id: 'some-external-id',
     },
   ])
 }
