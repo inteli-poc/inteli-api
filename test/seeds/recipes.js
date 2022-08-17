@@ -1,8 +1,7 @@
 const { client } = require('../../app/db')
 
 const cleanup = async () => {
-  await client('recipes').del()
-  await client('attachments').del()
+  await client.raw('TRUNCATE recipes, attachments CASCADE')
 }
 
 const attachmentId = '00000000-0000-1000-8000-000000000000'
