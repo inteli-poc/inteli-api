@@ -64,11 +64,11 @@ module.exports = function () {
       ],
       requestBody: {
         content: {
-          'application/json': {
+          'multipart/form-data': {
             schema: {
-              $ref: '#/components/schemas/NewOrderRejection',
+              $ref: '#/components/schemas/NewOrderRejection'
             },
-          },
+          }
         },
       },
       responses: {
