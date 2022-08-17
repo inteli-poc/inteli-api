@@ -7,7 +7,18 @@ module.exports = function () {
     GET: buildValidatedJsonHandler(recipe.get, {
       summary: 'List Recipes',
       description: 'Returns all recipes.',
-      parameters: [],
+      parameters: [
+        {
+          description: 'externalId of the purchase-order to get',
+          in: 'query',
+          required: false,
+          name: 'externalId',
+          allowEmptyValue: false,
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
       responses: {
         200: {
           description: 'Return Recipes',

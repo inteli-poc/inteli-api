@@ -1,7 +1,7 @@
 const { client } = require('../../app/db')
 
 const cleanup = async () => {
-  await client.raw('TRUNCATE TABLE orders, recipes, attachments CASCADE')
+  await client.raw('TRUNCATE TABLE build, recipes, attachments, parts CASCADE')
 }
 
 const seed = async () => {
@@ -56,37 +56,30 @@ const seed = async () => {
       latest_token_id: 1,
       price: '999.66',
       required_certs: JSON.stringify([{ description: 'foobar3000' }]),
-      supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+      supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       owner: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
     },
   ])
 
-  await Promise.all(
-    ['Created', 'Submitted', 'Rejected', 'Accepted', 'Amended'].map((status, i) =>
-      client('orders').insert([
-        {
-          id: `36345f4f-6535-42e2-83f9-79e2e195e11${i}`,
-          supplier: '36345f4f-0000-42e2-83f9-79e2e195e000',
-          items: ['10000000-0000-1000-9000-000000000000'],
-          buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
-          status,
-          required_by: '2022-10-21T10:10:10.919Z',
-          external_id: 'some-external-id',
-        },
-      ])
-    )
-  )
-
-  // with recipe that does not have a token_id
-  await client('orders').insert([
+  await client('build').insert([
     {
-      id: '36345f4f-6535-42e2-83f9-79e2e195e101',
-      supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-      items: ['10000000-0000-1000-9000-000000000000'],
-      buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
-      status: 'Created',
-      required_by: '2022-10-21T11:45:46.919Z',
+      id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
+      supplier: 'valid-2',
+      completion_estimated_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      started_at: new Date().toISOString(),
       external_id: 'some-external-id',
+      status: 'Created',
+    },
+  ])
+
+  await client('parts').insert([
+    {
+      id: '7989218f-fdc3-4f4c-a772-bae5f9e06994',
+      supplier: 'valid-2',
+      recipe_id: '36345f4f-0000-42e2-83f9-79e2e195e000',
+      build_id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
+      certifications: null,
     },
   ])
 }

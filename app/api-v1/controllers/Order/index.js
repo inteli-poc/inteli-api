@@ -56,7 +56,12 @@ module.exports = {
     }
   },
   get: async function (req) {
-    const result = await db.getOrders()
+    let result
+    if (req.query.externalId) {
+      result = await db.getOrdersByExternalId(req.query.externalId)
+    } else {
+      result = await db.getOrders()
+    }
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
       const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
@@ -67,6 +72,7 @@ module.exports = {
       newItem['status'] = item['status']
       newItem['items'] = item['items']
       newItem['requiredBy'] = item['required_by'].toISOString()
+      newItem['externalId'] = item['external_id']
       return newItem
     })
     const modifiedResult = []

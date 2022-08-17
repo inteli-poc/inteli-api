@@ -23,15 +23,16 @@ async function postOrderDb(reqBody) {
       items: reqBody.items,
       buyer: reqBody.buyerAddress,
       status: reqBody.status,
+      external_id: reqBody.externalId,
     })
     .returning(['id', 'status'])
 }
 
-async function postBuildDb(build){
+async function postBuildDb(build) {
   return client('build').insert(build).returning(['id'])
 }
 
-async function postPartDb(part){
+async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
 
@@ -102,6 +103,15 @@ async function getOrderTransactionsById(transaction_id, order_id, type) {
 async function getOrders() {
   return client('orders').select()
 }
+
+async function getOrdersByExternalId(externalId) {
+  return client('orders').select().where({ external_id: externalId })
+}
+
+async function getRecipesByExternalId(externalId) {
+  return client('recipes').select().where({ external_id: externalId })
+}
+
 async function insertRecipeTransaction(id, status, type, token_id) {
   return client('recipe_transactions')
     .insert({
@@ -151,11 +161,15 @@ async function updateRecipe(id, latest_token_id, updateOriginalTokenId) {
   }
 }
 
-async function getBuild(){
+async function getBuild() {
   return client('build').select()
 }
 
-async function getBuildById(id){
+async function getPartIdsByBuildId(build_id) {
+  return client('parts').select('id').where({ build_id })
+}
+
+async function getBuildById(id) {
   return client('build').select().where({ id })
 }
 
@@ -187,5 +201,8 @@ module.exports = {
   getBuild,
   getBuildById,
   postBuildDb,
-  postPartDb
+  postPartDb,
+  getOrdersByExternalId,
+  getRecipesByExternalId,
+  getPartIdsByBuildId,
 }

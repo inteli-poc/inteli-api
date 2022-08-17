@@ -17,7 +17,7 @@ module.exports = function () {
           allowEmptyValue: false,
           schema: {
             type: 'string',
-            format: 'uuid'
+            format: 'uuid',
           },
         },
       ],

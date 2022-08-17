@@ -300,6 +300,7 @@ describe('order controller', () => {
     let req = {}
     beforeEach(async () => {
       req.params = { id: '00000000-0000-1000-3000-000000000001' }
+      req.query = {}
       stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
       stubs.identityByAddress.onCall(0).resolves({ alias: 'supplier-alias' })
       stubs.identityByAddress.onCall(1).resolves({ alias: 'buyer-alias' })

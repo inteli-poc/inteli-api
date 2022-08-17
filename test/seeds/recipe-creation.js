@@ -1,10 +1,9 @@
 const db = require('../../app/db')
+const { client } = require('../../app/db')
 // This file should seed all the required info for all integration tests and local developmet
 
 const cleanup = async () => {
-  await db.client('recipe_transactions').del()
-  await db.client('recipes').del()
-  await db.client('attachments').del()
+  await client.raw('TRUNCATE recipe_transactions, recipes, attachments CASCADE')
 }
 const attachmentId = '10000000-0000-1000-8000-000000000000'
 

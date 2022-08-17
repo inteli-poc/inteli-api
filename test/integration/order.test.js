@@ -38,6 +38,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with existing supplier - 201', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
@@ -50,6 +51,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order - Check ID & Supplier', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
@@ -63,6 +65,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with non-existant supplier - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
@@ -74,6 +77,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with more than one item - 201', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
@@ -85,6 +89,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with 2 different items - 201', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
@@ -96,6 +101,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with incorrect supplier - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-2',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
@@ -107,6 +113,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order - Invalid UUID', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000'],
@@ -118,6 +125,7 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with required Params missing - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
       }
@@ -153,6 +161,7 @@ describeNoAuthOnly('order - no auth', function () {
 
     test('POST Order - Check ID & Manufacturer', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
