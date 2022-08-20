@@ -14,6 +14,9 @@ exports.up = async function (knex) {
     def.json('certifications')
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
+    def.foreign('recipe_id').references('id').on('recipes')
+    def.foreign('build_id').references('id').on('build')
+    def.primary(['id'])
   })
 }
 

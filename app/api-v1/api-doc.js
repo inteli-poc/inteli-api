@@ -291,20 +291,20 @@ const apiDoc = {
         description: 'A new purchase-order to be submitted',
         properties: {
           price: {
-            description : 'price of the order',
+            description: 'price of the order',
             type: 'number',
             format: 'float',
-            example: '1200.01'
+            example: '1200.01',
           },
           quantity: {
             description: 'quantity of the order',
             type: 'integer',
-            example: 1
+            example: 1,
           },
           forecastDate: {
             description: 'forecast date of the order',
             type: 'string',
-            format: 'date-time'
+            format: 'date-time',
           },
           externalId: {
             description: 'id of the order in an external ERP',
@@ -353,7 +353,7 @@ const apiDoc = {
           status: {
             type: 'string',
             description: 'Status of the purchase-order',
-            enum: ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'],
+            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted'],
           },
         },
       },
@@ -418,27 +418,27 @@ const apiDoc = {
             },
           },
           price: {
-            description : 'price of the order',
+            description: 'price of the order',
             type: 'number',
             format: 'float',
-            example: '1200.01'
+            example: '1200.01',
           },
           quantity: {
             description: 'quantity of the order',
             type: 'integer',
-            example: 1
+            example: 1,
           },
           forecastDate: {
             description: 'forecast date of the order',
             type: 'string',
-            format: 'date-time'
+            format: 'date-time',
           },
         },
       },
       OrderAmendment: {
         description: 'An action on an order that causes it to be amended following a rejection',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAmendment' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
       NewOrderRejection: {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
@@ -450,36 +450,36 @@ const apiDoc = {
             format: 'date-time',
           },
           price: {
-            description : 'price of the order',
-            type: 'number',
-            format: 'float',
-            example: '1200.01'
+            description: 'price of the order',
+            type: 'string',
+            example: '1200.01',
           },
           quantity: {
             description: 'quantity of the order',
-            type: 'integer',
-            example: 1
+            type: 'string',
+            example: '1',
           },
           forecastDate: {
             description: 'forecast date of the order',
             type: 'string',
-            format: 'date-time'
+            format: 'date-time',
           },
-          comments : {
-            description : 'comments related to order rejection',
-            type: 'string'
-          },
-          file: {
-            description: 'attachment to be added for order rejection',
+          comments: {
+            description: 'comments related to order rejection',
             type: 'string',
-            format: 'binary'
-          }
+            maxLength: 255,
+          },
+          imageAttachmentId: {
+            description: 'id of the attachment',
+            type: 'string',
+            format: 'uuid',
+          },
         },
       },
       OrderRejection: {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderRejection' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
       NewPartOrderAssignment: {
         description: 'A new action on a part that causes it to be assigned to an order',

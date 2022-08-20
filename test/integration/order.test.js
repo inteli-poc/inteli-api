@@ -42,6 +42,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
 
@@ -55,6 +58,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.body.supplier).to.equal('valid-1')
@@ -69,6 +75,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -81,6 +90,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -93,6 +105,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -105,6 +120,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-2',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -117,6 +135,9 @@ describeAuthOnly('order - authenticated', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -128,6 +149,9 @@ describeAuthOnly('order - authenticated', function () {
         externalId: 'some-external-id',
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -165,6 +189,9 @@ describeNoAuthOnly('order - no auth', function () {
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        forecastDate: '2022-10-21T10:10:10.919Z',
       }
       const response = await postOrderRoute(newOrder, app, null)
       expect(response.body.supplier).to.equal('valid-1')

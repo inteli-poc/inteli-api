@@ -9,11 +9,9 @@ module.exports = {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
-
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
-
     const validated = await validate({
       ...req.body,
       supplierAddress: supplierAddress,
@@ -44,6 +42,15 @@ module.exports = {
       newItem['status'] = item['status']
       newItem['items'] = item['items']
       newItem['requiredBy'] = item['required_by'].toISOString()
+      newItem['price'] = item['price']
+      newItem['quantity'] = item['quantity']
+      newItem['forecastDate'] = item['forecast_date'].toISOString()
+      if (item['image_attachment_id']) {
+        newItem['imageAttachmentId'] = item['image_attachment_id']
+      }
+      if (item['comments']) {
+        newItem['comments'] = item['comments']
+      }
       return newItem
     })
     const modifiedResult = []
@@ -73,6 +80,15 @@ module.exports = {
       newItem['items'] = item['items']
       newItem['requiredBy'] = item['required_by'].toISOString()
       newItem['externalId'] = item['external_id']
+      newItem['price'] = item['price']
+      newItem['quantity'] = item['quantity']
+      newItem['forecastDate'] = item['forecast_date'].toISOString()
+      if (item['image_attachment_id']) {
+        newItem['imageAttachmentId'] = item['image_attachment_id']
+      }
+      if (item['comments']) {
+        newItem['comments'] = item['comments']
+      }
       return newItem
     })
     const modifiedResult = []
@@ -92,8 +108,8 @@ module.exports = {
         id = req.params.id
         if (type == 'Submission') {
           transactionId = req.params.submissionId
-        } else if (type == 'Rejection') {
-          transactionId = req.params.rejectionId
+        } else if (type == 'Acknowledgement') {
+          transactionId = req.params.AcknowledgementId
         } else if (type == 'Acceptance') {
           transactionId = req.params.acceptanceId
         } else if (type == 'Amendment') {
@@ -102,7 +118,7 @@ module.exports = {
         if (!id) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactionsById(transactionId, id, type)
         let results = null
-        if (type == 'Rejection' || type == 'Amendment') {
+        if (type == 'Acknowledgement' || type == 'Amendment') {
           results = await db.getOrder(id)
         }
         const modifiedOrderTransactions = orderTransactions.map((item) => {
@@ -128,7 +144,7 @@ module.exports = {
         if (!id) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactions(id, type)
         let results = null
-        if (type == 'Rejection' || type == 'Amendment') {
+        if (type == 'Acknowledgement' || type == 'Amendment') {
           results = await db.getOrder(id)
         }
         const modifiedOrderTransactions = orderTransactions.map((item) => {
@@ -150,6 +166,8 @@ module.exports = {
     },
     create: (type) => {
       return async (req) => {
+        let binary_blob = null
+        let filename = null
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
 
@@ -161,21 +179,35 @@ module.exports = {
           } else {
             order.status = 'Submitted'
           }
-        } else if (type == 'Rejection') {
+        } else if (type == 'Acknowledgement') {
           if (order.status != 'Submitted') {
             throw new InternalError({ message: 'Order not in Submitted state' })
           } else {
-            order.status = 'Rejected'
+            order.status = 'AcknowledgedWithExceptions'
             order.required_by = req.body.requiredBy
-            order.items = req.body.items
+            order.price = parseFloat(req.body.price)
+            order.forecast_date = req.body.forecastDate
+            order.quantity = parseInt(req.body.quantity)
+            order.image_attachment_id = req.body.imageAttachmentId
+            order.comments = req.body.comments
+            const [attachment] = await db.getAttachment(order.image_attachment_id)
+            if (attachment) {
+              binary_blob = attachment.binary_blob
+              filename = attachment.filename
+            }
           }
         } else if (type == 'Amendment') {
-          if (order.status != 'Rejected') {
-            throw new InternalError({ message: 'Order not in Rejected state' })
+          if (order.status != 'AcknowledgedWithExceptions') {
+            throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
           } else {
             order.status = 'Amended'
             order.required_by = req.body.requiredBy
             order.items = req.body.items
+            order.price = parseFloat(req.body.price)
+            order.forecast_date = req.body.forecastDate
+            order.quantity = parseInt(req.body.quantity)
+            order.image_attachment_id = null
+            order.comments = null
           }
         } else if (type == 'Acceptance') {
           if (order.status != 'Submitted' && order.status != 'Amended') {
@@ -190,7 +222,7 @@ module.exports = {
         const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...order, selfAddress, transaction }, type)
+          payload = await mapOrderData({ ...order, selfAddress, transaction, binary_blob, filename }, type)
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
           throw err
@@ -216,18 +248,6 @@ module.exports = {
           await db.removeTransactionOrder(transaction.id)
           await db.insertOrderTransaction(id, type, 'Failed', 0)
           throw err
-        }
-        if (type == 'Rejection' || type == 'Amendment') {
-          return {
-            status: 201,
-            response: {
-              id: transaction.id,
-              submittedAt: new Date(transaction.created_at).toISOString(),
-              status: transaction.status,
-              requiredBy: order.required_by.toISOString(),
-              items: order.items,
-            },
-          }
         }
         return {
           status: 201,

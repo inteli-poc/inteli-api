@@ -64,7 +64,7 @@ const seed = async () => {
   await client('build').insert([
     {
       id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
-      supplier: 'valid-2',
+      supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       completion_estimated_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
       started_at: new Date().toISOString(),
@@ -76,7 +76,7 @@ const seed = async () => {
   await client('parts').insert([
     {
       id: '7989218f-fdc3-4f4c-a772-bae5f9e06994',
-      supplier: 'valid-2',
+      supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       recipe_id: '36345f4f-0000-42e2-83f9-79e2e195e000',
       build_id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
       certifications: null,

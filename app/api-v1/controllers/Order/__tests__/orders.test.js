@@ -313,6 +313,9 @@ describe('order controller', () => {
           description: 'some description - test',
           required_by: new Date(),
           items: recipeExamples.map((el) => el.id),
+          price: 1100,
+          quantity: 1,
+          forecast_date: new Date(),
         },
       ])
       stubs.getOrders = stub(db, 'getOrders').resolves([
@@ -324,6 +327,9 @@ describe('order controller', () => {
           description: 'some description - test',
           required_by: new Date(),
           items: recipeExamples.map((el) => el.id),
+          price: 1100,
+          quantity: 1,
+          forecast_date: new Date(),
         },
       ])
     })
@@ -599,12 +605,16 @@ describe('order controller', () => {
           })
           stubs.getOrder.resolves([
             {
-              status: 'submitted',
+              status: 'Created',
               requiredBy: '2022-06-11T08:47:23.397Z',
               items: ['50000000-0000-1000-5500-000000000001'],
+              external_id: 'some-external-id',
+              price: 1100,
+              quantity: 1,
+              forecast_date: '2022-06-13T11:20:35.466Z',
             },
           ])
-          response = await createTransaction('AnyType', {
+          response = await createTransaction('Submission', {
             params: { id: '00000000-0000-1000-3000-000000000001' },
             body: {
               items: ['50000000-0000-1000-5500-000000000001'],

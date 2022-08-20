@@ -6,21 +6,17 @@ exports.up = async function (knex) {
   const uuidGenerateV4 = () => knex.raw('uuid_generate_v4()')
   const now = () => knex.fn.now()
 
-  await knex.schema.alterTable('orders', (def) => {
-    def.primary(['id'])
-  })
-
   await knex.schema.createTable('order_transactions', (def) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
     def.integer('token_id')
     def.uuid('order_id').notNullable()
     def
-      .enu('type', ['Submission', 'Rejection', 'Acceptance', 'Amendment'], {
+      .enu('type', ['Submission', 'Acknowledgement', 'Acceptance', 'Amendment'], {
         enumName: 'order_type',
         useNative: true,
       })
       .notNullable()
-    def.enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'], {
+    def.enu('status', ['Submitted', 'InBlock', 'Finalised', 'Failed'], {
       enumName: 'tx_status',
       existingType: true,
       useNative: true,
