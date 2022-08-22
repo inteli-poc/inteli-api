@@ -62,7 +62,7 @@ const seed = async () => {
   ])
 
   await Promise.all(
-    ['Created', 'Submitted', 'Rejected', 'Accepted', 'Amended'].map((status, i) =>
+    ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Accepted', 'Amended'].map((status, i) =>
       client('orders').insert([
         {
           id: `36345f4f-6535-42e2-83f9-79e2e195e11${i}`,
@@ -72,6 +72,9 @@ const seed = async () => {
           status,
           required_by: '2022-10-21T10:10:10.919Z',
           external_id: 'some-external-id',
+          price: 1100,
+          quantity: 1,
+          forecast_date: '2022-10-21T10:10:10.919Z',
         },
       ])
     )
@@ -87,6 +90,9 @@ const seed = async () => {
       status: 'Created',
       required_by: '2022-10-21T11:45:46.919Z',
       external_id: 'some-external-id',
+      price: 1100,
+      quantity: 1,
+      forecast_date: '2022-10-21T10:10:10.919Z',
     },
   ])
 }

@@ -290,6 +290,22 @@ const apiDoc = {
         type: 'object',
         description: 'A new purchase-order to be submitted',
         properties: {
+          price: {
+            description: 'price of the order',
+            type: 'number',
+            format: 'float',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'integer',
+            example: 1,
+          },
+          forecastDate: {
+            description: 'forecast date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
           externalId: {
             description: 'id of the order in an external ERP',
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
@@ -337,7 +353,7 @@ const apiDoc = {
           status: {
             type: 'string',
             description: 'Status of the purchase-order',
-            enum: ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'],
+            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted'],
           },
         },
       },
@@ -401,12 +417,28 @@ const apiDoc = {
               example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
             },
           },
+          price: {
+            description: 'price of the order',
+            type: 'number',
+            format: 'float',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'integer',
+            example: 1,
+          },
+          forecastDate: {
+            description: 'forecast date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
         },
       },
       OrderAmendment: {
         description: 'An action on an order that causes it to be amended following a rejection',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAmendment' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
       NewOrderRejection: {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
@@ -417,22 +449,37 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
-          items: {
-            type: 'array',
-            description: 'List of parts to be supplied, identified by their recipe id',
-            maxItems: 10,
-            items: {
-              description: 'id of the recipe to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
-            },
+          price: {
+            description: 'price of the order',
+            type: 'string',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'string',
+            example: '1',
+          },
+          forecastDate: {
+            description: 'forecast date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
+          comments: {
+            description: 'comments related to order rejection',
+            type: 'string',
+            maxLength: 255,
+          },
+          imageAttachmentId: {
+            description: 'id of the attachment',
+            type: 'string',
+            format: 'uuid',
           },
         },
       },
       OrderRejection: {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderRejection' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
       NewPartOrderAssignment: {
         description: 'A new action on a part that causes it to be assigned to an order',

@@ -24,6 +24,9 @@ async function postOrderDb(reqBody) {
       buyer: reqBody.buyerAddress,
       status: reqBody.status,
       external_id: reqBody.externalId,
+      price: reqBody.price,
+      quantity: reqBody.quantity,
+      forecast_date: reqBody.forecastDate,
     })
     .returning(['id', 'status'])
 }
@@ -38,12 +41,14 @@ async function postPartDb(part) {
 
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
   if (updateOriginalTokenId) {
     return client('orders')
       .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
       .where({ id: reqBody.id })
   } else {
-    return client('orders').update({ status: reqBody.status, updated_at, latest_token_id }).where({ id: reqBody.id })
+    return client('orders').update(reqBody).where({ id: reqBody.id })
   }
 }
 async function getAttachment(id) {

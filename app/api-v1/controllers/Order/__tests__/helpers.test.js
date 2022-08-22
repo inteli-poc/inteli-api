@@ -17,6 +17,9 @@ const payload = {
     id: '50000000-e000-1000-5500-000000000001',
   },
   external_id: 'some-external-id',
+  price: 1100,
+  quantity: 1,
+  forecast_date: '2022-06-13T11:20:35.466Z',
 }
 
 describe('map order data helper function', () => {
@@ -99,6 +102,18 @@ describe('map order data helper function', () => {
             externalId: {
               type: 'LITERAL',
               value: 'some-external-id',
+            },
+            forecastDate: {
+              type: 'LITERAL',
+              value: '2022-06-13T11:20:35.466Z',
+            },
+            price: {
+              type: 'LITERAL',
+              value: '1100',
+            },
+            quantity: {
+              type: 'LITERAL',
+              value: '1',
             },
           },
         },

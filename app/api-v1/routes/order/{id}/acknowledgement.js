@@ -47,7 +47,7 @@ module.exports = function () {
       },
       tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create('Rejection'), {
+    POST: buildValidatedJsonHandler(order.transaction.create('Acknowledgement'), {
       summary: 'Create Purchase Order Rejection Action',
       description: 'A Supplier rejects the order {id}. Order must be in `Submitted` state.',
       parameters: [

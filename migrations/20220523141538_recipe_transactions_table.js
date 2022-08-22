@@ -7,7 +7,10 @@ exports.up = async (knex) => {
     def.integer('token_id')
     def.uuid('recipe_id').notNullable()
     def.enu('type', ['Creation']).notNullable()
-    def.enu('status', ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'])
+    def.enum('status', ['Submitted', 'InBlock', 'Finalised', 'Failed'], {
+      enumName: 'tx_status',
+      useNative: true,
+    })
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
 

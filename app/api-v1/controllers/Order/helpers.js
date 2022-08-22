@@ -32,11 +32,10 @@ const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
     parent_index: i + parentIndexOffset,
   }))
 
-const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
-  if(parentIndexRequired){
+const buildOrderOutput = (data, recipes,type) => {
     return {
       roles: {
-        Owner: (type == 'Rejection') ? data.buyer : data.supplier,
+        Owner: (type == 'Acknowledgement') ? data.buyer : data.supplier,
         Buyer: data.buyer,
         Supplier: data.supplier,
       },
@@ -46,28 +45,15 @@ const buildOrderOutput = (data, recipes,parentIndexRequired,type) => {
         requiredBy: { type: 'LITERAL', value: data.required_by },
         transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
         externalId: { type: 'LITERAL', value: data.external_id },
+        ...(type == 'Acknowledgement' && data.filename) && {image: {type: 'FILE', value: data.filename}},
+        price: {type: 'LITERAL', value: data.price.toString()},
+        quantity: {type: 'LITERAL', value: data.quantity.toString()},
+        forecastDate: {type: 'LITERAL', value: data.forecast_date},
+        ...(type == 'Acknowledgement' && data.comments) && {comments: {type: 'LITERAL', value: data.comments}},
         ...recipes,
       },
-      parent_index: 0
+      ...(type != 'Submission') && {parent_index: 0}
     }
-  }
-  else{
-    return {
-      roles: {
-        Owner: data.supplier,
-        Buyer: data.buyer,
-        Supplier: data.supplier,
-      },
-      metadata: {
-        type: { type: 'LITERAL', value: 'ORDER' },
-        status: { type: 'LITERAL', value: data.status },
-        requiredBy: { type: 'LITERAL', value: data.required_by },
-        transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
-        externalId: { type: 'LITERAL', value: data.external_id },
-        ...recipes,
-      },
-    }
-  }
 }
 /*eslint-enable */
 
@@ -77,14 +63,11 @@ exports.mapOrderData = async (data, type) => {
   const tokenIds = records.map((el) => el.latest_token_id)
   const orderTokenId = []
   let parentIndexOffset = 0
-  let parentIndexRequired = false
   if (type != 'Submission') {
     orderTokenId.push(data.latest_token_id)
     parentIndexOffset = 1
-    parentIndexRequired = true
   }
   if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
-
   const recipes = tokenIds.reduce((output, id) => {
     if (id) {
       output[id] = {
@@ -95,15 +78,13 @@ exports.mapOrderData = async (data, type) => {
 
     return output
   }, {})
-  const inputs = type != 'Acceptance' ? orderTokenId.concat(tokenIds) : orderTokenId
+  const inputs = type != 'Acceptance' && type != 'Acknowledgement' ? orderTokenId.concat(tokenIds) : orderTokenId
   const outputs =
-    type != 'Acceptance'
-      ? [
-          buildOrderOutput(data, recipes, parentIndexRequired, type),
-          ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type),
-        ]
-      : [buildOrderOutput(data, recipes, parentIndexRequired, type)]
+    type != 'Acceptance' && type != 'Acknowledgement'
+      ? [buildOrderOutput(data, recipes, type), ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type)]
+      : [buildOrderOutput(data, recipes, type)]
   return {
+    ...(type == 'Acknowledgement' && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs: outputs,
   }

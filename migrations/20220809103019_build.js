@@ -21,6 +21,7 @@ exports.up = async function (knex) {
     def.datetime('completed_at')
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
+    def.primary(['id'])
   })
 }
 
