@@ -230,6 +230,7 @@ module.exports = {
         try {
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
+            await db.updateOrderTransaction(id,result[0])
             let updateOriginalTokenIdForOrder = false
             if (type == 'Submission') {
               updateOriginalTokenIdForOrder = true

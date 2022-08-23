@@ -1,8 +1,9 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
-const { BadRequestError } = require('../../../utils/errors')
-const { validate } = require('./helpers')
+const { BadRequestError , InternalError} = require('../../../utils/errors')
 const camelcaseObjectDeep = require('camelcase-object-deep')
+const { runProcess } = require('../../../utils/dscp-api')
+const { validate, mapOrderData } = require('./helpers')
 
 module.exports = {
   getAll: async function (req) {
@@ -85,14 +86,116 @@ module.exports = {
     return { status: 201, response: camelcaseObjectDeep(build) }
   },
   transaction: {
-    getAll: async () => {
-      return { status: 500, response: { message: 'Not Implemented' } }
+    getAll: (type) => {
+      return async (req) => {
+        const { id } = req.params
+        if (!id) throw new BadRequestError('missing params')
+        const buildTransactions = await db.getBuildTransactions(id, type)
+        let build = await db.getBuildById(id)
+        const modifiedBuildTransactions = buildTransactions.map((item) => {
+          let newItem = {}
+          newItem['id'] = item['id']
+          newItem['status'] = item['status']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          if(build){
+            newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+          }
+          return newItem
+        })
+
+        return {
+          status: 200,
+          response: modifiedBuildTransactions,
+        }
+      }
     },
-    get: async () => {
-      return { status: 500, response: { message: 'Not Implemented' } }
+    get: (type) => {
+      return async (req) => {
+        const { id } = req.params
+        let transactionId
+        if(type == 'Schedule'){
+          transactionId = req.params.scheduleId
+        }
+        if (!id) throw new BadRequestError('missing params')
+        const buildTransactions = await db.getBuildTransactionsById(transactionId, id, type)
+        let build = await db.getBuildById(id)
+        const modifiedBuildTransactions = buildTransactions.map((item) => {
+          let newItem = {}
+          newItem['id'] = item['id']
+          newItem['status'] = item['status']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          if(build){
+            newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+          }
+          return newItem
+        })
+
+        return {
+          status: 200,
+          response: modifiedBuildTransactions[0],
+        }
+      }
     },
-    create: async () => {
-      return { status: 500, response: { message: 'Not Implemented' } }
+    create: (type) => {
+      return async (req) => {
+        const { id } = req.params
+        if (!id) throw new BadRequestError('missing params')
+
+        const [build] = await db.getBuildById(id)
+        const supplier = build.supplier
+        const parts = await db.getPartsByBuildId(id)
+        const recipes = parts.map((item) => {
+          return item.recipe_id
+        })
+        const records = await db.getRecipeByIDs(recipes)
+        const tokenIds = records.map((el) => el.latest_token_id)
+        const buyer = records[0].owner
+        if (!build) throw new NotFoundError('build')
+        if(type == 'Schedule'){
+          if (build.status != 'Created') {
+            throw new InternalError({ message: 'Build not in Created state' })
+          } else {
+            build.status = 'Scheduled'
+            build.completion_estimated_at = req.body.completionEstimate
+          }
+        }
+
+        const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
+        let payload
+        try {
+          payload = await mapOrderData({ ...build, transaction,tokenIds, supplier, buyer }, type)
+        } catch (err) {
+          await db.removeTransactionBuild(transaction.id)
+          throw err
+        }
+        try {
+          const result = await runProcess(payload, req.token)
+          if (Array.isArray(result)) {
+            await db.updateBuildTransaction(id,result[0])
+            let updateOriginalTokenIdForOrder = false
+            if (type == 'Schedule') {
+              updateOriginalTokenIdForOrder = true
+              await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
+            } else {
+              await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
+            }
+          } else {
+            throw new InternalError({ message: result.message })
+          }
+        } catch (err) {
+          await db.removeTransactionBuild(transaction.id)
+          await db.insertBuildTransaction(id, type, 'Failed', 0)
+          throw err
+        }
+        return {
+          status: 201,
+          response: {
+            id: transaction.id,
+            submittedAt: new Date(transaction.created_at).toISOString(),
+            status: transaction.status,
+          },
+        }
+      }
     },
   },
 }
