@@ -6,7 +6,7 @@ module.exports = {
       database: process.env.DB_NAME || 'inteli',
       user: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      port: process.env.DB_PORT || '5432',
+      port: process.env.DB_PORT || '6432',
     },
     pool: {
       min: 2,
@@ -26,7 +26,7 @@ module.exports = {
       database: process.env.DB_NAME || 'inteli',
       user: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      port: process.env.DB_PORT || '5432',
+      port: process.env.DB_PORT || '6432',
     },
     pool: {
       min: 2,

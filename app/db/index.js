@@ -164,12 +164,12 @@ async function insertOrderTransaction(id, type, status, token_id) {
     .then((t) => t[0])
 }
 
-async function updateOrderTransaction(id,token_id){
-  return client('order_transactions').update({token_id}).where({id})
+async function updateOrderTransaction(id, token_id) {
+  return client('order_transactions').update({ token_id }).where({ id })
 }
 
-async function updateBuildTransaction(id,token_id){
-  return client('build_transactions').update({token_id}).where({id})
+async function updateBuildTransaction(id, token_id) {
+  return client('build_transactions').update({ token_id }).where({ id })
 }
 
 async function insertBuildTransaction(id, type, status, token_id) {
@@ -221,7 +221,7 @@ async function getPartIdsByBuildId(build_id) {
   return client('parts').select('id').where({ build_id })
 }
 
-async function getPartsByBuildId(build_id){
+async function getPartsByBuildId(build_id) {
   return client('parts').select().where({ build_id })
 }
 
@@ -268,5 +268,5 @@ module.exports = {
   updateBuild,
   removeTransactionBuild,
   getBuildTransactions,
-  getBuildTransactionsById
+  getBuildTransactionsById,
 }

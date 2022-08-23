@@ -1,6 +1,6 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
-const { BadRequestError , InternalError} = require('../../../utils/errors')
+const { BadRequestError, InternalError, NotFoundError } = require('../../../utils/errors')
 const camelcaseObjectDeep = require('camelcase-object-deep')
 const { runProcess } = require('../../../utils/dscp-api')
 const { validate, mapOrderData } = require('./helpers')
@@ -97,7 +97,7 @@ module.exports = {
           newItem['id'] = item['id']
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
-          if(build){
+          if (build) {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
           }
           return newItem
@@ -113,7 +113,7 @@ module.exports = {
       return async (req) => {
         const { id } = req.params
         let transactionId
-        if(type == 'Schedule'){
+        if (type == 'Schedule') {
           transactionId = req.params.scheduleId
         }
         if (!id) throw new BadRequestError('missing params')
@@ -124,7 +124,7 @@ module.exports = {
           newItem['id'] = item['id']
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
-          if(build){
+          if (build) {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
           }
           return newItem
@@ -151,7 +151,7 @@ module.exports = {
         const tokenIds = records.map((el) => el.latest_token_id)
         const buyer = records[0].owner
         if (!build) throw new NotFoundError('build')
-        if(type == 'Schedule'){
+        if (type == 'Schedule') {
           if (build.status != 'Created') {
             throw new InternalError({ message: 'Build not in Created state' })
           } else {
@@ -163,7 +163,7 @@ module.exports = {
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...build, transaction,tokenIds, supplier, buyer }, type)
+          payload = await mapOrderData({ ...build, transaction, tokenIds, supplier, buyer }, type)
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
           throw err
@@ -171,7 +171,7 @@ module.exports = {
         try {
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
-            await db.updateBuildTransaction(id,result[0])
+            await db.updateBuildTransaction(id, result[0])
             let updateOriginalTokenIdForOrder = false
             if (type == 'Schedule') {
               updateOriginalTokenIdForOrder = true

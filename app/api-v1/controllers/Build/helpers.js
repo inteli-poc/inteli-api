@@ -16,7 +16,7 @@ exports.validate = async (items, supplier) => {
   }
 }
 
-const buildBuildOutputs = (data,recipes,type) => {
+const buildBuildOutputs = (data, recipes, type) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -31,11 +31,11 @@ const buildBuildOutputs = (data,recipes,type) => {
       externalId: { type: 'LITERAL', value: data.external_id },
       ...recipes,
     },
-    ...(type != 'Schedule') && {parent_index: 0}
+    ...(type != 'Schedule' && { parent_index: 0 }),
   }
 }
 
-exports.mapOrderData = async (data,type) => {
+exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
   const recipes = data.tokenIds.reduce((output, id) => {
@@ -48,13 +48,12 @@ exports.mapOrderData = async (data,type) => {
 
     return output
   }, {})
-  if(type == 'Schedule'){
+  if (type == 'Schedule') {
     inputs = []
-    outputs = [buildBuildOutputs(data,recipes,type)]
+    outputs = [buildBuildOutputs(data, recipes, type)]
   }
   return {
     inputs,
-    outputs
+    outputs,
   }
 }
-

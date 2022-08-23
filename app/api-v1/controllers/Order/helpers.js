@@ -84,7 +84,7 @@ exports.mapOrderData = async (data, type) => {
       ? [buildOrderOutput(data, recipes, type), ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type)]
       : [buildOrderOutput(data, recipes, type)]
   return {
-    ...(type == 'Acknowledgement' && data.binary_blob) && { image: data.binary_blob },
+    ...(type == 'Acknowledgement' && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs: outputs,
   }

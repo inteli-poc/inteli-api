@@ -118,17 +118,21 @@ describe('build.create', () => {
 
 describe('build.transaction', () => {
   let stubs = {}
-  let req  = {params : {id : '00000000-0000-1000-3000-000000000001'}}
+  let req = { params: { id: '00000000-0000-1000-3000-000000000001' } }
   describe('getAll', () => {
     beforeEach(async () => {
-      stubs.getBuildTransactions = stub(db, 'getBuildTransactions').resolves([{
-        id: '00000000-0000-1000-3000-000000000001',
-        status: 'Submitted',
-        created_at : new Date()
-      }])
-      stubs.getBuildById = stub(db, 'getBuildById').resolves([{
-        completion_estimated_at : new Date()
-      }])
+      stubs.getBuildTransactions = stub(db, 'getBuildTransactions').resolves([
+        {
+          id: '00000000-0000-1000-3000-000000000001',
+          status: 'Submitted',
+          created_at: new Date(),
+        },
+      ])
+      stubs.getBuildById = stub(db, 'getBuildById').resolves([
+        {
+          completion_estimated_at: new Date(),
+        },
+      ])
     })
     afterEach(async () => {
       req = {}
@@ -143,17 +147,23 @@ describe('build.transaction', () => {
 
   describe('get', () => {
     let stubs = {}
-    let req  = {params : {id : '00000000-0000-1000-3000-000000000001',scheduleId: '00000000-0000-1000-3000-000000000002'}}
+    let req = {
+      params: { id: '00000000-0000-1000-3000-000000000001', scheduleId: '00000000-0000-1000-3000-000000000002' },
+    }
     describe('getAll', () => {
       beforeEach(async () => {
-        stubs.getBuildTransactionsById = stub(db, 'getBuildTransactionsById').resolves([{
-          id: '00000000-0000-1000-3000-000000000001',
-          status: 'Submitted',
-          created_at : new Date()
-        }])
-        stubs.getBuildById = stub(db, 'getBuildById').resolves([{
-          completion_estimated_at : new Date()
-        }])
+        stubs.getBuildTransactionsById = stub(db, 'getBuildTransactionsById').resolves([
+          {
+            id: '00000000-0000-1000-3000-000000000001',
+            status: 'Submitted',
+            created_at: new Date(),
+          },
+        ])
+        stubs.getBuildById = stub(db, 'getBuildById').resolves([
+          {
+            completion_estimated_at: new Date(),
+          },
+        ])
       })
       afterEach(async () => {
         req = {}
@@ -169,63 +179,71 @@ describe('build.transaction', () => {
 
   describe('create', () => {
     let stubs = {}
-    let req  = {params : {id : '00000000-0000-1000-3000-000000000001'},body:{completionEstimate: new Date().toISOString()}}
+    let req = {
+      params: { id: '00000000-0000-1000-3000-000000000001' },
+      body: { completionEstimate: new Date().toISOString() },
+    }
     beforeEach(async () => {
-      stubs.getBuildById = stub(db,'getBuildById').resolves([{
-        "id":"70ce5b83-6cb6-4b62-871a-b637fe3aa9b4",
-        "external_id":"some-external-system-id",
-        "supplier":"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-        "status":"Created",
-        "completion_estimated_at":"2022-08-22T12:09:59.323Z",
-        "started_at":null,
-        "completed_at":null,
-        "created_at":"2022-08-23T11:07:41.409Z",
-        "updated_at":"2022-08-23T11:07:41.409Z",
-        "latest_token_id":null,
-        "original_token_id":null
-     }])
-     stubs.getPartIdsByBuildId = stub(db,'getPartsByBuildId').resolves([{
-      "id":"3f29e398-489c-4e3e-aa79-1911099054c5",
-      "recipe_id":"27bb8d4b-f576-4aef-8102-e66fe296db11",
-      "build_id":"70ce5b83-6cb6-4b62-871a-b637fe3aa9b4",
-      "supplier":"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-      "certifications":null,
-      "created_at":"2022-08-23T11:07:41.432Z",
-      "updated_at":"2022-08-23T11:07:41.432Z"
-      }])
-      stubs.getRecipeByIDs = stub(db, 'getRecipeByIDs').resolves([{
-        "id":"27bb8d4b-f576-4aef-8102-e66fe296db11",
-        "created_at":"2022-08-22T17:00:27.181Z",
-        "updated_at":"2022-08-22T17:00:27.181Z",
-        "external_id":"another-external-system-id",
-        "name":"Low-pressure compressor",
-        "image_attachment_id":"820caf18-3b04-447c-898c-9214521235df",
-        "material":"Aluminium",
-        "alloy":"Ti-6Al-4V",
-        "price":"1200",
-        "required_certs":[
-           {
-              "description":"tensionTest"
-           }
-        ],
-        "supplier":"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-        "owner":"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-        "latest_token_id":1,
-        "original_token_id":1
-     }])
-     stubs.insertBuildTransaction = stub(db,'insertBuildTransaction').resolves({
-      "id":"48d84d18-802e-4cb7-8997-f84dfc03b5a5",
-      "status":"Submitted",
-      "created_at":"2022-08-23T11:17:08.263Z"
+      stubs.getBuildById = stub(db, 'getBuildById').resolves([
+        {
+          id: '70ce5b83-6cb6-4b62-871a-b637fe3aa9b4',
+          external_id: 'some-external-system-id',
+          supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+          status: 'Created',
+          completion_estimated_at: '2022-08-22T12:09:59.323Z',
+          started_at: null,
+          completed_at: null,
+          created_at: '2022-08-23T11:07:41.409Z',
+          updated_at: '2022-08-23T11:07:41.409Z',
+          latest_token_id: null,
+          original_token_id: null,
+        },
+      ])
+      stubs.getPartIdsByBuildId = stub(db, 'getPartsByBuildId').resolves([
+        {
+          id: '3f29e398-489c-4e3e-aa79-1911099054c5',
+          recipe_id: '27bb8d4b-f576-4aef-8102-e66fe296db11',
+          build_id: '70ce5b83-6cb6-4b62-871a-b637fe3aa9b4',
+          supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+          certifications: null,
+          created_at: '2022-08-23T11:07:41.432Z',
+          updated_at: '2022-08-23T11:07:41.432Z',
+        },
+      ])
+      stubs.getRecipeByIDs = stub(db, 'getRecipeByIDs').resolves([
+        {
+          id: '27bb8d4b-f576-4aef-8102-e66fe296db11',
+          created_at: '2022-08-22T17:00:27.181Z',
+          updated_at: '2022-08-22T17:00:27.181Z',
+          external_id: 'another-external-system-id',
+          name: 'Low-pressure compressor',
+          image_attachment_id: '820caf18-3b04-447c-898c-9214521235df',
+          material: 'Aluminium',
+          alloy: 'Ti-6Al-4V',
+          price: '1200',
+          required_certs: [
+            {
+              description: 'tensionTest',
+            },
+          ],
+          supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+          owner: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+          latest_token_id: 1,
+          original_token_id: 1,
+        },
+      ])
+      stubs.insertBuildTransaction = stub(db, 'insertBuildTransaction').resolves({
+        id: '48d84d18-802e-4cb7-8997-f84dfc03b5a5',
+        status: 'Submitted',
+        created_at: '2022-08-23T11:17:08.263Z',
       })
-      runProcessReq = nock(dscpApiUrl)
-      .post('/v3/run-process', (body) => {
-        runProcessBody = body
-        return true
-      })
-      .reply(200, [20])
-      stubs.updateBuildTransaction = stub(db,'updateBuildTransaction').resolves([])
-      stubs.updateBuild = stub(db,'updateBuild').resolves([])
+      nock(dscpApiUrl)
+        .post('/v3/run-process', () => {
+          return true
+        })
+        .reply(200, [20])
+      stubs.updateBuildTransaction = stub(db, 'updateBuildTransaction').resolves([])
+      stubs.updateBuild = stub(db, 'updateBuild').resolves([])
     })
     afterEach(async () => {
       stubs.getBuildById.restore()
