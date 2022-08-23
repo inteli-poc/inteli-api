@@ -541,7 +541,7 @@ const apiDoc = {
         description:
           'An action on a build that causes it to be registered on-chain. Build schedule actions also result in the creation of the Part entities that are being constructed in the build',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
       NewBuildStart: {
         description: 'A new action on a build that causes it to be registered on-chain as started',
