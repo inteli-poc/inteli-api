@@ -256,6 +256,13 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
+            ...((type == 'Amendment' || type == 'Acknowledgement') && { requiredBy: req.body.requiredBy }),
+            ...((type == 'Amendment' || type == 'Acknowledgement') && { price: req.body.price }),
+            ...((type == 'Amendment' || type == 'Acknowledgement') && { items: req.body.items }),
+            ...((type == 'Amendment' || type == 'Acknowledgement') && { quantity: req.body.quantity }),
+            ...((type == 'Amendment' || type == 'Acknowledgement') && { forecastDate: req.body.forecastDate }),
+            ...(type == 'Acknowledgement' && { imageAttachmentId: req.body.imageAttachmentId }),
+            ...(type == 'Acknowledgement' && { comments: req.body.comments }),
           },
         }
       }

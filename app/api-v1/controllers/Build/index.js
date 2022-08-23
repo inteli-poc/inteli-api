@@ -99,6 +99,9 @@ module.exports = {
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            if (type == 'Start') {
+              newItem['startedAt'] = build[0].started_at.toISOString()
+            }
           }
           return newItem
         })
@@ -115,6 +118,8 @@ module.exports = {
         let transactionId
         if (type == 'Schedule') {
           transactionId = req.params.scheduleId
+        } else if (type == 'Start') {
+          transactionId = req.params.startId
         }
         if (!id) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactionsById(transactionId, id, type)
@@ -126,6 +131,9 @@ module.exports = {
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            if (type == 'Start') {
+              newItem['startedAt'] = build[0].started_at.toISOString()
+            }
           }
           return newItem
         })
@@ -157,6 +165,14 @@ module.exports = {
           } else {
             build.status = 'Scheduled'
             build.completion_estimated_at = req.body.completionEstimate
+          }
+        } else if (type == 'Start') {
+          if (build.status != 'Scheduled') {
+            throw new InternalError({ message: 'Build not in Scheduled state' })
+          } else {
+            build.status = 'Started'
+            build.completion_estimated_at = req.body.completionEstimate
+            build.started_at = req.body.startedAt
           }
         }
 
@@ -193,6 +209,8 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
+            ...((type == 'Schedule' || type == 'Start') && { completionEstimate: req.body.completionEstimate }),
+            ...(type == 'Start' && { startedAt: req.body.startedAt }),
           },
         }
       }
