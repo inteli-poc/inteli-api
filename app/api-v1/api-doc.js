@@ -438,7 +438,7 @@ const apiDoc = {
       OrderAmendment: {
         description: 'An action on an order that causes it to be amended following a rejection',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAmendment' }],
       },
       NewOrderRejection: {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
@@ -479,7 +479,7 @@ const apiDoc = {
       OrderRejection: {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderRejection' }],
       },
       NewPartOrderAssignment: {
         description: 'A new action on a part that causes it to be assigned to an order',
@@ -541,7 +541,7 @@ const apiDoc = {
         description:
           'An action on a build that causes it to be registered on-chain. Build schedule actions also result in the creation of the Part entities that are being constructed in the build',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
       },
       NewBuildStart: {
         description: 'A new action on a build that causes it to be registered on-chain as started',
