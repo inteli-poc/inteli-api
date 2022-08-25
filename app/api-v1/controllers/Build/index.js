@@ -174,8 +174,7 @@ module.exports = {
             build.completion_estimated_at = req.body.completionEstimate
             build.started_at = req.body.startedAt
           }
-        }
-        else if(type == 'progress-update'){
+        } else if (type == 'progress-update') {
           if (build.status != 'Scheduled') {
             throw new InternalError({ message: 'Build not in Scheduled state' })
           } else {
