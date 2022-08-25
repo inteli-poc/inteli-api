@@ -48,7 +48,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['build'],
     }),
-    POST: buildValidatedJsonHandler(buildController.transaction.create, {
+    POST: buildValidatedJsonHandler(buildController.transaction.create('progress-update'), {
       summary: 'Create Build Progress Update Action',
       description: 'A Supplier updates the progress of the build {id}. Build must be in `Started` state.',
       parameters: [
