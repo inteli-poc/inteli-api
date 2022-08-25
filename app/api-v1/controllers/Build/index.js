@@ -101,6 +101,8 @@ module.exports = {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
+            } else if (type == 'progress-update') {
+              newItem['attachmentId'] = build[0].image_attachment_id
             }
           }
           return newItem
@@ -133,6 +135,8 @@ module.exports = {
             newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
+            } else if (type == 'progress-update') {
+              newItem['attachmentId'] = build[0].image_attachment_id
             }
           }
           return newItem
@@ -175,7 +179,7 @@ module.exports = {
             build.started_at = req.body.startedAt
           }
         } else if (type == 'progress-update') {
-          if (build.status != 'Scheduled') {
+          if (build.status != 'Started') {
             throw new InternalError({ message: 'Build not in Started state' })
           } else {
             build.status = 'Started'
