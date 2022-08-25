@@ -50,7 +50,7 @@ exports.mapOrderData = async (data, type) => {
   }, {})
   if (type == 'Schedule') {
     inputs = []
-  } else if (type == 'Start') {
+  } else {
     inputs = [data.latest_token_id]
   }
   outputs = [buildBuildOutputs(data, recipes, type)]

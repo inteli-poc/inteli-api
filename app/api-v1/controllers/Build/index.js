@@ -175,6 +175,15 @@ module.exports = {
             build.started_at = req.body.startedAt
           }
         }
+        else if(type == 'progress-update'){
+          if (build.status != 'Scheduled') {
+            throw new InternalError({ message: 'Build not in Scheduled state' })
+          } else {
+            build.status = 'Started'
+            build.completion_estimated_at = req.body.completionEstimate
+            build.image_attachment_id = req.body.attachmentId
+          }
+        }
 
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
