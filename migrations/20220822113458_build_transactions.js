@@ -6,7 +6,7 @@ exports.up = async (knex) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
     def.integer('token_id')
     def.uuid('build_id').notNullable()
-    def.enu('type', ['Schedule', 'Start', 'Submit']).notNullable()
+    def.enu('type', ['Schedule', 'Start', 'progress-update', 'Submit']).notNullable()
     def.enum('status', ['Submitted', 'InBlock', 'Finalised', 'Failed'], {
       enumName: 'tx_status',
       useNative: true,
