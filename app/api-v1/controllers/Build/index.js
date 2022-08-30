@@ -98,11 +98,17 @@ module.exports = {
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
-            newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            if (type != 'Submit') {
+              newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            }
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
-            } else if (type == 'progress-update') {
+            }
+            if (type == 'progress-update' || type == 'Submit') {
               newItem['attachmentId'] = build[0].image_attachment_id
+            }
+            if (type == 'Submit') {
+              newItem['completedAt'] = build[0].completed_at.toISOString()
             }
           }
           return newItem
@@ -122,6 +128,10 @@ module.exports = {
           transactionId = req.params.scheduleId
         } else if (type == 'Start') {
           transactionId = req.params.startId
+        } else if (type == 'progress-update') {
+          transactionId = req.params.updateId
+        } else if (type == 'Submit') {
+          transactionId = req.params.completionId
         }
         if (!id) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactionsById(transactionId, id, type)
@@ -132,11 +142,17 @@ module.exports = {
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
-            newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            if (type != 'Submit') {
+              newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+            }
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
-            } else if (type == 'progress-update') {
+            }
+            if (type == 'progress-update' || type == 'Submit') {
               newItem['attachmentId'] = build[0].image_attachment_id
+            }
+            if (type == 'Submit') {
+              newItem['completedAt'] = build[0].completed_at.toISOString()
             }
           }
           return newItem
@@ -186,6 +202,14 @@ module.exports = {
             build.completion_estimated_at = req.body.completionEstimate
             build.image_attachment_id = req.body.attachmentId
           }
+        } else if (type == 'Submit') {
+          if (build.status != 'Started') {
+            throw new InternalError({ message: 'Build not in Started state' })
+          } else {
+            build.status = 'Submitted'
+            build.completed_at = req.body.completedAt
+            build.image_attachment_id = req.body.attachmentId
+          }
         }
 
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
@@ -221,8 +245,10 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
-            ...((type == 'Schedule' || type == 'Start') && { completionEstimate: req.body.completionEstimate }),
+            ...(type != 'Submit' && { completionEstimate: req.body.completionEstimate }),
             ...(type == 'Start' && { startedAt: req.body.startedAt }),
+            ...((type == 'progress-update' || type == 'Submit') && { attachmentId: req.body.attachmentId }),
+            ...(type == 'Submit' && { completedAt: req.body.completedAt }),
           },
         }
       }
