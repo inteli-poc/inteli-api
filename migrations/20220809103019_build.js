@@ -23,7 +23,7 @@ exports.up = async function (knex) {
     def.datetime('updated_at').notNullable().default(now())
     def.integer('latest_token_id')
     def.integer('original_token_id')
-    def.uuid('image_attachment_id')
+    def.uuid('attachment_id')
     def.primary(['id'])
   })
 }

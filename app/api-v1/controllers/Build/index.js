@@ -23,7 +23,7 @@ module.exports = {
         newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
-        newItem.attachmentId = item.image_attachment_id
+        newItem.attachmentId = item.attachment_id
         return newItem
       })
     )
@@ -47,7 +47,7 @@ module.exports = {
         newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
-        newItem.attachmentId = item.image_attachment_id
+        newItem.attachmentId = item.attachment_id
         return newItem
       })
     )
@@ -69,7 +69,7 @@ module.exports = {
     build.completion_estimated_at = req.body.completionEstimate
     build.completed_at = null
     build.started_at = null
-    build.image_attachment_id = null
+    build.attachment_id = null
     build.status = 'Created'
     const [buildId] = await db.postBuildDb(build)
     let parts = req.body.parts
@@ -108,7 +108,7 @@ module.exports = {
               newItem['startedAt'] = build[0].started_at.toISOString()
             }
             if (type == 'progress-update' || type == 'Complete') {
-              newItem['attachmentId'] = build[0].image_attachment_id
+              newItem['attachmentId'] = build[0].attachment_id
             }
             if (type == 'Complete') {
               newItem['completedAt'] = build[0].completed_at.toISOString()
@@ -152,7 +152,7 @@ module.exports = {
               newItem['startedAt'] = build[0].started_at.toISOString()
             }
             if (type == 'progress-update' || type == 'Complete') {
-              newItem['attachmentId'] = build[0].image_attachment_id
+              newItem['attachmentId'] = build[0].attachment_id
             }
             if (type == 'Complete') {
               newItem['completedAt'] = build[0].completed_at.toISOString()
@@ -205,8 +205,8 @@ module.exports = {
           } else {
             build.status = 'Started'
             build.completion_estimated_at = req.body.completionEstimate
-            build.image_attachment_id = req.body.attachmentId
-            const [attachment] = await db.getAttachment(build.image_attachment_id)
+            build.attachment_id = req.body.attachmentId
+            const [attachment] = await db.getAttachment(build.attachment_id)
             if (attachment) {
               binary_blob = attachment.binary_blob
               filename = attachment.filename
@@ -218,8 +218,8 @@ module.exports = {
           } else {
             build.status = 'Completed'
             build.completed_at = req.body.completedAt
-            build.image_attachment_id = req.body.attachmentId
-            const [attachment] = await db.getAttachment(build.image_attachment_id)
+            build.attachment_id = req.body.attachmentId
+            const [attachment] = await db.getAttachment(build.attachment_id)
             if (attachment) {
               binary_blob = attachment.binary_blob
               filename = attachment.filename
