@@ -67,6 +67,7 @@ module.exports = {
     build.completion_estimated_at = req.body.completionEstimate
     build.completed_at = null
     build.started_at = null
+    build.image_attachment_id = null
     build.status = 'Created'
     const [buildId] = await db.postBuildDb(build)
     let parts = req.body.parts
