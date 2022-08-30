@@ -48,7 +48,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['build'],
     }),
-    POST: buildValidatedJsonHandler(buildController.transaction.create, {
+    POST: buildValidatedJsonHandler(buildController.transaction.create('Submit'), {
       summary: 'Create Build Completion Action',
       description: 'A Supplier completes the build {id}. Build must be in `Started` state.',
       parameters: [
