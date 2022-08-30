@@ -20,7 +20,7 @@ module.exports = {
         })
         newItem.status = item.status
         newItem.id = item.id
-        newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
+        newItem.completionEstimate = item.completion_estimate.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
         newItem.attachmentId = item.attachment_id
@@ -44,7 +44,7 @@ module.exports = {
         newItem.partIds = partIds.map((item) => {
           return item.id
         })
-        newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
+        newItem.completionEstimate = item.completion_estimate.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
         newItem.attachmentId = item.attachment_id
@@ -66,7 +66,7 @@ module.exports = {
     const build = {}
     build.supplier = selfAddress
     build.external_id = req.body.externalId
-    build.completion_estimated_at = req.body.completionEstimate
+    build.completion_estimate = req.body.completionEstimate
     build.completed_at = null
     build.started_at = null
     build.attachment_id = null
@@ -102,7 +102,7 @@ module.exports = {
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
             if (type != 'Complete') {
-              newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
             }
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
@@ -146,7 +146,7 @@ module.exports = {
           newItem['submittedAt'] = item['created_at'].toISOString()
           if (build) {
             if (type != 'Complete') {
-              newItem['completionEstimate'] = build[0].completion_estimated_at.toISOString()
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
             }
             if (type == 'Start') {
               newItem['startedAt'] = build[0].started_at.toISOString()
@@ -189,14 +189,14 @@ module.exports = {
             throw new InternalError({ message: 'Build not in Created state' })
           } else {
             build.status = 'Scheduled'
-            build.completion_estimated_at = req.body.completionEstimate
+            build.completion_estimate = req.body.completionEstimate
           }
         } else if (type == 'Start') {
           if (build.status != 'Scheduled') {
             throw new InternalError({ message: 'Build not in Scheduled state' })
           } else {
             build.status = 'Started'
-            build.completion_estimated_at = req.body.completionEstimate
+            build.completion_estimate = req.body.completionEstimate
             build.started_at = req.body.startedAt
           }
         } else if (type == 'progress-update') {
@@ -204,7 +204,7 @@ module.exports = {
             throw new InternalError({ message: 'Build not in Started state' })
           } else {
             build.status = 'Started'
-            build.completion_estimated_at = req.body.completionEstimate
+            build.completion_estimate = req.body.completionEstimate
             build.attachment_id = req.body.attachmentId
             const [attachment] = await db.getAttachment(build.attachment_id)
             if (attachment) {

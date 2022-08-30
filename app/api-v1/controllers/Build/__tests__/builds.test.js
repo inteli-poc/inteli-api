@@ -15,7 +15,7 @@ describe('build.getAll', () => {
         supplier: 'some-supplier',
         completed_at: new Date(),
         started_at: new Date(),
-        completion_estimated_at: new Date(),
+        completion_estimate: new Date(),
         external_id: 'some-external-id',
       },
     ])
@@ -47,7 +47,7 @@ describe('build.getById', () => {
         supplier: 'some-supplier',
         completed_at: new Date(),
         started_at: new Date(),
-        completion_estimated_at: new Date(),
+        completion_estimate: new Date(),
         external_id: 'some-external-id',
       },
     ])
@@ -130,7 +130,7 @@ describe('build.transaction', () => {
       ])
       stubs.getBuildById = stub(db, 'getBuildById').resolves([
         {
-          completion_estimated_at: new Date(),
+          completion_estimate: new Date(),
         },
       ])
     })
@@ -161,7 +161,7 @@ describe('build.transaction', () => {
         ])
         stubs.getBuildById = stub(db, 'getBuildById').resolves([
           {
-            completion_estimated_at: new Date(),
+            completion_estimate: new Date(),
           },
         ])
       })
@@ -190,7 +190,7 @@ describe('build.transaction', () => {
           external_id: 'some-external-system-id',
           supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
           status: 'Created',
-          completion_estimated_at: '2022-08-22T12:09:59.323Z',
+          completion_estimate: '2022-08-22T12:09:59.323Z',
           started_at: null,
           completed_at: null,
           created_at: '2022-08-23T11:07:41.409Z',

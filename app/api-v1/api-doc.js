@@ -220,7 +220,7 @@ const apiDoc = {
             type: 'string',
             enum: ['Created', 'Scheduled', 'Started', 'Completed'],
           },
-          completionEstimatedAt: {
+          completionEstimate: {
             description: 'Date and time at which the build is estimated to finish',
             type: 'string',
             format: 'date-time',

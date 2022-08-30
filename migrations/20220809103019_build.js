@@ -16,7 +16,7 @@ exports.up = async function (knex) {
         enumName: 'buildstatus',
       })
       .notNullable()
-    def.datetime('completion_estimated_at').notNullable()
+    def.datetime('completion_estimate').notNullable()
     def.datetime('started_at')
     def.datetime('completed_at')
     def.datetime('created_at').notNullable().default(now())
