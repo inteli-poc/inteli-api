@@ -65,7 +65,7 @@ const seed = async () => {
     {
       id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
       supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
-      completion_estimated_at: new Date().toISOString(),
+      completion_estimate: new Date().toISOString(),
       completed_at: new Date().toISOString(),
       started_at: new Date().toISOString(),
       external_id: 'some-external-id',
