@@ -166,6 +166,8 @@ module.exports = {
     },
     create: (type) => {
       return async (req) => {
+        let binary_blob
+        let filename
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
 
@@ -201,6 +203,11 @@ module.exports = {
             build.status = 'Started'
             build.completion_estimated_at = req.body.completionEstimate
             build.image_attachment_id = req.body.attachmentId
+            const [attachment] = await db.getAttachment(build.image_attachment_id)
+            if (attachment) {
+              binary_blob = attachment.binary_blob
+              filename = attachment.filename
+            }
           }
         } else if (type == 'Complete') {
           if (build.status != 'Started') {
@@ -209,13 +216,21 @@ module.exports = {
             build.status = 'Completed'
             build.completed_at = req.body.completedAt
             build.image_attachment_id = req.body.attachmentId
+            const [attachment] = await db.getAttachment(build.image_attachment_id)
+            if (attachment) {
+              binary_blob = attachment.binary_blob
+              filename = attachment.filename
+            }
           }
         }
 
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...build, transaction, tokenIds, supplier, buyer }, type)
+          payload = await mapOrderData(
+            { ...build, transaction, tokenIds, supplier, buyer, binary_blob, filename },
+            type
+          )
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
           throw err

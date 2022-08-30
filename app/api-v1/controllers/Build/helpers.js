@@ -26,9 +26,11 @@ const buildBuildOutputs = (data, recipes, type) => {
     metadata: {
       type: { type: 'LITERAL', value: 'BUILD' },
       status: { type: 'LITERAL', value: data.status },
-      completionEstimate: { type: 'LITERAL', value: data.completion_estimated_at },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
       externalId: { type: 'LITERAL', value: data.external_id },
+      ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimated_at } }),
+      ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),
+      ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
       ...recipes,
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
@@ -55,6 +57,7 @@ exports.mapOrderData = async (data, type) => {
   }
   outputs = [buildBuildOutputs(data, recipes, type)]
   return {
+    ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
   }
