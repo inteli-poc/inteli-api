@@ -28,7 +28,7 @@ const buildBuildOutputs = (data, recipes, type) => {
       status: { type: 'LITERAL', value: data.status },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
       externalId: { type: 'LITERAL', value: data.external_id },
-      ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimated_at } }),
+      ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimate } }),
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),
       ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
       ...((type == 'Complete' || type == 'progress-update') && { image: { type: 'FILE', value: data.filename } }),
