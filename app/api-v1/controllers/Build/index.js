@@ -23,6 +23,7 @@ module.exports = {
         newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
+        newItem.attachmentId = item.image_attachment_id
         return newItem
       })
     )
@@ -46,6 +47,7 @@ module.exports = {
         newItem.completionEstimatedAt = item.completion_estimated_at.toISOString()
         newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
         newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
+        newItem.attachmentId = item.image_attachment_id
         return newItem
       })
     )
