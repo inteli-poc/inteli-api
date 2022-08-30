@@ -237,6 +237,12 @@ const apiDoc = {
             format: 'date-time',
             nullable: true,
           },
+          attachmentId: {
+            description: 'attachment related to progress update and completion',
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+          },
         },
       },
       NewPart: {
