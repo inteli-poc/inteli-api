@@ -5,7 +5,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 // eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(buildController.transaction.getAll('Submit'), {
+    GET: buildValidatedJsonHandler(buildController.transaction.getAll('Complete'), {
       summary: 'List Build Completion Actions',
       description: 'Returns the details of all on-chain transactions to complete the build {id}.',
       parameters: [
@@ -48,7 +48,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['build'],
     }),
-    POST: buildValidatedJsonHandler(buildController.transaction.create('Submit'), {
+    POST: buildValidatedJsonHandler(buildController.transaction.create('Complete'), {
       summary: 'Create Build Completion Action',
       description: 'A Supplier completes the build {id}. Build must be in `Started` state.',
       parameters: [

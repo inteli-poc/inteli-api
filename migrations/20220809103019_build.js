@@ -11,7 +11,7 @@ exports.up = async function (knex) {
     def.string('external_id').notNullable()
     def.string('supplier').notNullable()
     def
-      .enu('status', ['Created', 'Scheduled', 'Started', 'Submitted'], {
+      .enu('status', ['Created', 'Scheduled', 'Started', 'Completed'], {
         useNative: true,
         enumName: 'buildstatus',
       })
