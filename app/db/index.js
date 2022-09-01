@@ -85,6 +85,10 @@ async function getRecipes() {
   return client('recipes').select()
 }
 
+async function getParts() {
+  return client('parts').select()
+}
+
 async function getAllRecipeTransactions(recipe_id) {
   return client.from('recipe_transactions').select().where({ recipe_id })
 }
@@ -269,4 +273,5 @@ module.exports = {
   removeTransactionBuild,
   getBuildTransactions,
   getBuildTransactionsById,
+  getParts,
 }
