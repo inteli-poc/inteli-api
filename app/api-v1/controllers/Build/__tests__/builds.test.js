@@ -92,6 +92,15 @@ describe('build.create', () => {
         supplier: '5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y',
       },
     ])
+    stubs.getRecipeByIDdb = stub(db, 'getRecipeByIDdb').resolves([
+      {
+        required_certs: [
+          {
+            description: 'tensionTest',
+          },
+        ],
+      },
+    ])
     stubs.postBuildDb = stub(db, 'postBuildDb').resolves([
       {
         id: '7989218f-fdc3-4f4c-a772-bae5f9e06994',
@@ -109,6 +118,7 @@ describe('build.create', () => {
     stubs.getRecipeByIDs.restore()
     stubs.identityByAddress.restore()
     stubs.identityBySelf.restore()
+    stubs.getRecipeByIDdb.restore()
   })
   it('should resolve to 201', async () => {
     const result = await buildController.create(req)
