@@ -79,7 +79,8 @@ module.exports = {
       part.supplier = selfAddress
       part.build_id = buildId.id
       part.recipe_id = parts[index].recipeId
-      part.certifications = null
+      let [recipe] = await db.getRecipeByIDdb(part.recipe_id)
+      part.certifications = JSON.stringify(recipe.required_certs)
       let [partId] = await db.postPartDb(part)
       partIds.push(partId.id)
     }
