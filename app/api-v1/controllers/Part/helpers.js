@@ -19,7 +19,7 @@ exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
   let output = {}
-  output[data.tokenId] = { type: 'TOKEN', value: data.tokenId }
+  output[data.tokenId] = { type: 'TOKEN_ID', value: data.tokenId }
   const recipe = output
   let parent_index
   if (data.latest_token_id) {

@@ -42,7 +42,7 @@ module.exports = {
           if (part.metadata) {
             part.metadata = part.metadata.concat(req.body)
           }
-          const [attachment] = await db.getAttachment(req.body.attachment_id)
+          const [attachment] = await db.getAttachment(req.body.attachmentId)
           if (attachment) {
             binary_blob = attachment.binary_blob
             filename = attachment.filename
@@ -50,8 +50,8 @@ module.exports = {
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
         const tokenId = recipe.latest_token_id
-        const buyer = recipe.buyer
-        const supplier = recipe.owner
+        const buyer = recipe.owner
+        const supplier = recipe.supplier
         const transaction = await db.insertPartTransaction(id, type, 'Submitted')
         let payload
         try {
@@ -85,8 +85,8 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
-            ...((type == 'metadata-type' || type == 'certification') && { attachmentId: req.body.attachmentId }),
-            ...(type == 'metadata-type' && { metadataType: req.body.metadataType }),
+            ...((type == 'metadata-update' || type == 'certification') && { attachmentId: req.body.attachmentId }),
+            ...(type == 'metadata-update' && { metadataType: req.body.metadataType }),
             ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
             ...(type == 'order-assignment' && { orderId: req.body.orderId }),
           },
