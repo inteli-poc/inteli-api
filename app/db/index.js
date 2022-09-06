@@ -194,7 +194,7 @@ async function updatePartTransaction(id, token_id) {
 }
 
 async function insertPartTransaction(id, type, status, token_id) {
-  return client('build_transactions')
+  return client('part_transactions')
     .insert({
       build_id: id,
       status,
