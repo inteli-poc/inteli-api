@@ -12,10 +12,13 @@ exports.up = async function (knex) {
     def.specificType('build_id', 'uuid').notNullable()
     def.string('supplier').notNullable()
     def.json('certifications')
+    def.json('metadata')
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
     def.foreign('recipe_id').references('id').on('recipes')
     def.foreign('build_id').references('id').on('build')
+    def.integer('latest_token_id')
+    def.integer('original_token_id')
     def.primary(['id'])
   })
 }

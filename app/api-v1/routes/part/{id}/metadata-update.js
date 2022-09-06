@@ -48,7 +48,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['part'],
     }),
-    POST: buildValidatedJsonHandler(partController.transaction.create, {
+    POST: buildValidatedJsonHandler(partController.transaction.create('metadata-type'), {
       summary: 'Create Part Metadata Update Action',
       description: 'A Supplier updates metadata for the part {id}.',
       parameters: [

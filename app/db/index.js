@@ -65,6 +65,19 @@ async function updateBuild(reqBody, latest_token_id, updateOriginalTokenId) {
   }
 }
 
+async function updatePart(reqBody, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
+  if (updateOriginalTokenId) {
+    return client('parts')
+      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .where({ id: reqBody.id })
+  } else {
+    return client('parts').update(reqBody).where({ id: reqBody.id })
+  }
+}
+
 async function getAttachment(id) {
   return client('attachments').select(['id', 'filename', 'binary_blob']).where({ id })
 }
@@ -176,6 +189,22 @@ async function updateBuildTransaction(id, token_id) {
   return client('build_transactions').update({ token_id }).where({ id })
 }
 
+async function updatePartTransaction(id, token_id) {
+  return client('build_trsnsactions').update({ token_id }).where({ id })
+}
+
+async function insertPartTransaction(id, type, status, token_id) {
+  return client('build_transactions')
+    .insert({
+      build_id: id,
+      status,
+      type,
+      token_id,
+    })
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
 async function insertBuildTransaction(id, type, status, token_id) {
   return client('build_transactions')
     .insert({
@@ -194,6 +223,10 @@ async function removeTransactionOrder(id) {
 
 async function removeTransactionBuild(id) {
   return client('build_transactions').delete().where({ id })
+}
+
+async function removeTransactionPart(id) {
+  return client('part_transactions').delete().where(id)
 }
 
 async function removeTransactionRecipe(id) {
@@ -231,6 +264,10 @@ async function getPartsByBuildId(build_id) {
 
 async function getBuildById(id) {
   return client('build').select().where({ id })
+}
+
+async function getPartById(id) {
+  return client('parts').select().where({ id })
 }
 
 module.exports = {
@@ -274,4 +311,9 @@ module.exports = {
   getBuildTransactions,
   getBuildTransactionsById,
   getParts,
+  getPartById,
+  updatePart,
+  insertPartTransaction,
+  updatePartTransaction,
+  removeTransactionPart,
 }
