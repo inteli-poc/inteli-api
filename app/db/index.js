@@ -190,13 +190,13 @@ async function updateBuildTransaction(id, token_id) {
 }
 
 async function updatePartTransaction(id, token_id) {
-  return client('build_trsnsactions').update({ token_id }).where({ id })
+  return client('part_transactions').update({ token_id }).where({ id })
 }
 
 async function insertPartTransaction(id, type, status, token_id) {
   return client('part_transactions')
     .insert({
-      build_id: id,
+      part_id: id,
       status,
       type,
       token_id,
