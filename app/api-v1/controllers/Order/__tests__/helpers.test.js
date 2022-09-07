@@ -71,6 +71,7 @@ describe('map order data helper function', () => {
     stubs.getRecipeIds.resolves([recipesExample[0]])
     output = await mapOrderData(payload, 'Submission')
     expect(output).to.deep.equal({
+      id: Buffer.from(JSON.stringify('50000000-e000-1000-5500-000000000002')),
       inputs: [20],
       outputs: [
         {
@@ -121,8 +122,8 @@ describe('map order data helper function', () => {
               value: '1',
             },
             id: {
-              type: 'LITERAL',
-              value: '50000000-e000-1000-5500-000000000002',
+              type: 'FILE',
+              value: 'id.json',
             },
           },
         },

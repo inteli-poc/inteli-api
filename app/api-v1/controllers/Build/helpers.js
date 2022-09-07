@@ -33,10 +33,10 @@ const buildBuildOutputs = (data, parts_to_recipe, type) => {
       ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
       ...((type == 'Complete' || type == 'progress-update') && { image: { type: 'FILE', value: data.filename } }),
       ...((type == 'Complete' || type == 'progress-update') && {
-        imageAttachmentId: { type: 'LITERAL', value: data.attachment_id },
+        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
       }),
       ...parts_to_recipe,
-      id: { type: 'LITERAL', value: data.id },
+      id: { type: 'FILE', value: 'id.json' },
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
   }
@@ -62,6 +62,10 @@ exports.mapOrderData = async (data, type) => {
   }
   outputs = [buildBuildOutputs(data, parts_to_recipe, type)]
   return {
+    id: Buffer.from(JSON.stringify(data.id)),
+    ...((type == 'progress-update' || type == 'Complete') && {
+      imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
+    }),
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
