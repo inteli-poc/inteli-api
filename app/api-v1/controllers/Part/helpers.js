@@ -1,4 +1,4 @@
-const buildPartOutputs = (data, recipe, type, parent_index) => {
+const buildPartOutputs = (data, type, parent_index) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -9,7 +9,8 @@ const buildPartOutputs = (data, recipe, type, parent_index) => {
       type: { type: 'LITERAL', value: 'PART' },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
       ...(type == 'metadata-update' && { image: { type: 'FILE', value: data.filename } }),
-      ...recipe,
+      ...(type == 'metadata-update' && { metadataType: { type: 'LITERAL', value: data.metadataType } }),
+      id: { type: 'LITERAL', value: data.id },
     },
     ...(parent_index && { parent_index: 0 }),
   }
@@ -18,9 +19,6 @@ const buildPartOutputs = (data, recipe, type, parent_index) => {
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
-  let output = {}
-  output[data.tokenId] = { type: 'TOKEN_ID', value: data.tokenId }
-  const recipe = output
   let parent_index
   if (data.latest_token_id) {
     inputs = [data.latest_token_id]
@@ -28,7 +26,7 @@ exports.mapOrderData = async (data, type) => {
   } else {
     inputs = []
   }
-  outputs = [buildPartOutputs(data, recipe, type, parent_index)]
+  outputs = [buildPartOutputs(data, type, parent_index)]
   return {
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
     inputs,

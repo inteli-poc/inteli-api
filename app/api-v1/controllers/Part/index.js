@@ -36,11 +36,15 @@ module.exports = {
       return async (req) => {
         let binary_blob
         let filename
+        let metadataType
         const { id } = req.params
         const [part] = await db.getPartById(id)
         if (type == 'metadata-update') {
+          metadataType = req.body.metadataType
           if (part.metadata) {
             part.metadata = part.metadata.concat(req.body)
+          } else {
+            part.metadata = JSON.stringify([req.body])
           }
           const [attachment] = await db.getAttachment(req.body.attachmentId)
           if (attachment) {
@@ -55,7 +59,10 @@ module.exports = {
         const transaction = await db.insertPartTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...part, transaction, tokenId, supplier, buyer, binary_blob, filename }, type)
+          payload = await mapOrderData(
+            { ...part, transaction, tokenId, supplier, buyer, binary_blob, filename, metadataType },
+            type
+          )
         } catch (err) {
           await db.removeTransactionPart(transaction.id)
           throw err

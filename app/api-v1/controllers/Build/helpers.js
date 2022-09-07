@@ -16,7 +16,7 @@ exports.validate = async (items, supplier) => {
   }
 }
 
-const buildBuildOutputs = (data, recipes, type) => {
+const buildBuildOutputs = (data, parts_to_recipe, type) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -32,7 +32,11 @@ const buildBuildOutputs = (data, recipes, type) => {
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),
       ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
       ...((type == 'Complete' || type == 'progress-update') && { image: { type: 'FILE', value: data.filename } }),
-      ...recipes,
+      ...((type == 'Complete' || type == 'progress-update') && {
+        imageAttachmentId: { type: 'LITERAL', value: data.attachment_id },
+      }),
+      ...parts_to_recipe,
+      id: { type: 'LITERAL', value: data.id },
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
   }
@@ -41,11 +45,11 @@ const buildBuildOutputs = (data, recipes, type) => {
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
-  const recipes = data.tokenIds.reduce((output, id) => {
+  const parts_to_recipe = data.parts_to_recipe.reduce((output, id, index) => {
     if (id) {
-      output[id] = {
-        type: 'TOKEN_ID',
-        value: id,
+      output['part_recipe_' + index] = {
+        type: 'LITERAL',
+        value: JSON.stringify(id),
       }
     }
 
@@ -56,7 +60,7 @@ exports.mapOrderData = async (data, type) => {
   } else {
     inputs = [data.latest_token_id]
   }
-  outputs = [buildBuildOutputs(data, recipes, type)]
+  outputs = [buildBuildOutputs(data, parts_to_recipe, type)]
   return {
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,

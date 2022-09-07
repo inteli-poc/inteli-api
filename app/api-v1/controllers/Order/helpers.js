@@ -46,11 +46,13 @@ const buildOrderOutput = (data, recipes,type) => {
         transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
         externalId: { type: 'LITERAL', value: data.external_id },
         ...(type == 'Acknowledgement' && data.filename) && {image: {type: 'FILE', value: data.filename}},
+        ...(type == 'Acknowledgement') && {imageAtttachmentId: {type: 'LITERAL', value: data.image_attachment_id}},
         price: {type: 'LITERAL', value: data.price.toString()},
         quantity: {type: 'LITERAL', value: data.quantity.toString()},
         forecastDate: {type: 'LITERAL', value: data.forecast_date},
         ...(type == 'Acknowledgement' && data.comments) && {comments: {type: 'LITERAL', value: data.comments}},
         ...recipes,
+        id: { type : 'LITERAL', value: data.id}
       },
       ...(type != 'Submission') && {parent_index: 0}
     }
@@ -68,10 +70,10 @@ exports.mapOrderData = async (data, type) => {
     parentIndexOffset = 1
   }
   if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
-  const recipes = tokenIds.reduce((output, id) => {
+  const recipes = records.reduce((output, id, index) => {
     if (id) {
-      output[id] = {
-        type: 'TOKEN_ID',
+      output['recipe_' + index] = {
+        type: 'LITERAL',
         value: id,
       }
     }

@@ -20,6 +20,7 @@ const payload = {
   price: 1100,
   quantity: 1,
   forecast_date: '2022-06-13T11:20:35.466Z',
+  id: '50000000-e000-1000-5500-000000000002',
 }
 
 describe('map order data helper function', () => {
@@ -79,9 +80,13 @@ describe('map order data helper function', () => {
             Supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
           },
           metadata: {
-            20: {
-              type: 'TOKEN_ID',
-              value: 20,
+            recipe_0: {
+              type: 'LITERAL',
+              value: {
+                id: '50000000-0000-1000-5500-000000000001',
+                latest_token_id: 20,
+                supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+              },
             },
             type: {
               type: 'LITERAL',
@@ -114,6 +119,10 @@ describe('map order data helper function', () => {
             quantity: {
               type: 'LITERAL',
               value: '1',
+            },
+            id: {
+              type: 'LITERAL',
+              value: '50000000-e000-1000-5500-000000000002',
             },
           },
         },

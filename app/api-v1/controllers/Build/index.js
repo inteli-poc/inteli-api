@@ -178,11 +178,13 @@ module.exports = {
         const [build] = await db.getBuildById(id)
         const supplier = build.supplier
         const parts = await db.getPartsByBuildId(id)
+        const parts_to_recipe = parts.map((item) => {
+          return { id: item.id, recipe_id: item.recipe_id }
+        })
         const recipes = parts.map((item) => {
           return item.recipe_id
         })
         const records = await db.getRecipeByIDs(recipes)
-        const tokenIds = records.map((el) => el.latest_token_id)
         const buyer = records[0].owner
         if (!build) throw new NotFoundError('build')
         if (type == 'Schedule') {
@@ -232,7 +234,7 @@ module.exports = {
         let payload
         try {
           payload = await mapOrderData(
-            { ...build, transaction, tokenIds, supplier, buyer, binary_blob, filename },
+            { ...build, transaction, parts_to_recipe, supplier, buyer, binary_blob, filename },
             type
           )
         } catch (err) {
