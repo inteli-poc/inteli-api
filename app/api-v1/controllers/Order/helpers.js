@@ -32,7 +32,7 @@ const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
     parent_index: i + parentIndexOffset,
   }))
 
-const buildOrderOutput = (data, recipes,type) => {
+const buildOrderOutput = (data,type) => {
     return {
       roles: {
         Owner: (type == 'Acknowledgement') ? data.buyer : data.supplier,
@@ -51,7 +51,7 @@ const buildOrderOutput = (data, recipes,type) => {
         quantity: {type: 'LITERAL', value: data.quantity.toString()},
         forecastDate: {type: 'LITERAL', value: data.forecast_date},
         ...(type == 'Acknowledgement' && data.comments) && {comments: {type: 'FILE', value: 'comments.json'}},
-        ...recipes,
+        recipes: { type: 'FILE', value: 'recipes.json'},
         id: { type : 'FILE', value: 'id.json'}
       },
       ...(type != 'Submission') && {parent_index: 0}
@@ -70,22 +70,13 @@ exports.mapOrderData = async (data, type) => {
     parentIndexOffset = 1
   }
   if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
-  const recipes = records.reduce((output, id, index) => {
-    if (id) {
-      output['recipe_' + index] = {
-        type: 'LITERAL',
-        value: id,
-      }
-    }
-
-    return output
-  }, {})
   const inputs = type != 'Acceptance' && type != 'Acknowledgement' ? orderTokenId.concat(tokenIds) : orderTokenId
   const outputs =
     type != 'Acceptance' && type != 'Acknowledgement'
-      ? [buildOrderOutput(data, recipes, type), ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type)]
-      : [buildOrderOutput(data, recipes, type)]
+      ? [buildOrderOutput(data, type), ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type)]
+      : [buildOrderOutput(data, type)]
   return {
+    recipes: Buffer.from(JSON.stringify(data.items)),
     id: Buffer.from(JSON.stringify(data.id)),
     ...(type == 'Acknowledgement' &&
       data.image_attachment_id && { imageAtttachmentId: Buffer.from(JSON.stringify(data.image_attachment_id)) }),
