@@ -60,7 +60,15 @@ describe('part.transaction', () => {
       body: { metadataType: 'location', attachmentId: 'ba7a8e74-f553-407c-9de9-0aefdcd5ac6d' },
     }
     beforeEach(async () => {
-      stubs.getPartById = stub(db, 'getPartById').resolves([{}])
+      stubs.getPartById = stub(db, 'getPartById').resolves([
+        {
+          supplier: 'some-supplier',
+          certifications: [{ description: 'tensiontest' }],
+          build_id: '50000000-0000-1000-5500-000000000001',
+          recipe_id: '50000000-0000-1000-5500-000000000002',
+          id: '50000000-0000-1000-5500-000000000003',
+        },
+      ])
       stubs.getRecipeByIDdb = stub(db, 'getRecipeByIDdb').resolves([
         {
           latest_token_id: 1,
