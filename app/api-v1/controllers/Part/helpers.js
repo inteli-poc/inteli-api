@@ -10,7 +10,7 @@ const buildPartOutputs = (data, type, parent_index) => {
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
       ...(type == 'metadata-update' && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metadataType: { type: 'LITERAL', value: data.metadataType } }),
-      id: { type: 'LITERAL', value: data.id },
+      id: { type: 'FILE', value: 'id.json' },
     },
     ...(parent_index && { parent_index: 0 }),
   }
@@ -28,6 +28,7 @@ exports.mapOrderData = async (data, type) => {
   }
   outputs = [buildPartOutputs(data, type, parent_index)]
   return {
+    id: Buffer.from(JSON.stringify(data.id)),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
