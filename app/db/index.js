@@ -71,10 +71,23 @@ async function updatePart(reqBody, latest_token_id, updateOriginalTokenId) {
   reqBody.latest_token_id = latest_token_id
   if (updateOriginalTokenId) {
     return client('parts')
-      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .update({
+        ...reqBody,
+        metadata: JSON.stringify(reqBody.metadata),
+        certifications: JSON.stringify(reqBody.certifications),
+        updated_at,
+        latest_token_id,
+        original_token_id: latest_token_id,
+      })
       .where({ id: reqBody.id })
   } else {
-    return client('parts').update(reqBody).where({ id: reqBody.id })
+    return client('parts')
+      .update({
+        ...reqBody,
+        metadata: JSON.stringify(reqBody.metadata),
+        certifications: JSON.stringify(reqBody.certifications),
+      })
+      .where({ id: reqBody.id })
   }
 }
 

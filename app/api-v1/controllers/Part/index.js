@@ -37,14 +37,16 @@ module.exports = {
         let binary_blob
         let filename
         let metadataType
+        let imageAttachmentId
         const { id } = req.params
         const [part] = await db.getPartById(id)
         if (type == 'metadata-update') {
           metadataType = req.body.metadataType
+          imageAttachmentId = req.body.attachmentId
           if (part.metadata) {
             part.metadata = part.metadata.concat(req.body)
           } else {
-            part.metadata = JSON.stringify([req.body])
+            part.metadata = [req.body]
           }
           const [attachment] = await db.getAttachment(req.body.attachmentId)
           if (attachment) {
@@ -60,7 +62,7 @@ module.exports = {
         let payload
         try {
           payload = await mapOrderData(
-            { ...part, transaction, tokenId, supplier, buyer, binary_blob, filename, metadataType },
+            { ...part, transaction, tokenId, supplier, buyer, binary_blob, filename, metadataType, imageAttachmentId },
             type
           )
         } catch (err) {
