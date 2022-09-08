@@ -44,7 +44,7 @@ module.exports = {
           metadataType = req.body.metadataType
           imageAttachmentId = req.body.attachmentId
           if (part.metadata) {
-            part.metadata = part.metadata.concat(req.body)
+            part.metadata = part.metadata.concat([req.body])
           } else {
             part.metadata = [req.body]
           }
