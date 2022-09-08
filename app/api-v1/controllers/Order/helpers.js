@@ -46,7 +46,7 @@ const buildOrderOutput = (data,type) => {
         transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
         externalId: { type: 'LITERAL', value: data.external_id },
         ...(type == 'Acknowledgement' && data.filename) && {image: {type: 'FILE', value: data.filename}},
-        ...(type == 'Acknowledgement' && data.image_attachment_id) && {imageAtttachmentId: {type: 'FILE', value: 'image_attachment_id.json'}},
+        ...(type == 'Acknowledgement' && data.image_attachment_id) && {imageAttachmentId: {type: 'FILE', value: 'image_attachment_id.json'}},
         price: {type: 'LITERAL', value: data.price.toString()},
         quantity: {type: 'LITERAL', value: data.quantity.toString()},
         forecastDate: {type: 'LITERAL', value: data.forecast_date},
@@ -79,7 +79,7 @@ exports.mapOrderData = async (data, type) => {
     recipes: Buffer.from(JSON.stringify(data.items)),
     id: Buffer.from(JSON.stringify(data.id)),
     ...(type == 'Acknowledgement' &&
-      data.image_attachment_id && { imageAtttachmentId: Buffer.from(JSON.stringify(data.image_attachment_id)) }),
+      data.image_attachment_id && { imageAttachmentId: Buffer.from(JSON.stringify(data.image_attachment_id)) }),
     ...(type == 'Acknowledgement' && data.binary_blob && { image: data.binary_blob }),
     ...(type == 'Acknowledgement' && data.comments && { comments: Buffer.from(JSON.stringify(data.comments)) }),
     inputs,
