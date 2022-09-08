@@ -14,7 +14,7 @@ module.exports = {
     if (id) formData.append('file', id, 'id.json')
     if (imageAttachmentId) formData.append('file', imageAttachmentId, 'image_attachment_id.json')
     if (comments) formData.append('file', comments, 'comments.json')
-    if (recipes) formData.append('file',recipes, 'recipes.json')
+    if (recipes) formData.append('file', recipes, 'recipes.json')
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
