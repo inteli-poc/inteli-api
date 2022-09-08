@@ -16,7 +16,7 @@ exports.validate = async (items, supplier) => {
   }
 }
 
-const buildBuildOutputs = (data, parts_to_recipe, type) => {
+const buildBuildOutputs = (data, type) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -35,7 +35,7 @@ const buildBuildOutputs = (data, parts_to_recipe, type) => {
       ...((type == 'Complete' || type == 'progress-update') && {
         imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
       }),
-      ...parts_to_recipe,
+      partRecipeMap: { type: 'FILE', value: 'part_recipe.json' },
       id: { type: 'FILE', value: 'id.json' },
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
@@ -45,23 +45,14 @@ const buildBuildOutputs = (data, parts_to_recipe, type) => {
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
-  const parts_to_recipe = data.parts_to_recipe.reduce((output, id, index) => {
-    if (id) {
-      output['part_recipe_' + index] = {
-        type: 'LITERAL',
-        value: JSON.stringify(id),
-      }
-    }
-
-    return output
-  }, {})
   if (type == 'Schedule') {
     inputs = []
   } else {
     inputs = [data.latest_token_id]
   }
-  outputs = [buildBuildOutputs(data, parts_to_recipe, type)]
+  outputs = [buildBuildOutputs(data, type)]
   return {
+    partRecipeMap: Buffer.from(JSON.stringify(data.parts_to_recipe)),
     id: Buffer.from(JSON.stringify(data.id)),
     ...((type == 'progress-update' || type == 'Complete') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),

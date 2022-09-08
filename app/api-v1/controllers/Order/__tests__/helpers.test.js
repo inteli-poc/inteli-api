@@ -84,7 +84,7 @@ describe('map order data helper function', () => {
           metadata: {
             recipes: {
               type: 'FILE',
-              value: 'recipes.json'
+              value: 'recipes.json',
             },
             type: {
               type: 'LITERAL',
