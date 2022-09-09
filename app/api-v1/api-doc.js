@@ -290,6 +290,15 @@ const apiDoc = {
               },
             },
           },
+          metadata: {
+            type: 'array',
+            description: 'metadata this part has been assigned',
+            maxItems: 10,
+            items: {
+              description: 'metadata for a part',
+              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+            },
+          },
         },
       },
       NewOrder: {
@@ -649,7 +658,17 @@ const apiDoc = {
       PartMetadataUpdate: {
         description: 'An action on a build that adds arbitrary metadata',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        properties: {
+          metadata: {
+            description: 'metadata assigned to parts',
+            type: 'array',
+            items: {
+              description: 'metadata for a part',
+              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+            },
+          },
+        },
       },
     },
     ...securitySchemes,

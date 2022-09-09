@@ -17,20 +17,79 @@ module.exports = {
         newItem['recipeId'] = item.recipe_id
         newItem['id'] = item.id
         newItem['certifications'] = item.certifications
+        newItem['metadata'] = item.metadata
         return newItem
       })
     )
     return { status: 200, response: result }
   },
-  get: async function () {
-    return { status: 500, response: { message: 'Not Implemented' } }
+  get: async function (req) {
+    let { id } = req.params
+    let part
+    part = await db.getPartById(id)
+    const result = await Promise.all(
+      part.map(async (item) => {
+        const newItem = {}
+        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+        newItem['supplier'] = supplierAlias
+        newItem['buildId'] = item.build_id
+        newItem['recipeId'] = item.recipe_id
+        newItem['id'] = item.id
+        newItem['certifications'] = item.certifications
+        newItem['metadata'] = item.metadata
+        return newItem
+      })
+    )
+    return { status: 200, response: result }
   },
   transaction: {
-    getAll: async () => {
-      return { status: 500, response: { message: 'Not Implemented' } }
+    getAll: (type) => {
+      return async (req) => {
+        let { id } = req.params
+        let partTransanctions = await db.getPartTransactions(id, type)
+        let [part] = await db.getPartById(id)
+        const modifiedPartTransactions = partTransanctions.map((item) => {
+          const newItem = {}
+          newItem['id'] = item['id']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          newItem['status'] = item['status']
+          if (type == 'metadata-update') {
+            let metadata = part.metadata
+            newItem['metadata'] = metadata
+          }
+          return newItem
+        })
+        return {
+          status: 200,
+          response: modifiedPartTransactions,
+        }
+      }
     },
-    get: async () => {
-      return { status: 500, response: { message: 'Not Implemented' } }
+    get: (type) => {
+      return async (req) => {
+        let { id } = req.params
+        let transactionId
+        if (type == 'metadata-update') {
+          transactionId = req.params.updateId
+        }
+        let partTransanctions = await db.getPartTransactionsById(transactionId, id, type)
+        let [part] = await db.getPartById(id)
+        const modifiedPartTransactions = partTransanctions.map((item) => {
+          const newItem = {}
+          newItem['id'] = item['id']
+          newItem['submittedAt'] = item['created_at'].toISOString()
+          newItem['status'] = item['status']
+          if (type == 'metadata-update') {
+            let metadata = part.metadata
+            newItem['metadata'] = metadata
+          }
+          return newItem
+        })
+        return {
+          status: 200,
+          response: modifiedPartTransactions[0],
+        }
+      }
     },
     create: (type) => {
       return async (req) => {

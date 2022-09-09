@@ -20,10 +20,20 @@ describe('part.getAll', () => {
       },
     ])
     stubs.identityByAddress = stub(identityService, 'getMemberByAddress').resolves({ alias: 'supplier-alias' })
+    stubs.getPartById = stub(db, 'getPartById').resolves([
+      {
+        supplier: 'some-supplier',
+        certifications: [{ description: 'tensiontest' }],
+        build_id: '50000000-0000-1000-5500-000000000001',
+        recipe_id: '50000000-0000-1000-5500-000000000002',
+        id: '50000000-0000-1000-5500-000000000003',
+      },
+    ])
   })
   afterEach(async () => {
     stubs.getParts.restore()
     stubs.identityByAddress.restore()
+    stubs.getPartById.restore()
   })
   it('should resolve 200', async () => {
     const result = await partController.getAll()
@@ -32,24 +42,86 @@ describe('part.getAll', () => {
 })
 
 describe('part.get', () => {
-  it('should resolve 500 error', async () => {
-    const result = await partController.get()
-    expect(result.status).to.equal(500)
+  let req = {
+    params: {
+      id: '00000000-0000-1000-3000-000000000001',
+    },
+  }
+  it('should resolve 200', async () => {
+    const result = await partController.get(req)
+    expect(result.status).to.equal(200)
   })
 })
 
 describe('part.transaction', () => {
   describe('getAll', () => {
-    it('should resolve 500 error', async () => {
-      const result = await partController.transaction.get()
-      expect(result.status).to.equal(500)
+    let req = {
+      params: {
+        id: '00000000-0000-1000-3000-000000000001',
+      },
+    }
+    let stubs = {}
+    beforeEach(async () => {
+      stubs.getPartTransactions = stub(db, 'getPartTransactions').resolves([
+        {
+          id: '00000000-0000-1000-3000-000000000001',
+          status: 'Submitted',
+          created_at: new Date(),
+        },
+      ])
+      stubs.getPartById = stub(db, 'getPartById').resolves([
+        {
+          metadata: {
+            metadataType: 'location',
+            attachmentId: 'ba7a8e74-f553-407c-9de9-0aefdcd5ac6d',
+          },
+        },
+      ])
+    })
+    afterEach(async () => {
+      req = {}
+      stubs.getPartById.restore()
+      stubs.getPartTransactions.restore()
+    })
+    it('should resolve 200', async () => {
+      const result = await partController.transaction.getAll('metadata-update')(req)
+      expect(result.status).to.equal(200)
     })
   })
 
   describe('get', () => {
-    it('should resolve 500 error', async () => {
-      const result = await partController.transaction.get()
-      expect(result.status).to.equal(500)
+    let req = {
+      params: {
+        id: '00000000-0000-1000-3000-000000000001',
+        updateId: '00000000-0000-1000-3000-000000000001',
+      },
+    }
+    let stubs = {}
+    beforeEach(async () => {
+      stubs.getPartById = stub(db, 'getPartById').resolves([
+        {
+          metadata: {
+            metadataType: 'location',
+            attachmentId: 'ba7a8e74-f553-407c-9de9-0aefdcd5ac6d',
+          },
+        },
+      ])
+      stubs.getPartTransactionsById = stub(db, 'getPartTransactionsById').resolves([
+        {
+          id: '00000000-0000-1000-3000-000000000001',
+          status: 'Submitted',
+          created_at: new Date(),
+        },
+      ])
+    })
+    afterEach(async () => {
+      req = {}
+      stubs.getPartById.restore()
+      stubs.getPartTransactionsById.restore()
+    })
+    it('should resolve 200', async () => {
+      const result = await partController.transaction.get('metadata-update')(req)
+      expect(result.status).to.equal(200)
     })
   })
 

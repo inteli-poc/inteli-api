@@ -115,6 +115,10 @@ async function getParts() {
   return client('parts').select()
 }
 
+async function getPartById(id) {
+  return client('parts').select().where({ id })
+}
+
 async function getAllRecipeTransactions(recipe_id) {
   return client.from('recipe_transactions').select().where({ recipe_id })
 }
@@ -146,6 +150,10 @@ async function getOrderTransactions(order_id, type) {
   return client('order_transactions').select().where({ order_id, type })
 }
 
+async function getPartTransactions(part_id, type) {
+  return client('part_transactions').select().where({ part_id, type })
+}
+
 async function getBuildTransactions(build_id, type) {
   return client('build_transactions').select().where({ build_id, type })
 }
@@ -156,6 +164,10 @@ async function getBuildTransactionsById(transaction_id, build_id, type) {
 
 async function getOrderTransactionsById(transaction_id, order_id, type) {
   return client('order_transactions').select().where({ order_id, type, id: transaction_id })
+}
+
+async function getPartTransactionsById(transaction_id, part_id, type) {
+  return client('part_transactions').select().where({ part_id, type, id: transaction_id })
 }
 
 async function getOrders() {
@@ -279,10 +291,6 @@ async function getBuildById(id) {
   return client('build').select().where({ id })
 }
 
-async function getPartById(id) {
-  return client('parts').select().where({ id })
-}
-
 module.exports = {
   client,
   getRecipe,
@@ -329,4 +337,6 @@ module.exports = {
   insertPartTransaction,
   updatePartTransaction,
   removeTransactionPart,
+  getPartTransactions,
+  getPartTransactionsById,
 }
