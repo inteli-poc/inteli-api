@@ -605,6 +605,7 @@ describe('order controller', () => {
           })
           stubs.getOrder.resolves([
             {
+              id: '50000000-e000-1000-5500-000000000002',
               status: 'Created',
               requiredBy: '2022-06-11T08:47:23.397Z',
               items: ['50000000-0000-1000-5500-000000000001'],

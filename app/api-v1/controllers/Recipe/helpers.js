@@ -8,4 +8,6 @@ exports.mapRecipeData = (data) => ({
   type: { type: 'LITERAL', value: 'RECIPE' },
   image: { type: 'FILE', value: data.filename },
   price: { type: 'LITERAL', value: data.price },
+  id: { type: 'FILE', value: 'id.json' },
+  imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
 })

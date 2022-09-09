@@ -16,7 +16,7 @@ exports.validate = async (items, supplier) => {
   }
 }
 
-const buildBuildOutputs = (data, recipes, type) => {
+const buildBuildOutputs = (data, type) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -32,7 +32,11 @@ const buildBuildOutputs = (data, recipes, type) => {
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),
       ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
       ...((type == 'Complete' || type == 'progress-update') && { image: { type: 'FILE', value: data.filename } }),
-      ...recipes,
+      ...((type == 'Complete' || type == 'progress-update') && {
+        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
+      }),
+      partRecipeMap: { type: 'FILE', value: 'part_recipe.json' },
+      id: { type: 'FILE', value: 'id.json' },
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
   }
@@ -41,23 +45,18 @@ const buildBuildOutputs = (data, recipes, type) => {
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
-  const recipes = data.tokenIds.reduce((output, id) => {
-    if (id) {
-      output[id] = {
-        type: 'TOKEN_ID',
-        value: id,
-      }
-    }
-
-    return output
-  }, {})
   if (type == 'Schedule') {
     inputs = []
   } else {
     inputs = [data.latest_token_id]
   }
-  outputs = [buildBuildOutputs(data, recipes, type)]
+  outputs = [buildBuildOutputs(data, type)]
   return {
+    partRecipeMap: Buffer.from(JSON.stringify(data.parts_to_recipe)),
+    id: Buffer.from(JSON.stringify(data.id)),
+    ...((type == 'progress-update' || type == 'Complete') && {
+      imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
+    }),
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,

@@ -20,6 +20,7 @@ const payload = {
   price: 1100,
   quantity: 1,
   forecast_date: '2022-06-13T11:20:35.466Z',
+  id: '50000000-e000-1000-5500-000000000002',
 }
 
 describe('map order data helper function', () => {
@@ -70,6 +71,8 @@ describe('map order data helper function', () => {
     stubs.getRecipeIds.resolves([recipesExample[0]])
     output = await mapOrderData(payload, 'Submission')
     expect(output).to.deep.equal({
+      recipes: Buffer.from(JSON.stringify(payload.items)),
+      id: Buffer.from(JSON.stringify('50000000-e000-1000-5500-000000000002')),
       inputs: [20],
       outputs: [
         {
@@ -79,9 +82,9 @@ describe('map order data helper function', () => {
             Supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
           },
           metadata: {
-            20: {
-              type: 'TOKEN_ID',
-              value: 20,
+            recipes: {
+              type: 'FILE',
+              value: 'recipes.json',
             },
             type: {
               type: 'LITERAL',
@@ -114,6 +117,10 @@ describe('map order data helper function', () => {
             quantity: {
               type: 'LITERAL',
               value: '1',
+            },
+            id: {
+              type: 'FILE',
+              value: 'id.json',
             },
           },
         },

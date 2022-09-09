@@ -129,6 +129,8 @@ module.exports = {
       const payload = {
         image: recipe.binary_blob,
         requiredCerts: Buffer.from(JSON.stringify(recipe.required_certs)),
+        id: Buffer.from(JSON.stringify(id)),
+        imageAttachmentId: Buffer.from(JSON.stringify(recipe.image_attachment_id)),
         inputs: [],
         outputs: [
           {
