@@ -292,6 +292,7 @@ const apiDoc = {
           },
           metadata: {
             type: 'array',
+            nullable: true,
             description: 'metadata this part has been assigned',
             maxItems: 10,
             items: {
@@ -663,6 +664,7 @@ const apiDoc = {
           metadata: {
             description: 'metadata assigned to parts',
             type: 'array',
+            nullable: true,
             items: {
               description: 'metadata for a part',
               allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
