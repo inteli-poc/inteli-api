@@ -21,6 +21,9 @@ const returnOctet = ({ filename, binary_blob }) => ({
 module.exports = {
   get: async function () {
     const attachments = await db.getAttachments()
+    if (attachments.length == 0) {
+      throw new NotFoundError('attachments')
+    }
     const res = attachments.map((item) => {
       return {
         id: item.id,

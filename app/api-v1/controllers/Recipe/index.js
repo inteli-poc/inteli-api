@@ -12,6 +12,9 @@ module.exports = {
     } else {
       recipes = await db.getRecipes()
     }
+    if (recipes.length == 0) {
+      throw new NotFoundError('recipes')
+    }
     const result = await Promise.all(
       recipes.map(async (recipe) => {
         const { alias: supplierAlias } = await identity.getMemberByAddress(req, recipe.supplier)

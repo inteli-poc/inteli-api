@@ -74,7 +74,7 @@ module.exports = {
       result = await db.getOrders()
     }
     if (result.length == 0) {
-      throw new NotFoundError('order')
+      throw new NotFoundError('orders')
     }
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)

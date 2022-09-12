@@ -9,7 +9,7 @@ module.exports = {
     let parts
     parts = await db.getParts()
     if (parts.length == 0) {
-      throw new NotFoundError('part')
+      throw new NotFoundError('parts')
     }
     const result = await Promise.all(
       parts.map(async (item) => {

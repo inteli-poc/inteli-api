@@ -123,7 +123,7 @@ describe('Attachment controller', () => {
       })
 
       it('returns empty list', async () => {
-        expect(response.response).to.deep.equal([])
+        expect(response.code).to.equal(404)
       })
     })
 
