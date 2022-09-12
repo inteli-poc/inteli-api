@@ -47,6 +47,23 @@ describe('part.get', () => {
       id: '00000000-0000-1000-3000-000000000001',
     },
   }
+  let stubs = {}
+  beforeEach(async () => {
+    stubs.getPartById = stub(db, 'getPartById').resolves([
+      {
+        supplier: 'some-supplier',
+        certifications: [{ description: 'tensiontest' }],
+        build_id: '50000000-0000-1000-5500-000000000001',
+        recipe_id: '50000000-0000-1000-5500-000000000002',
+        id: '50000000-0000-1000-5500-000000000003',
+      },
+    ])
+    stubs.identityByAddress = stub(identityService, 'getMemberByAddress').resolves({ alias: 'supplier-alias' })
+  })
+  afterEach(async () => {
+    stubs.getPartById.restore()
+    stubs.identityByAddress.restore()
+  })
   it('should resolve 200', async () => {
     const result = await partController.get(req)
     expect(result.status).to.equal(200)
@@ -141,6 +158,16 @@ describe('part.transaction', () => {
           id: '50000000-0000-1000-5500-000000000003',
         },
       ])
+      stubs.getBuildById = stub(db, 'getBuildById').resolves([
+        {
+          supplier: 'some-supplier',
+          completed_at: new Date(),
+          started_at: new Date(),
+          completion_estimate: new Date(),
+          external_id: 'some-external-id',
+          status: 'Scheduled',
+        },
+      ])
       stubs.getRecipeByIDdb = stub(db, 'getRecipeByIDdb').resolves([
         {
           latest_token_id: 1,
@@ -173,6 +200,7 @@ describe('part.transaction', () => {
       stubs.getRecipeByIDdb.restore()
       stubs.getPartById.restore()
       stubs.getAttachment.restore()
+      stubs.getBuildById.restore()
       nock.cleanAll()
       req = {}
     })

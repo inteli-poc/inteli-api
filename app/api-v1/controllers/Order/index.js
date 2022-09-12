@@ -31,7 +31,11 @@ module.exports = {
   },
   getById: async function (req) {
     let { id } = req.params
+    if (!id) throw new BadRequestError('missing params')
     const result = await db.getOrder(id)
+    if (result.length == 0) {
+      throw new NotFoundError('order')
+    }
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
       const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
@@ -68,6 +72,9 @@ module.exports = {
       result = await db.getOrdersByExternalId(req.query.externalId)
     } else {
       result = await db.getOrders()
+    }
+    if (result.length == 0) {
+      throw new NotFoundError('order')
     }
     const promises = result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
@@ -116,10 +123,17 @@ module.exports = {
           transactionId = req.params.amendmentId
         }
         if (!id) throw new BadRequestError('missing params')
+        if (!transactionId) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactionsById(transactionId, id, type)
+        if (orderTransactions.length == 0) {
+          throw new NotFoundError('order_transactions')
+        }
         let results = null
         if (type == 'Acknowledgement' || type == 'Amendment') {
           results = await db.getOrder(id)
+          if (results.length == 0) {
+            throw new NotFoundError('order')
+          }
         }
         const modifiedOrderTransactions = orderTransactions.map((item) => {
           const newItem = {}
@@ -143,9 +157,15 @@ module.exports = {
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactions(id, type)
+        if (orderTransactions.length == 0) {
+          throw new NotFoundError('order_transactions')
+        }
         let results = null
         if (type == 'Acknowledgement' || type == 'Amendment') {
           results = await db.getOrder(id)
+          if (results.length == 0) {
+            throw new NotFoundError('order')
+          }
         }
         const modifiedOrderTransactions = orderTransactions.map((item) => {
           const newItem = {}
@@ -194,6 +214,8 @@ module.exports = {
             if (attachment) {
               binary_blob = attachment.binary_blob
               filename = attachment.filename
+            } else {
+              throw new NotFoundError('attachment')
             }
           }
         } else if (type == 'Amendment') {

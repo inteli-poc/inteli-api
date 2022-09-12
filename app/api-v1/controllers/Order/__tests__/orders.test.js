@@ -436,6 +436,7 @@ describe('order controller', () => {
       })
       describe('/order/{id}/submission/{submissionId} - get by id', () => {
         it('get submission type transactions by submissionid', async () => {
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
           req.params.submissionId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Submission')(req)
           expect(result.status).to.equal(200)
@@ -443,13 +444,15 @@ describe('order controller', () => {
       })
       describe('/order/{id}/rejection/{rejectionId} - get by id', () => {
         it('get rejection type transactions by rejectionId', async () => {
-          req.params.rejectionId = '6908132e-36af-46bf-9758-85e9f95eb542'
-          const result = await orderController.transaction.getById('Rejection')(req)
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
+          req.params.AcknowledgementId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Acknowledgement')(req)
           expect(result.status).to.equal(200)
         })
       })
       describe('/order/{id}/acceptance/{acceptanceId} - get by id', () => {
         it('get acceptance type transactions by acceptanceId', async () => {
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
           req.params.acceptanceId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Acceptance')(req)
           expect(result.status).to.equal(200)
@@ -457,7 +460,8 @@ describe('order controller', () => {
       })
       describe('/order/{id}/amendment/{amendmentId} - get by id', () => {
         it('get amendment type transactions by amendmentId', async () => {
-          req.params.amendmentID = '6908132e-36af-46bf-9758-85e9f95eb542'
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
+          req.params.amendmentId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Amendment')(req)
           expect(result.status).to.equal(200)
         })

@@ -96,7 +96,9 @@ module.exports = {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')
       const transactions = await db.getAllRecipeTransactions(id)
-
+      if (transactions.length == 0) {
+        throw new NotFoundError('recipe_transactions')
+      }
       return {
         status: 200,
         response: transactions.map(({ id, created_at, status }) => ({

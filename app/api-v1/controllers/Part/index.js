@@ -2,12 +2,15 @@ const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { runProcess } = require('../../../utils/dscp-api')
 const { mapOrderData } = require('./helpers')
-const { InternalError } = require('../../../utils/errors')
+const { InternalError, BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
   getAll: async function (req) {
     let parts
     parts = await db.getParts()
+    if (parts.length == 0) {
+      throw new NotFoundError('part')
+    }
     const result = await Promise.all(
       parts.map(async (item) => {
         const newItem = {}
@@ -25,8 +28,14 @@ module.exports = {
   },
   get: async function (req) {
     let { id } = req.params
+    if (!id) {
+      throw new BadRequestError('missing params')
+    }
     let part
     part = await db.getPartById(id)
+    if (part.length == 0) {
+      throw new NotFoundError('part')
+    }
     const result = await Promise.all(
       part.map(async (item) => {
         const newItem = {}
@@ -46,8 +55,17 @@ module.exports = {
     getAll: (type) => {
       return async (req) => {
         let { id } = req.params
+        if (!id) {
+          throw new BadRequestError('missing params')
+        }
         let partTransanctions = await db.getPartTransactions(id, type)
+        if (partTransanctions.length == 0) {
+          throw new NotFoundError('part_transactions')
+        }
         let [part] = await db.getPartById(id)
+        if (!part) {
+          throw new NotFoundError('part')
+        }
         const modifiedPartTransactions = partTransanctions.map((item) => {
           const newItem = {}
           newItem['id'] = item['id']
@@ -68,12 +86,24 @@ module.exports = {
     get: (type) => {
       return async (req) => {
         let { id } = req.params
+        if (!id) {
+          throw new BadRequestError('missing params')
+        }
         let transactionId
         if (type == 'metadata-update') {
           transactionId = req.params.updateId
         }
+        if (!transactionId) {
+          throw new BadRequestError('missing params')
+        }
         let partTransanctions = await db.getPartTransactionsById(transactionId, id, type)
+        if (partTransanctions.length == 0) {
+          throw new NotFoundError('part_transactions')
+        }
         let [part] = await db.getPartById(id)
+        if (!part) {
+          throw new NotFoundError('part')
+        }
         const modifiedPartTransactions = partTransanctions.map((item) => {
           const newItem = {}
           newItem['id'] = item['id']
@@ -98,7 +128,19 @@ module.exports = {
         let metadataType
         let imageAttachmentId
         const { id } = req.params
+        if (!id) {
+          throw new BadRequestError('missing params')
+        }
         const [part] = await db.getPartById(id)
+        if (!part) {
+          throw new NotFoundError('part')
+        }
+        const buildId = part.build_id
+        const [build] = await db.getBuildById(buildId)
+        const status = build.status
+        if (status == 'Submitted') {
+          throw new InternalError({ message: 'build not in Schedule, Started or Completed state' })
+        }
         if (type == 'metadata-update') {
           metadataType = req.body.metadataType
           imageAttachmentId = req.body.attachmentId
@@ -111,6 +153,8 @@ module.exports = {
           if (attachment) {
             binary_blob = attachment.binary_blob
             filename = attachment.filename
+          } else {
+            throw new NotFoundError('attachment')
           }
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
