@@ -8,6 +8,9 @@ const { validate, mapOrderData } = require('./helpers')
 module.exports = {
   getAll: async function (req) {
     const build = await db.getBuild()
+    if (build.length == 0) {
+      throw new NotFoundError('build')
+    }
     const result = await Promise.all(
       build.map(async (item) => {
         const newItem = {}
@@ -31,7 +34,13 @@ module.exports = {
   },
   getById: async function (req) {
     const { id } = req.params
+    if (!id) {
+      throw new BadRequestError('missing params')
+    }
     const build = await db.getBuildById(id)
+    if (build.length == 0) {
+      throw new NotFoundError('build')
+    }
     const result = await Promise.all(
       build.map(async (item) => {
         const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
@@ -95,7 +104,13 @@ module.exports = {
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactions(id, type)
+        if (buildTransactions.length == 0) {
+          throw new NotFoundError('build_transactions')
+        }
         let build = await db.getBuildById(id)
+        if (build.length == 0) {
+          throw new NotFoundError('build')
+        }
         const modifiedBuildTransactions = buildTransactions.map((item) => {
           let newItem = {}
           newItem['id'] = item['id']
@@ -138,8 +153,15 @@ module.exports = {
           transactionId = req.params.completionId
         }
         if (!id) throw new BadRequestError('missing params')
+        if (!transactionId) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactionsById(transactionId, id, type)
+        if (buildTransactions.length == 0) {
+          throw new NotFoundError('build_transactions')
+        }
         let build = await db.getBuildById(id)
+        if (build.length == 0) {
+          throw new NotFoundError('build')
+        }
         const modifiedBuildTransactions = buildTransactions.map((item) => {
           let newItem = {}
           newItem['id'] = item['id']
@@ -176,6 +198,7 @@ module.exports = {
         if (!id) throw new BadRequestError('missing params')
 
         const [build] = await db.getBuildById(id)
+        if (!build) throw new NotFoundError('build')
         const supplier = build.supplier
         const parts = await db.getPartsByBuildId(id)
         const parts_to_recipe = parts.map((item) => {
@@ -186,7 +209,6 @@ module.exports = {
         })
         const records = await db.getRecipeByIDs(recipes)
         const buyer = records[0].owner
-        if (!build) throw new NotFoundError('build')
         if (type == 'Schedule') {
           if (build.status != 'Created') {
             throw new InternalError({ message: 'Build not in Created state' })
@@ -213,6 +235,8 @@ module.exports = {
             if (attachment) {
               binary_blob = attachment.binary_blob
               filename = attachment.filename
+            } else {
+              throw new NotFoundError('attachment')
             }
           }
         } else if (type == 'Complete') {
@@ -226,6 +250,8 @@ module.exports = {
             if (attachment) {
               binary_blob = attachment.binary_blob
               filename = attachment.filename
+            } else {
+              throw new NotFoundError('attachment')
             }
           }
         }

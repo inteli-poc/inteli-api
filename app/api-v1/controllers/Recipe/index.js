@@ -12,6 +12,9 @@ module.exports = {
     } else {
       recipes = await db.getRecipes()
     }
+    if (recipes.length == 0) {
+      throw new NotFoundError('recipes')
+    }
     const result = await Promise.all(
       recipes.map(async (recipe) => {
         const { alias: supplierAlias } = await identity.getMemberByAddress(req, recipe.supplier)
@@ -96,7 +99,9 @@ module.exports = {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')
       const transactions = await db.getAllRecipeTransactions(id)
-
+      if (transactions.length == 0) {
+        throw new NotFoundError('recipe_transactions')
+      }
       return {
         status: 200,
         response: transactions.map(({ id, created_at, status }) => ({

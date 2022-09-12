@@ -5,7 +5,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 // eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.get, {
+    GET: buildValidatedJsonHandler(partController.transaction.getAll('metadata-update'), {
       summary: 'List Part Metadata Update Actions',
       description: 'Returns the details of all on-chain transactions to update metadata for the part {id}.',
       parameters: [
