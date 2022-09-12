@@ -138,8 +138,8 @@ module.exports = {
         const buildId = part.build_id
         const [build] = await db.getBuildById(buildId)
         const status = build.status
-        if (status == 'Submitted') {
-          throw new InternalError({ message: 'build not in Schedule, Started or Completed state' })
+        if (status == 'Created') {
+          throw new InternalError({ message: 'build not in Scheduled, Started or Completed state' })
         }
         if (type == 'metadata-update') {
           metadataType = req.body.metadataType
