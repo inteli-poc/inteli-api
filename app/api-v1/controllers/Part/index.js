@@ -163,7 +163,7 @@ module.exports = {
         const [build] = await db.getBuildById(buildId)
         const status = build.status
         if (status == 'Created') {
-          throw new InternalError({ message: 'build not in Scheduled, Started or Completed state' })
+          throw new InternalError({ message: 'build is in created state' })
         }
         if (type == 'metadata-update') {
           metadataType = req.body.metadataType
@@ -186,6 +186,9 @@ module.exports = {
           let [order] = await db.getOrder(part.order_id)
           if (!order) {
             throw new NotFoundError('order')
+          }
+          if (order.status == 'Created') {
+            throw new InternalError({ message: 'order is in created state' })
           }
           if (order.items[itemIndex] != part.recipe_id) {
             throw new InternalError({ message: 'recipe id mismatch' })
