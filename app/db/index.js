@@ -119,6 +119,10 @@ async function getPartById(id) {
   return client('parts').select().where({ id })
 }
 
+async function getPartsByOrderId(order_id) {
+  return client('parts').select().where({ order_id })
+}
+
 async function getAllRecipeTransactions(recipe_id) {
   return client.from('recipe_transactions').select().where({ recipe_id })
 }
@@ -339,4 +343,5 @@ module.exports = {
   removeTransactionPart,
   getPartTransactions,
   getPartTransactionsById,
+  getPartsByOrderId,
 }

@@ -371,6 +371,16 @@ const apiDoc = {
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted'],
           },
+          partIds: {
+            type: 'array',
+            description: 'List of part Ids',
+            maxItems: 10,
+            items: {
+              description: 'id of the part to be built',
+              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
+            },
+          },
         },
       },
       ChainAction: {

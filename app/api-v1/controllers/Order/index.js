@@ -55,6 +55,12 @@ module.exports = {
       if (item['comments']) {
         newItem['comments'] = item['comments']
       }
+      let parts = await db.getPartsByOrderId(item['id'])
+      if (parts.length != 0) {
+        newItem['partIds'] = parts.map((item) => {
+          return item['id']
+        })
+      }
       return newItem
     })
     const modifiedResult = []
@@ -95,6 +101,12 @@ module.exports = {
       }
       if (item['comments']) {
         newItem['comments'] = item['comments']
+      }
+      let parts = await db.getPartsByOrderId(item['id'])
+      if (parts.length != 0) {
+        newItem['partIds'] = parts.map((item) => {
+          return item['id']
+        })
       }
       return newItem
     })

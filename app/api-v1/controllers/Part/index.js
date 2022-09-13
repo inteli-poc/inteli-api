@@ -156,6 +156,16 @@ module.exports = {
           } else {
             throw new NotFoundError('attachment')
           }
+        } else if (type == 'order-assignment') {
+          part.order_id = req.body.orderId
+          let itemIndex = req.body.itemIndex
+          let [order] = await db.getOrder(part.order_id)
+          if (!order) {
+            throw new NotFoundError('order')
+          }
+          if (order.items[itemIndex] != part.recipe_id) {
+            throw new InternalError({ message: 'recipe id mismatch' })
+          }
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
         const tokenId = recipe.latest_token_id
@@ -197,9 +207,10 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
-            ...(type == 'metadata-update' && { metadata: part.metadata }),
+            ...(type == 'metadata-update' && { metadata: [req.body] }),
             ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
             ...(type == 'order-assignment' && { orderId: req.body.orderId }),
+            ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
           },
         }
       }
