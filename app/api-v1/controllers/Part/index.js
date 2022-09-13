@@ -77,13 +77,14 @@ module.exports = {
               newItem['metadata'] = metadata
             }
             if (type == 'order-assignment') {
-              if (!item['order_id']) {
-                throw new NotFoundError('order')
-              }
               newItem['orderId'] = item['order_id']
-              let [order] = await db.getOrder(item['order_id'])
-              let itemIndex = order.items.indexOf(part.recipe_id)
-              newItem['itemIndex'] = itemIndex
+              if (item['order_id']) {
+                let [order] = await db.getOrder(item['order_id'])
+                let itemIndex = order.items.indexOf(part.recipe_id)
+                newItem['itemIndex'] = itemIndex
+              } else {
+                newItem['itemIndex'] = null
+              }
             }
             return newItem
           })
@@ -128,13 +129,14 @@ module.exports = {
               newItem['metadata'] = metadata
             }
             if (type == 'order-assignment') {
-              if (!item['order_id']) {
-                throw new NotFoundError('order')
-              }
               newItem['orderId'] = item['order_id']
-              let [order] = await db.getOrder(item['order_id'])
-              let itemIndex = order.items.indexOf(part.recipe_id)
-              newItem['itemIndex'] = itemIndex
+              if (item['order_id']) {
+                let [order] = await db.getOrder(item['order_id'])
+                let itemIndex = order.items.indexOf(part.recipe_id)
+                newItem['itemIndex'] = itemIndex
+              } else {
+                newItem['itemIndex'] = null
+              }
             }
             return newItem
           })
