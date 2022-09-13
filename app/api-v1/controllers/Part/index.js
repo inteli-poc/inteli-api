@@ -66,17 +66,28 @@ module.exports = {
         if (!part) {
           throw new NotFoundError('part')
         }
-        const modifiedPartTransactions = partTransanctions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (type == 'metadata-update') {
-            let metadata = part.metadata
-            newItem['metadata'] = metadata
-          }
-          return newItem
-        })
+        const modifiedPartTransactions = await Promise.all(
+          partTransanctions.map(async (item) => {
+            const newItem = {}
+            newItem['id'] = item['id']
+            newItem['submittedAt'] = item['created_at'].toISOString()
+            newItem['status'] = item['status']
+            if (type == 'metadata-update') {
+              let metadata = part.metadata
+              newItem['metadata'] = metadata
+            }
+            if (type == 'order-assignment') {
+              if (!item['order_id']) {
+                throw new NotFoundError('order')
+              }
+              newItem['orderId'] = item['order_id']
+              let [order] = await db.getOrder(item['order_id'])
+              let itemIndex = order.items.indexOf(part.recipe_id)
+              newItem['itemIndex'] = itemIndex
+            }
+            return newItem
+          })
+        )
         return {
           status: 200,
           response: modifiedPartTransactions,
@@ -92,6 +103,8 @@ module.exports = {
         let transactionId
         if (type == 'metadata-update') {
           transactionId = req.params.updateId
+        } else if (type == 'order-assignment') {
+          transactionId = req.params.assignmentId
         }
         if (!transactionId) {
           throw new BadRequestError('missing params')
@@ -104,17 +117,28 @@ module.exports = {
         if (!part) {
           throw new NotFoundError('part')
         }
-        const modifiedPartTransactions = partTransanctions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (type == 'metadata-update') {
-            let metadata = part.metadata
-            newItem['metadata'] = metadata
-          }
-          return newItem
-        })
+        const modifiedPartTransactions = await Promise.all(
+          partTransanctions.map(async (item) => {
+            const newItem = {}
+            newItem['id'] = item['id']
+            newItem['submittedAt'] = item['created_at'].toISOString()
+            newItem['status'] = item['status']
+            if (type == 'metadata-update') {
+              let metadata = part.metadata
+              newItem['metadata'] = metadata
+            }
+            if (type == 'order-assignment') {
+              if (!item['order_id']) {
+                throw new NotFoundError('order')
+              }
+              newItem['orderId'] = item['order_id']
+              let [order] = await db.getOrder(item['order_id'])
+              let itemIndex = order.items.indexOf(part.recipe_id)
+              newItem['itemIndex'] = itemIndex
+            }
+            return newItem
+          })
+        )
         return {
           status: 200,
           response: modifiedPartTransactions[0],
