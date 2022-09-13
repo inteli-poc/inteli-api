@@ -1,4 +1,4 @@
-const buildPartOutputs = (data, type, parent_index) => {
+const buildPartOutputs = (data, type, parent_index_required) => {
   return {
     roles: {
       Owner: data.supplier,
@@ -8,31 +8,34 @@ const buildPartOutputs = (data, type, parent_index) => {
     metadata: {
       type: { type: 'LITERAL', value: 'PART' },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+      ...(type == 'order-assignment' && { orderId: { type: 'FILE', value: 'order_id.json' } }),
       ...(type == 'metadata-update' && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metaDataType: { type: 'LITERAL', value: data.metadataType } }),
       ...(type == 'metadata-update' && { imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' } }),
+      actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
     },
-    ...(parent_index && { parent_index: 0 }),
+    ...(parent_index_required && { parent_index: 0 }),
   }
 }
 
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs
-  let parent_index
+  let parent_index_required = false
   if (data.latest_token_id) {
     inputs = [data.latest_token_id]
-    parent_index = 0
+    parent_index_required = true
   } else {
     inputs = []
   }
-  outputs = [buildPartOutputs(data, type, parent_index)]
+  outputs = [buildPartOutputs(data, type, parent_index_required)]
   return {
     id: Buffer.from(JSON.stringify(data.id)),
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
+    ...(type == 'order-assignment' && { orderId: Buffer.from(JSON.stringify(data.order_id)) }),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,

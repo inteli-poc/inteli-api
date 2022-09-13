@@ -66,17 +66,28 @@ module.exports = {
         if (!part) {
           throw new NotFoundError('part')
         }
-        const modifiedPartTransactions = partTransanctions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (type == 'metadata-update') {
-            let metadata = part.metadata
-            newItem['metadata'] = metadata
-          }
-          return newItem
-        })
+        const modifiedPartTransactions = await Promise.all(
+          partTransanctions.map(async (item) => {
+            const newItem = {}
+            newItem['id'] = item['id']
+            newItem['submittedAt'] = item['created_at'].toISOString()
+            newItem['status'] = item['status']
+            if (type == 'metadata-update') {
+              let metadata = part.metadata
+              newItem['metadata'] = metadata
+            }
+            if (type == 'order-assignment') {
+              if (!part.order_id) {
+                throw new NotFoundError('order')
+              }
+              newItem['orderId'] = part.order_id
+              let [order] = await db.getOrder(part.order_id)
+              let itemIndex = order.items.indexOf(part.recipe_id)
+              newItem['itemIndex'] = itemIndex
+            }
+            return newItem
+          })
+        )
         return {
           status: 200,
           response: modifiedPartTransactions,
@@ -92,6 +103,8 @@ module.exports = {
         let transactionId
         if (type == 'metadata-update') {
           transactionId = req.params.updateId
+        } else if (type == 'order-assignment') {
+          transactionId = req.params.assignmentId
         }
         if (!transactionId) {
           throw new BadRequestError('missing params')
@@ -104,17 +117,28 @@ module.exports = {
         if (!part) {
           throw new NotFoundError('part')
         }
-        const modifiedPartTransactions = partTransanctions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (type == 'metadata-update') {
-            let metadata = part.metadata
-            newItem['metadata'] = metadata
-          }
-          return newItem
-        })
+        const modifiedPartTransactions = await Promise.all(
+          partTransanctions.map(async (item) => {
+            const newItem = {}
+            newItem['id'] = item['id']
+            newItem['submittedAt'] = item['created_at'].toISOString()
+            newItem['status'] = item['status']
+            if (type == 'metadata-update') {
+              let metadata = part.metadata
+              newItem['metadata'] = metadata
+            }
+            if (type == 'order-assignment') {
+              if (!part.order_id) {
+                throw new NotFoundError('order')
+              }
+              newItem['orderId'] = part.order_id
+              let [order] = await db.getOrder(part.order_id)
+              let itemIndex = order.items.indexOf(part.recipe_id)
+              newItem['itemIndex'] = itemIndex
+            }
+            return newItem
+          })
+        )
         return {
           status: 200,
           response: modifiedPartTransactions[0],
@@ -139,7 +163,7 @@ module.exports = {
         const [build] = await db.getBuildById(buildId)
         const status = build.status
         if (status == 'Created') {
-          throw new InternalError({ message: 'build not in Scheduled, Started or Completed state' })
+          throw new InternalError({ message: 'build is in created state' })
         }
         if (type == 'metadata-update') {
           metadataType = req.body.metadataType
@@ -155,6 +179,19 @@ module.exports = {
             filename = attachment.filename
           } else {
             throw new NotFoundError('attachment')
+          }
+        } else if (type == 'order-assignment') {
+          part.order_id = req.body.orderId
+          let itemIndex = req.body.itemIndex
+          let [order] = await db.getOrder(part.order_id)
+          if (!order) {
+            throw new NotFoundError('order')
+          }
+          if (order.status == 'Created') {
+            throw new InternalError({ message: 'order is in created state' })
+          }
+          if (order.items[itemIndex] != part.recipe_id) {
+            throw new InternalError({ message: 'recipe id mismatch' })
           }
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
@@ -197,9 +234,10 @@ module.exports = {
             id: transaction.id,
             submittedAt: new Date(transaction.created_at).toISOString(),
             status: transaction.status,
-            ...(type == 'metadata-update' && { metadata: part.metadata }),
+            ...(type == 'metadata-update' && { metadata: [req.body] }),
             ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
             ...(type == 'order-assignment' && { orderId: req.body.orderId }),
+            ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
           },
         }
       }
