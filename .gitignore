@@ -6,6 +6,7 @@ coverage.json
 .idea
 .env
 .vscode
+.scannerwork
 test.env
 test/test.env
 
