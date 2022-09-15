@@ -1,55 +1,24 @@
 const db = require('../../../db')
-const identity = require('../../services/identityService')
 const { runProcess } = require('../../../utils/dscp-api')
-const { mapOrderData, getResponse } = require('./helpers')
+const { mapOrderData, getResponse, getResultForPartGet, getResultForPartTransactionGet } = require('./helpers')
 const { InternalError, BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
   getAll: async function (req) {
     let parts
     parts = await db.getParts()
-    if (parts.length == 0) {
-      throw new NotFoundError('parts')
-    }
-    const result = await Promise.all(
-      parts.map(async (item) => {
-        const newItem = {}
-        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-        newItem['supplier'] = supplierAlias
-        newItem['buildId'] = item.build_id
-        newItem['recipeId'] = item.recipe_id
-        newItem['id'] = item.id
-        newItem['certifications'] = item.certifications
-        newItem['metadata'] = item.metadata
-        return newItem
-      })
-    )
-    return { status: 200, response: result }
+    let result = await getResultForPartGet(parts, req)
+    return result
   },
   get: async function (req) {
     let { id } = req.params
     if (!id) {
       throw new BadRequestError('missing params')
     }
-    let part
-    part = await db.getPartById(id)
-    if (part.length == 0) {
-      throw new NotFoundError('part')
-    }
-    const result = await Promise.all(
-      part.map(async (item) => {
-        const newItem = {}
-        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-        newItem['supplier'] = supplierAlias
-        newItem['buildId'] = item.build_id
-        newItem['recipeId'] = item.recipe_id
-        newItem['id'] = item.id
-        newItem['certifications'] = item.certifications
-        newItem['metadata'] = item.metadata
-        return newItem
-      })
-    )
-    return { status: 200, response: result }
+    let parts
+    parts = await db.getPartById(id)
+    let result = await getResultForPartGet(parts, req)
+    return result
   },
   transaction: {
     getAll: (type) => {
@@ -59,35 +28,7 @@ module.exports = {
           throw new BadRequestError('missing params')
         }
         let partTransanctions = await db.getPartTransactions(id, type)
-        if (partTransanctions.length == 0) {
-          throw new NotFoundError('part_transactions')
-        }
-        let [part] = await db.getPartById(id)
-        if (!part) {
-          throw new NotFoundError('part')
-        }
-        const modifiedPartTransactions = await Promise.all(
-          partTransanctions.map(async (item) => {
-            const newItem = {}
-            newItem['id'] = item['id']
-            newItem['submittedAt'] = item['created_at'].toISOString()
-            newItem['status'] = item['status']
-            if (type == 'metadata-update') {
-              let metadata = part.metadata
-              newItem['metadata'] = metadata
-            }
-            if (type == 'order-assignment') {
-              if (!part.order_id) {
-                throw new NotFoundError('order')
-              }
-              newItem['orderId'] = part.order_id
-              let [order] = await db.getOrder(part.order_id)
-              let itemIndex = order.items.indexOf(part.recipe_id)
-              newItem['itemIndex'] = itemIndex
-            }
-            return newItem
-          })
-        )
+        let modifiedPartTransactions = await getResultForPartTransactionGet(partTransanctions, type, id)
         return {
           status: 200,
           response: modifiedPartTransactions,
@@ -110,35 +51,7 @@ module.exports = {
           throw new BadRequestError('missing params')
         }
         let partTransanctions = await db.getPartTransactionsById(transactionId, id, type)
-        if (partTransanctions.length == 0) {
-          throw new NotFoundError('part_transactions')
-        }
-        let [part] = await db.getPartById(id)
-        if (!part) {
-          throw new NotFoundError('part')
-        }
-        const modifiedPartTransactions = await Promise.all(
-          partTransanctions.map(async (item) => {
-            const newItem = {}
-            newItem['id'] = item['id']
-            newItem['submittedAt'] = item['created_at'].toISOString()
-            newItem['status'] = item['status']
-            if (type == 'metadata-update') {
-              let metadata = part.metadata
-              newItem['metadata'] = metadata
-            }
-            if (type == 'order-assignment') {
-              if (!part.order_id) {
-                throw new NotFoundError('order')
-              }
-              newItem['orderId'] = part.order_id
-              let [order] = await db.getOrder(part.order_id)
-              let itemIndex = order.items.indexOf(part.recipe_id)
-              newItem['itemIndex'] = itemIndex
-            }
-            return newItem
-          })
-        )
+        let modifiedPartTransactions = await getResultForPartTransactionGet(partTransanctions, type, id)
         return {
           status: 200,
           response: modifiedPartTransactions[0],
