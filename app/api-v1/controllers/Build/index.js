@@ -242,8 +242,8 @@ module.exports = {
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-            binary_blob = attachment.binary_blob
-            filename = attachment.filename
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
             break
           case 'Complete':
             if (build.status != 'Started') {
@@ -256,8 +256,8 @@ module.exports = {
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-            binary_blob = attachment.binary_blob
-            filename = attachment.filename
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
             break
         }
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')

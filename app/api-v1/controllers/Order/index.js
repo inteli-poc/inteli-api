@@ -228,8 +228,8 @@ module.exports = {
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-            binary_blob = attachment.binary_blob
-            filename = attachment.filename
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
             break
           case 'Amendment':
             if (order.status != 'AcknowledgedWithExceptions') {

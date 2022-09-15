@@ -181,8 +181,8 @@ module.exports = {
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-            binary_blob = attachment.binary_blob
-            filename = attachment.filename
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
             break
           case 'order-assignment':
             part.order_id = req.body.orderId
@@ -191,10 +191,10 @@ module.exports = {
             if (order.length == 0) {
               throw new NotFoundError('order')
             }
-            if (order.status == 'Created') {
+            if (order[0].status == 'Created') {
               throw new InternalError({ message: 'order is in created state' })
             }
-            if (order.items[itemIndex] != part.recipe_id) {
+            if (order[0].items[itemIndex] != part.recipe_id) {
               throw new InternalError({ message: 'recipe id mismatch' })
             }
             break
