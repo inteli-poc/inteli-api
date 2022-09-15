@@ -16,6 +16,18 @@ exports.validate = async (items, supplier) => {
   }
 }
 
+exports.getResponse = async (type, transaction, req) => {
+  return {
+    id: transaction.id,
+    submittedAt: new Date(transaction.created_at).toISOString(),
+    status: transaction.status,
+    ...(type != 'Complete' && { completionEstimate: req.body.completionEstimate }),
+    ...(type == 'Start' && { startedAt: req.body.startedAt }),
+    ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
+    ...(type == 'Complete' && { completedAt: req.body.completedAt }),
+  }
+}
+
 const buildBuildOutputs = (data, type) => {
   return {
     roles: {
