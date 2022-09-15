@@ -1,5 +1,6 @@
 const db = require('../../../db')
-const { NoTokenError, NothingToProcess, BadRequestError } = require('../../../utils/errors')
+const identity = require('../../services/identityService')
+const { NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 exports.validate = async (body) => {
   // Will add a get function at a later date to check for duplication
@@ -34,6 +35,74 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'Acknowledgement' && { comments: req.body.comments }),
   }
 }
+
+exports.getResultForOrderGet = async (result, req) => {
+  if (result.length == 0) {
+    throw new NotFoundError('orders')
+  }
+  const promises = result.map(async (item) => {
+    const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+    const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
+    const newItem = {}
+    newItem['buyer'] = buyerAlias
+    newItem['supplier'] = supplierAlias
+    newItem['id'] = item['id']
+    newItem['status'] = item['status']
+    newItem['items'] = item['items']
+    newItem['requiredBy'] = item['required_by'].toISOString()
+    newItem['externalId'] = item['external_id']
+    newItem['price'] = item['price']
+    newItem['quantity'] = item['quantity']
+    newItem['forecastDate'] = item['forecast_date'].toISOString()
+    if (item['image_attachment_id']) {
+      newItem['imageAttachmentId'] = item['image_attachment_id']
+    }
+    if (item['comments']) {
+      newItem['comments'] = item['comments']
+    }
+    let parts = await db.getPartsByOrderId(item['id'])
+    if (parts.length != 0) {
+      newItem['partIds'] = parts.map((item) => {
+        return item['id']
+      })
+    }
+    return newItem
+  })
+  const modifiedResult = []
+  for await (let val of promises) {
+    modifiedResult.push(val)
+  }
+  return {
+    status: 200,
+    response: modifiedResult,
+  }
+}
+
+exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) => {
+  if (orderTransactions.length == 0) {
+    throw new NotFoundError('order_transactions')
+  }
+  let results = null
+  if (type == 'Acknowledgement' || type == 'Amendment') {
+    results = await db.getOrder(id)
+    if (results.length == 0) {
+      throw new NotFoundError('order')
+    }
+  }
+  const modifiedOrderTransactions = orderTransactions.map((item) => {
+    const newItem = {}
+    newItem['id'] = item['id']
+    newItem['submittedAt'] = item['created_at'].toISOString()
+    newItem['status'] = item['status']
+    if (results) {
+      newItem['items'] = results[0].items
+      newItem['requiredBy'] = results[0].required_by.toISOString()
+    }
+    return newItem
+  })
+  return modifiedOrderTransactions
+}
+
 /*eslint-disable */
 const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({

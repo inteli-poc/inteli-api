@@ -1,3 +1,7 @@
+const db = require('../../../db')
+const identity = require('../../services/identityService')
+const { NotFoundError } = require('../../../utils/errors')
+
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
     roles: {
@@ -31,6 +35,58 @@ exports.getResponse = async (type, transaction, req) => {
   }
 }
 
+exports.getResultForPartGet = async (parts, req) => {
+  if (parts.length == 0) {
+    throw new NotFoundError('parts')
+  }
+  const result = await Promise.all(
+    parts.map(async (item) => {
+      const newItem = {}
+      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+      newItem['supplier'] = supplierAlias
+      newItem['buildId'] = item.build_id
+      newItem['recipeId'] = item.recipe_id
+      newItem['id'] = item.id
+      newItem['certifications'] = item.certifications
+      newItem['metadata'] = item.metadata
+      return newItem
+    })
+  )
+  return { status: 200, response: result }
+}
+
+exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => {
+  if (partTransanctions.length == 0) {
+    throw new NotFoundError('part_transactions')
+  }
+  let [part] = await db.getPartById(id)
+  if (!part) {
+    throw new NotFoundError('part')
+  }
+  const modifiedPartTransactions = await Promise.all(
+    partTransanctions.map(async (item) => {
+      const newItem = {}
+      newItem['id'] = item['id']
+      newItem['submittedAt'] = item['created_at'].toISOString()
+      newItem['status'] = item['status']
+      if (type == 'metadata-update') {
+        let metadata = part.metadata
+        newItem['metadata'] = metadata
+      }
+      if (type == 'order-assignment') {
+        if (!part.order_id) {
+          throw new NotFoundError('order')
+        }
+        newItem['orderId'] = part.order_id
+        let [order] = await db.getOrder(part.order_id)
+        let itemIndex = order.items.indexOf(part.recipe_id)
+        newItem['itemIndex'] = itemIndex
+      }
+      return newItem
+    })
+  )
+  return modifiedPartTransactions
+}
 exports.mapOrderData = async (data, type) => {
   let inputs
   let outputs

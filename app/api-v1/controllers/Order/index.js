@@ -1,6 +1,12 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
-const { validate, mapOrderData, getResponse } = require('./helpers')
+const {
+  validate,
+  mapOrderData,
+  getResponse,
+  getResultForOrderGet,
+  getResultForOrderTransactionGet,
+} = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 
@@ -33,44 +39,7 @@ module.exports = {
     let { id } = req.params
     if (!id) throw new BadRequestError('missing params')
     const result = await db.getOrder(id)
-    if (result.length == 0) {
-      throw new NotFoundError('order')
-    }
-    const promises = result.map(async (item) => {
-      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
-      const newItem = {}
-      newItem['buyer'] = buyerAlias
-      newItem['supplier'] = supplierAlias
-      newItem['id'] = item['id']
-      newItem['status'] = item['status']
-      newItem['items'] = item['items']
-      newItem['requiredBy'] = item['required_by'].toISOString()
-      newItem['price'] = item['price']
-      newItem['quantity'] = item['quantity']
-      newItem['forecastDate'] = item['forecast_date'].toISOString()
-      if (item['image_attachment_id']) {
-        newItem['imageAttachmentId'] = item['image_attachment_id']
-      }
-      if (item['comments']) {
-        newItem['comments'] = item['comments']
-      }
-      let parts = await db.getPartsByOrderId(item['id'])
-      if (parts.length != 0) {
-        newItem['partIds'] = parts.map((item) => {
-          return item['id']
-        })
-      }
-      return newItem
-    })
-    const modifiedResult = []
-    for await (let val of promises) {
-      modifiedResult.push(val)
-    }
-    return {
-      status: 200,
-      response: modifiedResult,
-    }
+    await getResultForOrderGet(result, req)
   },
   get: async function (req) {
     let result
@@ -79,45 +48,7 @@ module.exports = {
     } else {
       result = await db.getOrders()
     }
-    if (result.length == 0) {
-      throw new NotFoundError('orders')
-    }
-    const promises = result.map(async (item) => {
-      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
-      const newItem = {}
-      newItem['buyer'] = buyerAlias
-      newItem['supplier'] = supplierAlias
-      newItem['id'] = item['id']
-      newItem['status'] = item['status']
-      newItem['items'] = item['items']
-      newItem['requiredBy'] = item['required_by'].toISOString()
-      newItem['externalId'] = item['external_id']
-      newItem['price'] = item['price']
-      newItem['quantity'] = item['quantity']
-      newItem['forecastDate'] = item['forecast_date'].toISOString()
-      if (item['image_attachment_id']) {
-        newItem['imageAttachmentId'] = item['image_attachment_id']
-      }
-      if (item['comments']) {
-        newItem['comments'] = item['comments']
-      }
-      let parts = await db.getPartsByOrderId(item['id'])
-      if (parts.length != 0) {
-        newItem['partIds'] = parts.map((item) => {
-          return item['id']
-        })
-      }
-      return newItem
-    })
-    const modifiedResult = []
-    for await (let val of promises) {
-      modifiedResult.push(val)
-    }
-    return {
-      status: 200,
-      response: modifiedResult,
-    }
+    await getResultForOrderGet(result, req)
   },
   transaction: {
     getById: (type) => {
@@ -137,27 +68,7 @@ module.exports = {
         if (!id) throw new BadRequestError('missing params')
         if (!transactionId) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactionsById(transactionId, id, type)
-        if (orderTransactions.length == 0) {
-          throw new NotFoundError('order_transactions')
-        }
-        let results = null
-        if (type == 'Acknowledgement' || type == 'Amendment') {
-          results = await db.getOrder(id)
-          if (results.length == 0) {
-            throw new NotFoundError('order')
-          }
-        }
-        const modifiedOrderTransactions = orderTransactions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (results) {
-            newItem['items'] = results[0].items
-            newItem['requiredBy'] = results[0].required_by.toISOString()
-          }
-          return newItem
-        })
+        let modifiedOrderTransactions = await getResultForOrderTransactionGet(orderTransactions, type, id)
         return {
           status: 200,
           response: modifiedOrderTransactions[0],
@@ -169,27 +80,7 @@ module.exports = {
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
         const orderTransactions = await db.getOrderTransactions(id, type)
-        if (orderTransactions.length == 0) {
-          throw new NotFoundError('order_transactions')
-        }
-        let results = null
-        if (type == 'Acknowledgement' || type == 'Amendment') {
-          results = await db.getOrder(id)
-          if (results.length == 0) {
-            throw new NotFoundError('order')
-          }
-        }
-        const modifiedOrderTransactions = orderTransactions.map((item) => {
-          const newItem = {}
-          newItem['id'] = item['id']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          newItem['status'] = item['status']
-          if (results) {
-            newItem['items'] = results[0].items
-            newItem['requiredBy'] = results[0].required_by.toISOString()
-          }
-          return newItem
-        })
+        let modifiedOrderTransactions = await getResultForOrderTransactionGet(orderTransactions, type, id)
         return {
           status: 200,
           response: modifiedOrderTransactions,

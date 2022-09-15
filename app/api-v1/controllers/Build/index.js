@@ -3,34 +3,18 @@ const identity = require('../../services/identityService')
 const { BadRequestError, InternalError, NotFoundError } = require('../../../utils/errors')
 const camelcaseObjectDeep = require('camelcase-object-deep')
 const { runProcess } = require('../../../utils/dscp-api')
-const { validate, mapOrderData, getResponse } = require('./helpers')
+const {
+  validate,
+  mapOrderData,
+  getResponse,
+  getResultForBuildGet,
+  getResultForBuildTransactionGet,
+} = require('./helpers')
 
 module.exports = {
   getAll: async function (req) {
     const build = await db.getBuild()
-    if (build.length == 0) {
-      throw new NotFoundError('build')
-    }
-    const result = await Promise.all(
-      build.map(async (item) => {
-        const newItem = {}
-        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-        newItem.supplier = supplierAlias
-        newItem.externalId = item.external_id
-        const partIds = await db.getPartIdsByBuildId(item.id)
-        newItem.partIds = partIds.map((item) => {
-          return item.id
-        })
-        newItem.status = item.status
-        newItem.id = item.id
-        newItem.completionEstimate = item.completion_estimate.toISOString()
-        newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
-        newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
-        newItem.attachmentId = item.attachment_id
-        return newItem
-      })
-    )
-    return { status: 200, response: result }
+    await getResultForBuildGet(build, req)
   },
   getById: async function (req) {
     const { id } = req.params
@@ -38,29 +22,7 @@ module.exports = {
       throw new BadRequestError('missing params')
     }
     const build = await db.getBuildById(id)
-    if (build.length == 0) {
-      throw new NotFoundError('build')
-    }
-    const result = await Promise.all(
-      build.map(async (item) => {
-        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-        const newItem = {}
-        newItem.supplier = supplierAlias
-        newItem.status = item.status
-        newItem.id = item.id
-        newItem.externalId = item.external_id
-        const partIds = await db.getPartIdsByBuildId(item.id)
-        newItem.partIds = partIds.map((item) => {
-          return item.id
-        })
-        newItem.completionEstimate = item.completion_estimate.toISOString()
-        newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
-        newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
-        newItem.attachmentId = item.attachment_id
-        return newItem
-      })
-    )
-    return { status: 200, response: result }
+    await getResultForBuildGet(build, req)
   },
   create: async function (req) {
     if (!req.body) {
@@ -104,34 +66,7 @@ module.exports = {
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactions(id, type)
-        if (buildTransactions.length == 0) {
-          throw new NotFoundError('build_transactions')
-        }
-        let build = await db.getBuildById(id)
-        if (build.length == 0) {
-          throw new NotFoundError('build')
-        }
-        const modifiedBuildTransactions = buildTransactions.map((item) => {
-          let newItem = {}
-          newItem['id'] = item['id']
-          newItem['status'] = item['status']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          switch (type) {
-            case 'Start':
-              newItem['startedAt'] = build[0].started_at.toISOString()
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-              break
-            case 'progress-update':
-              newItem['attachmentId'] = build[0].attachment_id
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-              break
-            case 'Complete':
-              newItem['attachmentId'] = build[0].attachment_id
-              newItem['completedAt'] = build[0].completed_at.toISOString()
-              break
-          }
-          return newItem
-        })
+        let modifiedBuildTransactions = await getResultForBuildTransactionGet(buildTransactions, type, id)
 
         return {
           status: 200,
@@ -160,34 +95,7 @@ module.exports = {
         if (!id) throw new BadRequestError('missing params')
         if (!transactionId) throw new BadRequestError('missing params')
         const buildTransactions = await db.getBuildTransactionsById(transactionId, id, type)
-        if (buildTransactions.length == 0) {
-          throw new NotFoundError('build_transactions')
-        }
-        let build = await db.getBuildById(id)
-        if (build.length == 0) {
-          throw new NotFoundError('build')
-        }
-        const modifiedBuildTransactions = buildTransactions.map((item) => {
-          let newItem = {}
-          newItem['id'] = item['id']
-          newItem['status'] = item['status']
-          newItem['submittedAt'] = item['created_at'].toISOString()
-          switch (type) {
-            case 'Start':
-              newItem['startedAt'] = build[0].started_at.toISOString()
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-              break
-            case 'progress-update':
-              newItem['attachmentId'] = build[0].attachment_id
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-              break
-            case 'Complete':
-              newItem['attachmentId'] = build[0].attachment_id
-              newItem['completedAt'] = build[0].completed_at.toISOString()
-              break
-          }
-          return newItem
-        })
+        let modifiedBuildTransactions = await getResultForBuildTransactionGet(buildTransactions, type, id)
 
         return {
           status: 200,
