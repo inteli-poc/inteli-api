@@ -26,7 +26,7 @@ const buildBuildOutputs = (data, type) => {
     metadata: {
       type: { type: 'LITERAL', value: 'BUILD' },
       status: { type: 'LITERAL', value: data.status },
-      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
       externalId: { type: 'LITERAL', value: data.external_id },
       ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimate } }),
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),

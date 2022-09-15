@@ -20,6 +20,20 @@ exports.validate = async (body) => {
   return body
 }
 
+exports.getResponse = async (type, transaction, req) => {
+  return {
+    id: transaction.id,
+    submittedAt: new Date(transaction.created_at).toISOString(),
+    status: transaction.status,
+    ...((type == 'Amendment' || type == 'Acknowledgement') && { requiredBy: req.body.requiredBy }),
+    ...((type == 'Amendment' || type == 'Acknowledgement') && { price: req.body.price }),
+    ...((type == 'Amendment' || type == 'Acknowledgement') && { items: req.body.items }),
+    ...((type == 'Amendment' || type == 'Acknowledgement') && { quantity: req.body.quantity }),
+    ...((type == 'Amendment' || type == 'Acknowledgement') && { forecastDate: req.body.forecastDate }),
+    ...(type == 'Acknowledgement' && { imageAttachmentId: req.body.imageAttachmentId }),
+    ...(type == 'Acknowledgement' && { comments: req.body.comments }),
+  }
+}
 /*eslint-disable */
 const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
   recipes.map((_, i) => ({
@@ -43,7 +57,7 @@ const buildOrderOutput = (data,type) => {
         type: { type: 'LITERAL', value: 'ORDER' },
         status: { type: 'LITERAL', value: data.status },
         requiredBy: { type: 'LITERAL', value: data.required_by },
-        transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+        transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
         externalId: { type: 'LITERAL', value: data.external_id },
         ...(type == 'Acknowledgement' && data.filename) && {image: {type: 'FILE', value: data.filename}},
         ...(type == 'Acknowledgement' && data.image_attachment_id) && {imageAttachmentId: {type: 'FILE', value: 'image_attachment_id.json'}},

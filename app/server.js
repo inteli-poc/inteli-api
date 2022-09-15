@@ -15,6 +15,8 @@ const v1DscpApiService = require('./api-v1/services/dscpApiService')
 const v1IdentityService = require('./api-v1/services/identityService')
 const { handleErrors } = require('./utils/errors')
 const { verifyJwks } = require('./utils/auth')
+const crypto = require('crypto')
+const fs = require('fs').promises
 
 async function createHttpServer() {
   const app = express()
@@ -35,7 +37,17 @@ async function createHttpServer() {
 
   const multerOptions = {
     limits: { fileSize: FILE_UPLOAD_SIZE_LIMIT_BYTES },
-    storage: multer.diskStorage({}),
+    storage: multer.diskStorage({
+      filename: (req, file, cb) => {
+        const buf = crypto.randomBytes(20)
+        cb(null, buf.toString('hex'))
+      },
+      destination: async (req, file, cb) => {
+        const path = './uploads'
+        await fs.mkdir(path, { recursive: true })
+        cb(null, './uploads/')
+      },
+    }),
   }
 
   const securityHandlers =

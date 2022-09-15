@@ -7,7 +7,7 @@ const buildPartOutputs = (data, type, parent_index_required) => {
     },
     metadata: {
       type: { type: 'LITERAL', value: 'PART' },
-      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
       ...(type == 'order-assignment' && { orderId: { type: 'FILE', value: 'order_id.json' } }),
       ...(type == 'metadata-update' && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metaDataType: { type: 'LITERAL', value: data.metadataType } }),
@@ -16,6 +16,18 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       id: { type: 'FILE', value: 'id.json' },
     },
     ...(parent_index_required && { parent_index: 0 }),
+  }
+}
+
+exports.getResponse = async (type, transaction, req) => {
+  return {
+    id: transaction.id,
+    submittedAt: new Date(transaction.created_at).toISOString(),
+    status: transaction.status,
+    ...(type == 'metadata-update' && { metadata: [req.body] }),
+    ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
+    ...(type == 'order-assignment' && { orderId: req.body.orderId }),
+    ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
   }
 }
 

@@ -1,6 +1,6 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
-const { validate, mapOrderData } = require('./helpers')
+const { validate, mapOrderData, getResponse } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 
@@ -200,21 +200,23 @@ module.exports = {
       return async (req) => {
         let binary_blob = null
         let filename = null
+        let attachment
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
 
         const [order] = await db.getOrder(id)
         if (!order) throw new NotFoundError('order')
-        if (type == 'Submission') {
-          if (order.status != 'Created') {
-            throw new InternalError({ message: 'Order not in Created state' })
-          } else {
+        switch (type) {
+          case 'Submission':
+            if (order.status != 'Created') {
+              throw new InternalError({ message: 'Order not in Created state' })
+            }
             order.status = 'Submitted'
-          }
-        } else if (type == 'Acknowledgement') {
-          if (order.status != 'Submitted') {
-            throw new InternalError({ message: 'Order not in Submitted state' })
-          } else {
+            break
+          case 'Acknowledgement':
+            if (order.status != 'Submitted') {
+              throw new InternalError({ message: 'Order not in Submitted state' })
+            }
             order.status = 'AcknowledgedWithExceptions'
             order.required_by = req.body.requiredBy
             order.price = parseFloat(req.body.price)
@@ -222,18 +224,17 @@ module.exports = {
             order.quantity = parseInt(req.body.quantity)
             order.image_attachment_id = req.body.imageAttachmentId
             order.comments = req.body.comments
-            const [attachment] = await db.getAttachment(order.image_attachment_id)
-            if (attachment) {
-              binary_blob = attachment.binary_blob
-              filename = attachment.filename
-            } else {
+            attachment = await db.getAttachment(order.image_attachment_id)
+            if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-          }
-        } else if (type == 'Amendment') {
-          if (order.status != 'AcknowledgedWithExceptions') {
-            throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
-          } else {
+            binary_blob = attachment.binary_blob
+            filename = attachment.filename
+            break
+          case 'Amendment':
+            if (order.status != 'AcknowledgedWithExceptions') {
+              throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
+            }
             order.status = 'Amended'
             order.required_by = req.body.requiredBy
             order.items = req.body.items
@@ -242,13 +243,13 @@ module.exports = {
             order.quantity = parseInt(req.body.quantity)
             order.image_attachment_id = null
             order.comments = null
-          }
-        } else if (type == 'Acceptance') {
-          if (order.status != 'Submitted' && order.status != 'Amended') {
-            throw new InternalError({ message: 'Order not in Submitted or Amended state' })
-          } else {
+            break
+          case 'Acceptance':
+            if (order.status != 'Submitted' && order.status != 'Amended') {
+              throw new InternalError({ message: 'Order not in Submitted or Amended state' })
+            }
             order.status = 'Accepted'
-          }
+            break
         }
         const selfAddress = await identity.getMemberBySelf(req)
         if (!selfAddress) throw new IdentityError()
@@ -286,18 +287,7 @@ module.exports = {
         }
         return {
           status: 201,
-          response: {
-            id: transaction.id,
-            submittedAt: new Date(transaction.created_at).toISOString(),
-            status: transaction.status,
-            ...((type == 'Amendment' || type == 'Acknowledgement') && { requiredBy: req.body.requiredBy }),
-            ...((type == 'Amendment' || type == 'Acknowledgement') && { price: req.body.price }),
-            ...((type == 'Amendment' || type == 'Acknowledgement') && { items: req.body.items }),
-            ...((type == 'Amendment' || type == 'Acknowledgement') && { quantity: req.body.quantity }),
-            ...((type == 'Amendment' || type == 'Acknowledgement') && { forecastDate: req.body.forecastDate }),
-            ...(type == 'Acknowledgement' && { imageAttachmentId: req.body.imageAttachmentId }),
-            ...(type == 'Acknowledgement' && { comments: req.body.comments }),
-          },
+          response: await getResponse(type, transaction, req),
         }
       }
     },

@@ -128,7 +128,7 @@ async function getAllRecipeTransactions(recipe_id) {
 }
 
 const insertAttachment = async (name, fileData) => {
-  return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
+  return client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
 }
 
 async function getAttachmentByIdDb(id) {
