@@ -7,7 +7,8 @@ module.exports = {
   getAll: async function (req) {
     let parts
     parts = await db.getParts()
-    await getResultForPartGet(parts, req)
+    let result = await getResultForPartGet(parts, req)
+    return result
   },
   get: async function (req) {
     let { id } = req.params
@@ -16,7 +17,8 @@ module.exports = {
     }
     let parts
     parts = await db.getPartById(id)
-    await getResultForPartGet(parts, req)
+    let result = await getResultForPartGet(parts, req)
+    return result
   },
   transaction: {
     getAll: (type) => {

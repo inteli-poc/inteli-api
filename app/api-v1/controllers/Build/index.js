@@ -14,7 +14,8 @@ const {
 module.exports = {
   getAll: async function (req) {
     const build = await db.getBuild()
-    await getResultForBuildGet(build, req)
+    let result = await getResultForBuildGet(build, req)
+    return result
   },
   getById: async function (req) {
     const { id } = req.params
@@ -22,7 +23,8 @@ module.exports = {
       throw new BadRequestError('missing params')
     }
     const build = await db.getBuildById(id)
-    await getResultForBuildGet(build, req)
+    let result = await getResultForBuildGet(build, req)
+    return result
   },
   create: async function (req) {
     if (!req.body) {

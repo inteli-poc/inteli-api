@@ -39,7 +39,8 @@ module.exports = {
     let { id } = req.params
     if (!id) throw new BadRequestError('missing params')
     const result = await db.getOrder(id)
-    await getResultForOrderGet(result, req)
+    let response = await getResultForOrderGet(result, req)
+    return response
   },
   get: async function (req) {
     let result
@@ -48,7 +49,8 @@ module.exports = {
     } else {
       result = await db.getOrders()
     }
-    await getResultForOrderGet(result, req)
+    let response = await getResultForOrderGet(result, req)
+    return response
   },
   transaction: {
     getById: (type) => {
