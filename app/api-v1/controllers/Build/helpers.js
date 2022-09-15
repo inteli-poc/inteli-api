@@ -16,6 +16,18 @@ exports.validate = async (items, supplier) => {
   }
 }
 
+exports.getResponse = async (type, transaction, req) => {
+  return {
+    id: transaction.id,
+    submittedAt: new Date(transaction.created_at).toISOString(),
+    status: transaction.status,
+    ...(type != 'Complete' && { completionEstimate: req.body.completionEstimate }),
+    ...(type == 'Start' && { startedAt: req.body.startedAt }),
+    ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
+    ...(type == 'Complete' && { completedAt: req.body.completedAt }),
+  }
+}
+
 const buildBuildOutputs = (data, type) => {
   return {
     roles: {
@@ -26,7 +38,7 @@ const buildBuildOutputs = (data, type) => {
     metadata: {
       type: { type: 'LITERAL', value: 'BUILD' },
       status: { type: 'LITERAL', value: data.status },
-      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/[-]/g, '') },
+      transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
       externalId: { type: 'LITERAL', value: data.external_id },
       ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimate } }),
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),

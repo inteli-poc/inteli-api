@@ -7,7 +7,7 @@ const { apiDocs } = require('../helper/routeHelper')
 
 const OpenAPISchemaValidator = require('openapi-schema-validator').default
 
-var validator = new OpenAPISchemaValidator({
+let validator = new OpenAPISchemaValidator({
   version: 3,
   // optional
   extensions: {

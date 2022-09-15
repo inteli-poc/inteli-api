@@ -1,7 +1,7 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { runProcess } = require('../../../utils/dscp-api')
-const { mapOrderData } = require('./helpers')
+const { mapOrderData, getResponse } = require('./helpers')
 const { InternalError, BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
@@ -151,6 +151,9 @@ module.exports = {
         let filename
         let metadataType
         let imageAttachmentId
+        let attachment
+        let itemIndex
+        let order
         const { id } = req.params
         if (!id) {
           throw new BadRequestError('missing params')
@@ -165,34 +168,36 @@ module.exports = {
         if (status == 'Created') {
           throw new InternalError({ message: 'build is in created state' })
         }
-        if (type == 'metadata-update') {
-          metadataType = req.body.metadataType
-          imageAttachmentId = req.body.attachmentId
-          if (part.metadata) {
-            part.metadata = part.metadata.concat([req.body])
-          } else {
-            part.metadata = [req.body]
-          }
-          const [attachment] = await db.getAttachment(req.body.attachmentId)
-          if (attachment) {
-            binary_blob = attachment.binary_blob
-            filename = attachment.filename
-          } else {
-            throw new NotFoundError('attachment')
-          }
-        } else if (type == 'order-assignment') {
-          part.order_id = req.body.orderId
-          let itemIndex = req.body.itemIndex
-          let [order] = await db.getOrder(part.order_id)
-          if (!order) {
-            throw new NotFoundError('order')
-          }
-          if (order.status == 'Created') {
-            throw new InternalError({ message: 'order is in created state' })
-          }
-          if (order.items[itemIndex] != part.recipe_id) {
-            throw new InternalError({ message: 'recipe id mismatch' })
-          }
+        switch (type) {
+          case 'metadata-update':
+            metadataType = req.body.metadataType
+            imageAttachmentId = req.body.attachmentId
+            if (part.metadata) {
+              part.metadata = part.metadata.concat([req.body])
+            } else {
+              part.metadata = [req.body]
+            }
+            attachment = await db.getAttachment(req.body.attachmentId)
+            if (attachment.length == 0) {
+              throw new NotFoundError('attachment')
+            }
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
+            break
+          case 'order-assignment':
+            part.order_id = req.body.orderId
+            itemIndex = req.body.itemIndex
+            order = await db.getOrder(part.order_id)
+            if (order.length == 0) {
+              throw new NotFoundError('order')
+            }
+            if (order[0].status == 'Created') {
+              throw new InternalError({ message: 'order is in created state' })
+            }
+            if (order[0].items[itemIndex] != part.recipe_id) {
+              throw new InternalError({ message: 'recipe id mismatch' })
+            }
+            break
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
         const tokenId = recipe.latest_token_id
@@ -230,15 +235,7 @@ module.exports = {
         }
         return {
           status: 201,
-          response: {
-            id: transaction.id,
-            submittedAt: new Date(transaction.created_at).toISOString(),
-            status: transaction.status,
-            ...(type == 'metadata-update' && { metadata: [req.body] }),
-            ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
-            ...(type == 'order-assignment' && { orderId: req.body.orderId }),
-            ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
-          },
+          response: await getResponse(type, transaction, req),
         }
       }
     },

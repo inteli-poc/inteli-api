@@ -3,7 +3,7 @@ const identity = require('../../services/identityService')
 const { BadRequestError, InternalError, NotFoundError } = require('../../../utils/errors')
 const camelcaseObjectDeep = require('camelcase-object-deep')
 const { runProcess } = require('../../../utils/dscp-api')
-const { validate, mapOrderData } = require('./helpers')
+const { validate, mapOrderData, getResponse } = require('./helpers')
 
 module.exports = {
   getAll: async function (req) {
@@ -83,11 +83,11 @@ module.exports = {
     const [buildId] = await db.postBuildDb(build)
     let parts = req.body.parts
     let partIds = []
-    for (let index = 0; index < parts.length; index++) {
+    for (let value of parts) {
       const part = {}
       part.supplier = selfAddress
       part.build_id = buildId.id
-      part.recipe_id = parts[index].recipeId
+      part.recipe_id = value.recipeId
       let [recipe] = await db.getRecipeByIDdb(part.recipe_id)
       part.certifications = JSON.stringify(recipe.required_certs)
       let [partId] = await db.postPartDb(part)
@@ -116,19 +116,19 @@ module.exports = {
           newItem['id'] = item['id']
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
-          if (build) {
-            if (type != 'Complete') {
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-            }
-            if (type == 'Start') {
+          switch (type) {
+            case 'Start':
               newItem['startedAt'] = build[0].started_at.toISOString()
-            }
-            if (type == 'progress-update' || type == 'Complete') {
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+              break
+            case 'progress-update':
               newItem['attachmentId'] = build[0].attachment_id
-            }
-            if (type == 'Complete') {
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+              break
+            case 'Complete':
+              newItem['attachmentId'] = build[0].attachment_id
               newItem['completedAt'] = build[0].completed_at.toISOString()
-            }
+              break
           }
           return newItem
         })
@@ -143,14 +143,19 @@ module.exports = {
       return async (req) => {
         const { id } = req.params
         let transactionId
-        if (type == 'Schedule') {
-          transactionId = req.params.scheduleId
-        } else if (type == 'Start') {
-          transactionId = req.params.startId
-        } else if (type == 'progress-update') {
-          transactionId = req.params.updateId
-        } else if (type == 'Complete') {
-          transactionId = req.params.completionId
+        switch (type) {
+          case 'Schedule':
+            transactionId = req.params.scheduleId
+            break
+          case 'Start':
+            transactionId = req.params.startId
+            break
+          case 'progress-update':
+            transactionId = req.params.updateId
+            break
+          case 'Complete':
+            transactionId = req.params.completionId
+            break
         }
         if (!id) throw new BadRequestError('missing params')
         if (!transactionId) throw new BadRequestError('missing params')
@@ -167,19 +172,19 @@ module.exports = {
           newItem['id'] = item['id']
           newItem['status'] = item['status']
           newItem['submittedAt'] = item['created_at'].toISOString()
-          if (build) {
-            if (type != 'Complete') {
-              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-            }
-            if (type == 'Start') {
+          switch (type) {
+            case 'Start':
               newItem['startedAt'] = build[0].started_at.toISOString()
-            }
-            if (type == 'progress-update' || type == 'Complete') {
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+              break
+            case 'progress-update':
               newItem['attachmentId'] = build[0].attachment_id
-            }
-            if (type == 'Complete') {
+              newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+              break
+            case 'Complete':
+              newItem['attachmentId'] = build[0].attachment_id
               newItem['completedAt'] = build[0].completed_at.toISOString()
-            }
+              break
           }
           return newItem
         })
@@ -209,53 +214,52 @@ module.exports = {
         })
         const records = await db.getRecipeByIDs(recipes)
         const buyer = records[0].owner
-        if (type == 'Schedule') {
-          if (build.status != 'Created') {
-            throw new InternalError({ message: 'Build not in Created state' })
-          } else {
+        let attachment
+        switch (type) {
+          case 'Schedule':
+            if (build.status != 'Created') {
+              throw new InternalError({ message: 'Build not in Created state' })
+            }
             build.status = 'Scheduled'
             build.completion_estimate = req.body.completionEstimate
-          }
-        } else if (type == 'Start') {
-          if (build.status != 'Scheduled') {
-            throw new InternalError({ message: 'Build not in Scheduled state' })
-          } else {
+            break
+          case 'Start':
+            if (build.status != 'Scheduled') {
+              throw new InternalError({ message: 'Build not in Scheduled state' })
+            }
             build.status = 'Started'
             build.completion_estimate = req.body.completionEstimate
             build.started_at = req.body.startedAt
-          }
-        } else if (type == 'progress-update') {
-          if (build.status != 'Started') {
-            throw new InternalError({ message: 'Build not in Started state' })
-          } else {
+            break
+          case 'progress-update':
+            if (build.status != 'Started') {
+              throw new InternalError({ message: 'Build not in Started state' })
+            }
             build.status = 'Started'
             build.completion_estimate = req.body.completionEstimate
             build.attachment_id = req.body.attachmentId
-            const [attachment] = await db.getAttachment(build.attachment_id)
-            if (attachment) {
-              binary_blob = attachment.binary_blob
-              filename = attachment.filename
-            } else {
+            attachment = await db.getAttachment(build.attachment_id)
+            if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-          }
-        } else if (type == 'Complete') {
-          if (build.status != 'Started') {
-            throw new InternalError({ message: 'Build not in Started state' })
-          } else {
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
+            break
+          case 'Complete':
+            if (build.status != 'Started') {
+              throw new InternalError({ message: 'Build not in Started state' })
+            }
             build.status = 'Completed'
             build.completed_at = req.body.completedAt
             build.attachment_id = req.body.attachmentId
-            const [attachment] = await db.getAttachment(build.attachment_id)
-            if (attachment) {
-              binary_blob = attachment.binary_blob
-              filename = attachment.filename
-            } else {
+            attachment = await db.getAttachment(build.attachment_id)
+            if (attachment.length == 0) {
               throw new NotFoundError('attachment')
             }
-          }
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
+            break
         }
-
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
@@ -288,15 +292,7 @@ module.exports = {
         }
         return {
           status: 201,
-          response: {
-            id: transaction.id,
-            submittedAt: new Date(transaction.created_at).toISOString(),
-            status: transaction.status,
-            ...(type != 'Complete' && { completionEstimate: req.body.completionEstimate }),
-            ...(type == 'Start' && { startedAt: req.body.startedAt }),
-            ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
-            ...(type == 'Complete' && { completedAt: req.body.completedAt }),
-          },
+          response: await getResponse(type, transaction, req),
         }
       }
     },
