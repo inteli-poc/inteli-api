@@ -5,7 +5,7 @@ const camelcaseObjectDeep = require('camelcase-object-deep')
 const { runProcess } = require('../../../utils/dscp-api')
 const {
   validate,
-  mapOrderData,
+  mapBuildData,
   getResponse,
   getResultForBuildGet,
   getResultForBuildTransactionGet,
@@ -173,7 +173,7 @@ module.exports = {
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData(
+          payload = await mapBuildData(
             { ...build, transaction, parts_to_recipe, supplier, buyer, binary_blob, filename },
             type
           )

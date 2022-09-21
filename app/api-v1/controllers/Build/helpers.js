@@ -112,7 +112,7 @@ const buildBuildOutputs = (data, type) => {
   }
 }
 
-exports.mapOrderData = async (data, type) => {
+exports.mapBuildData = async (data, type) => {
   let inputs
   let outputs
   if (type == 'Schedule') {

@@ -1,6 +1,6 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
-const { NotFoundError } = require('../../../utils/errors')
+const { NotFoundError, InternalError } = require('../../../utils/errors')
 
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
@@ -13,9 +13,14 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       type: { type: 'LITERAL', value: 'PART' },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
       ...(type == 'order-assignment' && { orderId: { type: 'FILE', value: 'order_id.json' } }),
-      ...(type == 'metadata-update' && { image: { type: 'FILE', value: data.filename } }),
+      ...((type == 'metadata-update' || type == 'certification') && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metaDataType: { type: 'LITERAL', value: data.metadataType } }),
-      ...(type == 'metadata-update' && { imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' } }),
+      ...((type == 'metadata-update' || type == 'certification') && {
+        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
+      }),
+      ...(type == 'certification' && {
+        certificationIndex: { type: 'LITERAL', value: JSON.stringify(data.certificationIndex) },
+      }),
       actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
     },
@@ -29,7 +34,7 @@ exports.getResponse = async (type, transaction, req) => {
     submittedAt: new Date(transaction.created_at).toISOString(),
     status: transaction.status,
     ...(type == 'metadata-update' && { metadata: [req.body] }),
-    ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
+    ...(type == 'certification' && { certifications: [req.body] }),
     ...(type == 'order-assignment' && { orderId: req.body.orderId }),
     ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
   }
@@ -53,6 +58,26 @@ exports.getResultForPartGet = async (parts, req) => {
     })
   )
   return { status: 200, response: result }
+}
+
+exports.insertCertificationIntoPart = async (part, certificationIndex, attachmentId) => {
+  if (!part.certifications) {
+    throw new NotFoundError('part certifications')
+  }
+  if (certificationIndex > part.certifications.length) {
+    throw new InternalError({ message: 'certification index out of range' })
+  }
+  for (let index = 0; index <= part.certifications.length; index++) {
+    if (index == certificationIndex) {
+      part.certifications[index].certificationAttachmentId = attachmentId
+    }
+  }
+}
+
+exports.checkAttachment = async (attachment) => {
+  if (attachment.length == 0) {
+    throw new NotFoundError('attachment')
+  }
 }
 
 exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => {
@@ -87,7 +112,7 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
   )
   return modifiedPartTransactions
 }
-exports.mapOrderData = async (data, type) => {
+exports.mapPartData = async (data, type) => {
   let inputs
   let outputs
   let parent_index_required = false
