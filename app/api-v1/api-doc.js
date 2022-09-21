@@ -549,18 +549,7 @@ const apiDoc = {
       PartCertification: {
         description: 'An action that registers certification information against a part',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
-        properties: {
-          certifications: {
-            description: 'certifications assigned to parts',
-            type: 'array',
-            nullable: true,
-            items: {
-              description: 'certification for a part',
-              allOf: [{ $ref: '#/components/schemas/NewPartCertification' }],
-            },
-          },
-        },
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartCertification' }],
       },
       NewBuildSchedule: {
         description:
@@ -680,18 +669,7 @@ const apiDoc = {
       PartMetadataUpdate: {
         description: 'An action on a build that adds arbitrary metadata',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
-        properties: {
-          metadata: {
-            description: 'metadata assigned to parts',
-            type: 'array',
-            nullable: true,
-            items: {
-              description: 'metadata for a part',
-              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
-            },
-          },
-        },
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
       },
     },
     ...securitySchemes,

@@ -164,7 +164,7 @@ module.exports = {
         try {
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
-            await db.updatePartTransaction(id, result[0])
+            await db.updatePartTransaction(transaction.id, result[0])
             let updateOriginalTokenIdForOrder = false
             if (!part.latest_token_id) {
               updateOriginalTokenIdForOrder = true

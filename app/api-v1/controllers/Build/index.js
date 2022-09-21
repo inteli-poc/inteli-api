@@ -184,7 +184,7 @@ module.exports = {
         try {
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
-            await db.updateBuildTransaction(id, result[0])
+            await db.updateBuildTransaction(transaction.id, result[0])
             let updateOriginalTokenIdForOrder = false
             if (type == 'Schedule') {
               updateOriginalTokenIdForOrder = true

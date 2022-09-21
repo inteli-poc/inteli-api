@@ -1,6 +1,7 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { NotFoundError, InternalError } = require('../../../utils/errors')
+const { getMetadata } = require('../../../utils/dscp-api')
 
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
@@ -33,8 +34,9 @@ exports.getResponse = async (type, transaction, req) => {
     id: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
     status: transaction.status,
-    ...(type == 'metadata-update' && { metadata: [req.body] }),
-    ...(type == 'certification' && { certifications: [req.body] }),
+    ...(type == 'metadata-update' && { metadataType: req.body.metadataType }),
+    ...((type == 'metadata-update' || type == 'certification') && { attachmentId: req.body.attachmentId }),
+    ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
     ...(type == 'order-assignment' && { orderId: req.body.orderId }),
     ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
   }
@@ -88,24 +90,39 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
   if (!part) {
     throw new NotFoundError('part')
   }
+  let attachmentId
   const modifiedPartTransactions = await Promise.all(
     partTransanctions.map(async (item) => {
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
       newItem['status'] = item['status']
-      if (type == 'metadata-update') {
-        let metadata = part.metadata
-        newItem['metadata'] = metadata
-      }
-      if (type == 'order-assignment') {
-        if (!part.order_id) {
-          throw new NotFoundError('order')
-        }
-        newItem['orderId'] = part.order_id
-        let [order] = await db.getOrder(part.order_id)
-        let itemIndex = order.items.indexOf(part.recipe_id)
-        newItem['itemIndex'] = itemIndex
+      switch(type){
+        case 'metadata-update':
+          let metadataType = await getMetadata(item.token_id,'metaDataType')
+          metadataType = metadataType.data
+          attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
+          attachmentId = attachmentId.data
+          newItem['metadataType'] = metadataType
+          newItem['attachmentId'] = attachmentId
+          break
+        case 'order-assignment':
+          if (!part.order_id) {
+            throw new NotFoundError('order')
+          }
+          newItem['orderId'] = part.order_id
+          let [order] = await db.getOrder(part.order_id)
+          let itemIndex = order.items.indexOf(part.recipe_id)
+          newItem['itemIndex'] = itemIndex
+          break
+        case 'certification':
+          let certificationIndex = await getMetadata(item.token_id,'certificationIndex')
+          certificationIndex = certificationIndex.data
+          attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
+          attachmentId = attachmentId.data
+          newItem['certificationIndex'] = certificationIndex
+          newItem['attachmentId'] = attachmentId
+          break
       }
       return newItem
     })
