@@ -49,10 +49,16 @@ module.exports = {
           throw new BadRequestError('missing params')
         }
         let transactionId
-        if (type == 'metadata-update') {
-          transactionId = req.params.updateId
-        } else if (type == 'order-assignment') {
-          transactionId = req.params.assignmentId
+        switch (type) {
+          case 'metadata-update':
+            transactionId = req.params.updateId
+            break
+          case 'order-assignment':
+            transactionId = req.params.assignmentId
+            break
+          case 'certification':
+            transactionId = req.params.certificationId
+            break
         }
         if (!transactionId) {
           throw new BadRequestError('missing params')
