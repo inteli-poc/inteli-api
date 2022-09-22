@@ -1,6 +1,7 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
-const { NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
+const {NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
+const { getMetadata } = require('../../../utils/dscp-api')
 
 exports.validate = async (body) => {
   // Will add a get function at a later date to check for duplication
@@ -78,42 +79,69 @@ exports.getResultForOrderGet = async (result, req) => {
   }
 }
 
+const getCommonData = async (item, newItem) => {
+  let price
+  let quantity
+  let requiredBy
+  let forecastDate
+  price = await getMetadata(item.token_id,'price')
+  price = price.data
+  quantity = await getMetadata(item.token_id,'quantity')
+  quantity = quantity.data
+  forecastDate = await getMetadata(item.token_id,'forecastDate')
+  forecastDate = forecastDate.data
+  requiredBy = await getMetadata(item.token_id,'requiredBy')
+  requiredBy = requiredBy.data
+  newItem['price'] = price
+  newItem['quantity'] = quantity
+  newItem['requiredBy'] = requiredBy
+  newItem['forecastDate'] = forecastDate
+}
+
 exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) => {
   if (orderTransactions.length == 0) {
     throw new NotFoundError('order_transactions')
   }
-  let results = null
-  if (type == 'Acknowledgement' || type == 'Amendment') {
-    results = await db.getOrder(id)
-    if (results.length == 0) {
-      throw new NotFoundError('order')
-    }
+  let order = await db.getOrder(id)
+  if (order.length == 0) {
+    throw new NotFoundError('order')
   }
-  const modifiedOrderTransactions = orderTransactions.map((item) => {
+  const modifiedOrderTransactions = await Promise.all(orderTransactions.map(async (item) => {
     const newItem = {}
     newItem['id'] = item['id']
     newItem['submittedAt'] = item['created_at'].toISOString()
     newItem['status'] = item['status']
-    if (results) {
-      newItem['items'] = results[0].items
-      newItem['requiredBy'] = results[0].required_by.toISOString()
+    switch(type){
+      case 'Acknowledgement':
+        await getCommonData(item,newItem)
+        try{
+          let comments = await dscpApi.getMetadata(index,'comments')
+          comments = comments.data
+        }
+        catch(err){
+            console.log('comments not found')
+            comments = null
+        }
+        try{
+          let imageAttachmentId = await dscpApi.getMetadata(index,'imageAttachmentId')
+          imageAttachmentId = imageAttachmentId.data
+        }
+        catch(err){
+            console.log('image attachment not found')
+            imageAttachmentId = null
+        }
+        newItem['comments'] = comments
+        newItem['imageAttachmentId'] = imageAttachmentId
+        break
+      case 'Amendment':
+        await getCommonData(item,newItem)
+        break
     }
     return newItem
-  })
+  }))
   return modifiedOrderTransactions
 }
 
-/*eslint-disable */
-const buildRecipeOutputs = (data, recipes,parentIndexOffset,type) =>
-  recipes.map((_, i) => ({
-    roles: {
-      Owner: data.buyer,
-      Buyer: data.buyer,
-      Supplier: data.supplier,
-    },
-    metadata: { type: { type: 'LITERAL', value: 'RECIPE' } },
-    parent_index: i + parentIndexOffset,
-  }))
 
 const buildOrderOutput = (data,type) => {
     return {
@@ -132,7 +160,16 @@ const buildOrderOutput = (data,type) => {
         ...(type == 'Acknowledgement' && data.image_attachment_id) && {imageAttachmentId: {type: 'FILE', value: 'image_attachment_id.json'}},
         price: {type: 'LITERAL', value: data.price.toString()},
         quantity: {type: 'LITERAL', value: data.quantity.toString()},
-        forecastDate: {type: 'LITERAL', value: data.forecast_date},
+        description: {type: 'LITERAL', value: data.description},
+        deliveryTerms: {type: 'LITERAL', value: data.delivery_terms},
+        deliveryAddress: {type: 'LITERAL', value: data.delivery_address},
+        priceType: {type: 'LITERAL', value: data.price_type},
+        confirmedReceiptDate: {type: 'LITERAL', value: data.confirmed_receipt_date},
+        unitOfMeasure: {type: 'LITERAL', value: data.unit_of_measure},
+        currency: {type: 'LITERAL', value: data.currency},
+        exportClassification: {type: 'LITERAL', value: data.export_classification},
+        lineText: {type: 'LITERAL', value: data.line_text},
+        businessPartnerCode: {type: 'LITERAL', value: data.business_partner_code},
         ...(type == 'Acknowledgement' && data.comments) && {comments: {type: 'FILE', value: 'comments.json'}},
         recipes: { type: 'FILE', value: 'recipes.json'},
         id: { type : 'FILE', value: 'id.json'}
@@ -147,17 +184,12 @@ exports.mapOrderData = async (data, type) => {
   const records = await db.getRecipeByIDs(data.items)
   const tokenIds = records.map((el) => el.latest_token_id)
   const orderTokenId = []
-  let parentIndexOffset = 0
   if (type != 'Submission') {
     orderTokenId.push(data.latest_token_id)
-    parentIndexOffset = 1
   }
   if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
-  const inputs = type != 'Acceptance' && type != 'Acknowledgement' ? orderTokenId.concat(tokenIds) : orderTokenId
-  const outputs =
-    type != 'Acceptance' && type != 'Acknowledgement'
-      ? [buildOrderOutput(data, type), ...buildRecipeOutputs(data, tokenIds, parentIndexOffset, type)]
-      : [buildOrderOutput(data, type)]
+  const inputs = orderTokenId
+  const outputs = [buildOrderOutput(data, type)]
   return {
     recipes: Buffer.from(JSON.stringify(data.items)),
     id: Buffer.from(JSON.stringify(data.id)),

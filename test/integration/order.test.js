@@ -44,7 +44,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
 
@@ -60,7 +69,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.body.supplier).to.equal('valid-1')
@@ -77,7 +95,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -92,7 +119,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -107,7 +143,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -122,7 +167,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -137,7 +191,16 @@ describeAuthOnly('order - authenticated', function () {
         items: ['00000000-0000-1000-8000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -151,7 +214,16 @@ describeAuthOnly('order - authenticated', function () {
         requiredBy: new Date().toISOString(),
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -191,7 +263,16 @@ describeNoAuthOnly('order - no auth', function () {
         items: ['10000000-0000-1000-8000-000000000000'],
         price: 1100,
         quantity: 1,
-        forecastDate: '2022-10-21T10:10:10.919Z',
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, null)
       expect(response.body.supplier).to.equal('valid-1')

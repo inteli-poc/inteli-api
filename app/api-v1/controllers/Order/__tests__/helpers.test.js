@@ -19,7 +19,16 @@ const payload = {
   external_id: 'some-external-id',
   price: 1100,
   quantity: 1,
-  forecast_date: '2022-06-13T11:20:35.466Z',
+  currency: 'some-currency',
+  delivery_terms: 'some-delivery-terms',
+  delivery_address: 'some-delivery-address',
+  line_text: 'some-line-text',
+  export_classification: 'some-export-classification',
+  unit_of_measure: 'some-unit-of-measure',
+  price_type: 'some-price-type',
+  confirmed_receipt_date: 'some-confirmed-receipt-date',
+  description: 'some-description',
+  business_partner_code: 'some-business-partner-code',
   id: '50000000-e000-1000-5500-000000000002',
 }
 
@@ -73,7 +82,7 @@ describe('map order data helper function', () => {
     expect(output).to.deep.equal({
       recipes: Buffer.from(JSON.stringify(payload.items)),
       id: Buffer.from(JSON.stringify('50000000-e000-1000-5500-000000000002')),
-      inputs: [20],
+      inputs: [],
       outputs: [
         {
           roles: {
@@ -106,10 +115,6 @@ describe('map order data helper function', () => {
               type: 'LITERAL',
               value: 'some-external-id',
             },
-            forecastDate: {
-              type: 'LITERAL',
-              value: '2022-06-13T11:20:35.466Z',
-            },
             price: {
               type: 'LITERAL',
               value: '1100',
@@ -122,22 +127,48 @@ describe('map order data helper function', () => {
               type: 'FILE',
               value: 'id.json',
             },
-          },
-        },
-        {
-          roles: {
-            Owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-            Buyer: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-            Supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-          },
-          metadata: {
-            type: {
+            currency: {
               type: 'LITERAL',
-              value: 'RECIPE',
+              value: 'some-currency'
             },
+            exportClassification: {
+              type: 'LITERAL',
+              value: 'some-export-classification'
+            },
+            priceType: {
+              type: 'LITERAL',
+              value: 'some-price-type'
+            },
+            deliveryAddress: {
+              type: 'LITERAL',
+              value: 'some-delivery-address'
+            },
+            deliveryTerms: {
+              type: 'LITERAL',
+              value: 'some-delivery-terms'
+            },
+            description: {
+              type: 'LITERAL',
+              value: 'some-description'
+            },
+            businessPartnerCode: {
+              type: 'LITERAL',
+              value: 'some-business-partner-code'
+            },
+            lineText: {
+              type: 'LITERAL',
+              value: 'some-line-text'
+            },
+            unitOfMeasure: {
+              type: 'LITERAL',
+              value: 'some-unit-of-measure'
+            },
+            confirmedReceiptDate: {
+              type: 'LITERAL',
+              value: 'some-confirmed-receipt-date'
+            }
           },
-          parent_index: 0,
-        },
+        }
       ],
     })
   })

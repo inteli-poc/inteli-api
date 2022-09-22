@@ -94,11 +94,18 @@ describe('part.transaction', () => {
           },
         },
       ])
+      nock(dscpApiUrl)
+        .get(uri => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
+      nock(dscpApiUrl)
+        .get(uri => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
     })
     afterEach(async () => {
       req = {}
       stubs.getPartById.restore()
       stubs.getPartTransactions.restore()
+      nock.cleanAll()
     })
     it('should resolve 200', async () => {
       const result = await partController.transaction.getAll('metadata-update')(req)
@@ -130,11 +137,18 @@ describe('part.transaction', () => {
           created_at: new Date(),
         },
       ])
+      nock(dscpApiUrl)
+        .get(uri => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
+      nock(dscpApiUrl)
+        .get(uri => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
     })
     afterEach(async () => {
       req = {}
       stubs.getPartById.restore()
       stubs.getPartTransactionsById.restore()
+      nock.cleanAll()
     })
     it('should resolve 200', async () => {
       const result = await partController.transaction.get('metadata-update')(req)

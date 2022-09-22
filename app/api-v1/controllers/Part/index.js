@@ -154,6 +154,7 @@ module.exports = {
               metadataType,
               imageAttachmentId,
               certificationIndex,
+              itemIndex
             },
             type
           )

@@ -14,6 +14,7 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       type: { type: 'LITERAL', value: 'PART' },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
       ...(type == 'order-assignment' && { orderId: { type: 'FILE', value: 'order_id.json' } }),
+      ...(type == 'order-assignment' && { itemIndex: { type: 'LITERAL', value: JSON.stringify(data.itemIndex) } }),
       ...((type == 'metadata-update' || type == 'certification') && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metaDataType: { type: 'LITERAL', value: data.metadataType } }),
       ...((type == 'metadata-update' || type == 'certification') && {
@@ -110,9 +111,11 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           if (!part.order_id) {
             throw new NotFoundError('order')
           }
-          newItem['orderId'] = part.order_id
-          let [order] = await db.getOrder(part.order_id)
-          let itemIndex = order.items.indexOf(part.recipe_id)
+          let orderId = await getMetadata(item.token_id,'orderId')
+          orderId = orderId.data
+          let itemIndex = await getMetadata(item.token_id,'itemIndex')
+          itemIndex = itemIndex.data
+          newItem['orderId'] = orderId
           newItem['itemIndex'] = itemIndex
           break
         case 'certification':
