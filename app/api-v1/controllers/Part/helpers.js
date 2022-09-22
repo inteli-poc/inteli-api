@@ -92,17 +92,21 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
     throw new NotFoundError('part')
   }
   let attachmentId
+  let metadataType
+  let orderId
+  let itemIndex
+  let certificationIndex
   const modifiedPartTransactions = await Promise.all(
     partTransanctions.map(async (item) => {
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
       newItem['status'] = item['status']
-      switch(type){
+      switch (type) {
         case 'metadata-update':
-          let metadataType = await getMetadata(item.token_id,'metaDataType')
+          metadataType = await getMetadata(item.token_id, 'metaDataType')
           metadataType = metadataType.data
-          attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
           attachmentId = attachmentId.data
           newItem['metadataType'] = metadataType
           newItem['attachmentId'] = attachmentId
@@ -111,17 +115,17 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           if (!part.order_id) {
             throw new NotFoundError('order')
           }
-          let orderId = await getMetadata(item.token_id,'orderId')
+          orderId = await getMetadata(item.token_id, 'orderId')
           orderId = orderId.data
-          let itemIndex = await getMetadata(item.token_id,'itemIndex')
+          itemIndex = await getMetadata(item.token_id, 'itemIndex')
           itemIndex = itemIndex.data
           newItem['orderId'] = orderId
           newItem['itemIndex'] = itemIndex
           break
         case 'certification':
-          let certificationIndex = await getMetadata(item.token_id,'certificationIndex')
+          certificationIndex = await getMetadata(item.token_id, 'certificationIndex')
           certificationIndex = certificationIndex.data
-          attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
           attachmentId = attachmentId.data
           newItem['certificationIndex'] = certificationIndex
           newItem['attachmentId'] = attachmentId

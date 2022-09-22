@@ -34,7 +34,7 @@ async function postOrderDb(reqBody) {
       line_text: reqBody.lineText,
       business_partner_code: reqBody.businessPartnerCode,
       currency: reqBody.currency,
-      confirmed_receipt_date: confirmedReceiptDate
+      confirmed_receipt_date: reqBody.confirmedReceiptDate,
     })
     .returning(['id', 'status'])
 }

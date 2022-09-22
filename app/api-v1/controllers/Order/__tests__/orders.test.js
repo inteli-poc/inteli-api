@@ -371,21 +371,21 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
-            token_id: 1
+            token_id: 1,
           },
         ])
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         stubs.getOrderTransactions.restore()
@@ -440,21 +440,21 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
-            token_id: 1
+            token_id: 1,
           },
         ])
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
         nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
-        .reply(200, 'some-metadata')
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         req = {}

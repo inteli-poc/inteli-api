@@ -95,10 +95,10 @@ describe('part.transaction', () => {
         },
       ])
       nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
+        .get((uri) => uri.includes('metadata'))
         .reply(200, 'some-metadata')
       nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
+        .get((uri) => uri.includes('metadata'))
         .reply(200, 'some-metadata')
     })
     afterEach(async () => {
@@ -138,10 +138,10 @@ describe('part.transaction', () => {
         },
       ])
       nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
+        .get((uri) => uri.includes('metadata'))
         .reply(200, 'some-metadata')
       nock(dscpApiUrl)
-        .get(uri => uri.includes('metadata'))
+        .get((uri) => uri.includes('metadata'))
         .reply(200, 'some-metadata')
     })
     afterEach(async () => {

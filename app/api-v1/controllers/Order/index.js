@@ -12,18 +12,21 @@ const { BadRequestError, NotFoundError, IdentityError, InternalError } = require
 
 module.exports = {
   post: async function (req) {
+    console.log('iamhere')
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
+    console.log('iamhere2')
     const validated = await validate({
       ...req.body,
       supplierAddress: supplierAddress,
       status: 'Created',
       buyerAddress: selfAddress,
     })
+    console.log('iamhere3')
     const [result] = await db.postOrderDb(validated)
 
     return {

@@ -136,7 +136,7 @@ describe('build.transaction', () => {
           id: '00000000-0000-1000-3000-000000000001',
           status: 'Submitted',
           created_at: new Date(),
-          token_id: 1
+          token_id: 1,
         },
       ])
       stubs.getBuildById = stub(db, 'getBuildById').resolves([
@@ -145,8 +145,8 @@ describe('build.transaction', () => {
         },
       ])
       nock(dscpApiUrl)
-      .get(uri => uri.includes('metadata'))
-      .reply(200, 'some-metadata')
+        .get((uri) => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
     })
     afterEach(async () => {
       req = {}
@@ -171,7 +171,7 @@ describe('build.transaction', () => {
           id: '00000000-0000-1000-3000-000000000001',
           status: 'Submitted',
           created_at: new Date(),
-          token_id: 1
+          token_id: 1,
         },
       ])
       stubs.getBuildById = stub(db, 'getBuildById').resolves([
@@ -180,8 +180,8 @@ describe('build.transaction', () => {
         },
       ])
       nock(dscpApiUrl)
-      .get(uri => uri.includes('metadata'))
-      .reply(200, 'some-metadata')
+        .get((uri) => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
     })
     afterEach(async () => {
       req = {}

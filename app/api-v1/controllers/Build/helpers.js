@@ -66,44 +66,48 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
   }
   let completionEstimate
   let attachmentId
-  const modifiedBuildTransactions = await Promise.all(buildTransactions.map(async (item) => {
-    let newItem = {}
-    newItem['id'] = item['id']
-    newItem['status'] = item['status']
-    newItem['submittedAt'] = item['created_at'].toISOString()
-    switch (type) {
-      case 'Start':
-        let startedAt = await getMetadata(item.token_id,'startedAt')
-        startedAt = startedAt.data
-        completionEstimate = await getMetadata(item.token_id,'completionEstimate')
-        completionEstimate = completionEstimate.data
-        newItem['startedAt'] = startedAt
-        newItem['completionEstimate'] = completionEstimate
-        break
-      case 'Schedule':
-        completionEstimate = await getMetadata(item.token_id,'completionEstimate')
-        completionEstimate = completionEstimate.data
-        newItem['completionEstimate'] = completionEstimate
-        break
-      case 'progress-update':
-        attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
-        attachmentId = attachmentId.data
-        completionEstimate = await getMetadata(item.token_id,'completionEstimate')
-        completionEstimate = completionEstimate.data
-        newItem['attachmentId'] = attachmentId
-        newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-        break
-      case 'Complete':
-        attachmentId = await getMetadata(item.token_id,'imageAttachmentId')
-        attachmentId = attachmentId.data
-        let completedAt = await getMetadata(item.token_id,'completedAt')
-        completedAt = completedAt.data
-        newItem['attachmentId'] = attachmentId
-        newItem['completedAt'] = completedAt
-        break
-    }
-    return newItem
-  }))
+  let startedAt
+  let completedAt
+  const modifiedBuildTransactions = await Promise.all(
+    buildTransactions.map(async (item) => {
+      let newItem = {}
+      newItem['id'] = item['id']
+      newItem['status'] = item['status']
+      newItem['submittedAt'] = item['created_at'].toISOString()
+      switch (type) {
+        case 'Start':
+          startedAt = await getMetadata(item.token_id, 'startedAt')
+          startedAt = startedAt.data
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['startedAt'] = startedAt
+          newItem['completionEstimate'] = completionEstimate
+          break
+        case 'Schedule':
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['completionEstimate'] = completionEstimate
+          break
+        case 'progress-update':
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
+          attachmentId = attachmentId.data
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['attachmentId'] = attachmentId
+          newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+          break
+        case 'Complete':
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
+          attachmentId = attachmentId.data
+          completedAt = await getMetadata(item.token_id, 'completedAt')
+          completedAt = completedAt.data
+          newItem['attachmentId'] = attachmentId
+          newItem['completedAt'] = completedAt
+          break
+      }
+      return newItem
+    })
+  )
   return modifiedBuildTransactions
 }
 const buildBuildOutputs = (data, type) => {

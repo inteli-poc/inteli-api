@@ -129,46 +129,46 @@ describe('map order data helper function', () => {
             },
             currency: {
               type: 'LITERAL',
-              value: 'some-currency'
+              value: 'some-currency',
             },
             exportClassification: {
               type: 'LITERAL',
-              value: 'some-export-classification'
+              value: 'some-export-classification',
             },
             priceType: {
               type: 'LITERAL',
-              value: 'some-price-type'
+              value: 'some-price-type',
             },
             deliveryAddress: {
               type: 'LITERAL',
-              value: 'some-delivery-address'
+              value: 'some-delivery-address',
             },
             deliveryTerms: {
               type: 'LITERAL',
-              value: 'some-delivery-terms'
+              value: 'some-delivery-terms',
             },
             description: {
               type: 'LITERAL',
-              value: 'some-description'
+              value: 'some-description',
             },
             businessPartnerCode: {
               type: 'LITERAL',
-              value: 'some-business-partner-code'
+              value: 'some-business-partner-code',
             },
             lineText: {
               type: 'LITERAL',
-              value: 'some-line-text'
+              value: 'some-line-text',
             },
             unitOfMeasure: {
               type: 'LITERAL',
-              value: 'some-unit-of-measure'
+              value: 'some-unit-of-measure',
             },
             confirmedReceiptDate: {
               type: 'LITERAL',
-              value: 'some-confirmed-receipt-date'
-            }
+              value: 'some-confirmed-receipt-date',
+            },
           },
-        }
+        },
       ],
     })
   })

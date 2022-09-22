@@ -31,20 +31,17 @@ module.exports = {
     return res.json()
   },
 
-  async getMetadata(tokenID,metadata){
-    const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/item/${tokenID}/metadata/${metadata}` 
-    if(metadata == 'image'){
-        return axios(url, {
-            method: 'GET',
-            responseType: 'arraybuffer'
-            }
-        )
+  async getMetadata(tokenID, metadata) {
+    const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/item/${tokenID}/metadata/${metadata}`
+    if (metadata == 'image') {
+      return axios(url, {
+        method: 'GET',
+        responseType: 'arraybuffer',
+      })
+    } else {
+      return axios(url, {
+        method: 'GET',
+      })
     }
-    else{
-        return axios(url, {
-            method: 'GET'
-            }
-        )
-    }
-}
+  },
 }
