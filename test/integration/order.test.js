@@ -51,7 +51,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -76,7 +76,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -102,7 +102,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -126,7 +126,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -150,7 +150,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -174,7 +174,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -198,7 +198,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -221,7 +221,7 @@ describeAuthOnly('order - authenticated', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }
@@ -270,7 +270,7 @@ describeNoAuthOnly('order - no auth', function () {
         exportClassification: 'some-export-classification',
         unitOfMeasure: 'some-unit-of-measure',
         priceType: 'some-price-type',
-        confirmedReceiptDate: 'some-confirmed-receipt-date',
+        confirmedReceiptDate: new Date().toISOString(),
         description: 'some-description',
         businessPartnerCode: 'some-business-partner-code',
       }

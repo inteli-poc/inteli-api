@@ -20,7 +20,7 @@ const createAttachmentFromFile = async (file) => {
     fs.readFile(file.path, async (err, data) => {
       if (err) throw new HttpResponseError({ code: 500, message: err.message })
       const attachment = await createAttachment(file.originalname, data)
-      fsPromises.unlink(file.path)
+      await fsPromises.unlink(file.path)
       resolve(attachment)
     })
   })
