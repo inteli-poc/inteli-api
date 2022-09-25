@@ -490,11 +490,6 @@ const apiDoc = {
             type: 'integer',
             example: 1,
           },
-          forecastDate: {
-            description: 'forecast date of the order',
-            type: 'string',
-            format: 'date-time',
-          },
         },
       },
       OrderAmendment: {
@@ -520,11 +515,6 @@ const apiDoc = {
             description: 'quantity of the order',
             type: 'string',
             example: '1',
-          },
-          forecastDate: {
-            description: 'forecast date of the order',
-            type: 'string',
-            format: 'date-time',
           },
           comments: {
             description: 'comments related to order rejection',
