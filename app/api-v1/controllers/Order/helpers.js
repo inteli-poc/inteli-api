@@ -54,7 +54,16 @@ exports.getResultForOrderGet = async (result, req) => {
     newItem['externalId'] = item['external_id']
     newItem['price'] = item['price']
     newItem['quantity'] = item['quantity']
-    newItem['forecastDate'] = item['forecast_date'].toISOString()
+    newItem['description'] = item['description']
+    newItem['currency'] = item['currency']
+    newItem['deliveryTerms'] = item['delivery_terms']
+    newItem['deliveryAddress'] = item['delivery_address']
+    newItem['exportClassification'] = item['export_classification']
+    newItem['businessPartnerCode'] = item['business_partner_code']
+    newItem['lineText'] = item['line_text']
+    newItem['priceType'] = item['price_type']
+    newItem['unitOfMeasure'] = item['unit_of_measure']
+    newItem['confirmedReceiptDate'] = item['confirmed_receipt_date']
     if (item['image_attachment_id']) {
       newItem['imageAttachmentId'] = item['image_attachment_id']
     }
