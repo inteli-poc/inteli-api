@@ -1,6 +1,7 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError } = require('../../../utils/errors')
+const { getMetadata } = require('../../../utils/dscp-api')
 
 exports.validate = async (items, supplier) => {
   const uniqueRecipeIDs = [...new Set(items)]
@@ -63,27 +64,50 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
   if (build.length == 0) {
     throw new NotFoundError('build')
   }
-  const modifiedBuildTransactions = buildTransactions.map((item) => {
-    let newItem = {}
-    newItem['id'] = item['id']
-    newItem['status'] = item['status']
-    newItem['submittedAt'] = item['created_at'].toISOString()
-    switch (type) {
-      case 'Start':
-        newItem['startedAt'] = build[0].started_at.toISOString()
-        newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-        break
-      case 'progress-update':
-        newItem['attachmentId'] = build[0].attachment_id
-        newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
-        break
-      case 'Complete':
-        newItem['attachmentId'] = build[0].attachment_id
-        newItem['completedAt'] = build[0].completed_at.toISOString()
-        break
-    }
-    return newItem
-  })
+  let completionEstimate
+  let attachmentId
+  let startedAt
+  let completedAt
+  const modifiedBuildTransactions = await Promise.all(
+    buildTransactions.map(async (item) => {
+      let newItem = {}
+      newItem['id'] = item['id']
+      newItem['status'] = item['status']
+      newItem['submittedAt'] = item['created_at'].toISOString()
+      switch (type) {
+        case 'Start':
+          startedAt = await getMetadata(item.token_id, 'startedAt')
+          startedAt = startedAt.data
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['startedAt'] = startedAt
+          newItem['completionEstimate'] = completionEstimate
+          break
+        case 'Schedule':
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['completionEstimate'] = completionEstimate
+          break
+        case 'progress-update':
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
+          attachmentId = attachmentId.data
+          completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
+          completionEstimate = completionEstimate.data
+          newItem['attachmentId'] = attachmentId
+          newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+          break
+        case 'Complete':
+          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
+          attachmentId = attachmentId.data
+          completedAt = await getMetadata(item.token_id, 'completedAt')
+          completedAt = completedAt.data
+          newItem['attachmentId'] = attachmentId
+          newItem['completedAt'] = completedAt
+          break
+      }
+      return newItem
+    })
+  )
   return modifiedBuildTransactions
 }
 const buildBuildOutputs = (data, type) => {
@@ -112,7 +136,7 @@ const buildBuildOutputs = (data, type) => {
   }
 }
 
-exports.mapOrderData = async (data, type) => {
+exports.mapBuildData = async (data, type) => {
   let inputs
   let outputs
   if (type == 'Schedule') {

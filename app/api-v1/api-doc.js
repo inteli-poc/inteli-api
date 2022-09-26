@@ -317,10 +317,46 @@ const apiDoc = {
             type: 'integer',
             example: 1,
           },
-          forecastDate: {
-            description: 'forecast date of the order',
+          description: {
+            description: 'description of the order',
+            type: 'string',
+          },
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
             type: 'string',
             format: 'date-time',
+          },
+          deliveryTerms: {
+            description: 'delivery terms of the order',
+            type: 'string',
+          },
+          deliveryAddress: {
+            description: 'delivery address of the order',
+            type: 'string',
+          },
+          priceType: {
+            description: 'price type of the order',
+            type: 'string',
+          },
+          unitOfMeasure: {
+            description: 'unit of measure for the order',
+            type: 'string',
+          },
+          currency: {
+            description: 'currency for the order',
+            type: 'string',
+          },
+          exportClassification: {
+            description: 'export classification of the order',
+            type: 'string',
+          },
+          lineText: {
+            description: 'line text for the order',
+            type: 'string',
+          },
+          businessPartnerCode: {
+            description: 'business partner code for the order',
+            type: 'string',
           },
           externalId: {
             description: 'id of the order in an external ERP',
@@ -454,11 +490,6 @@ const apiDoc = {
             type: 'integer',
             example: 1,
           },
-          forecastDate: {
-            description: 'forecast date of the order',
-            type: 'string',
-            format: 'date-time',
-          },
         },
       },
       OrderAmendment: {
@@ -485,20 +516,17 @@ const apiDoc = {
             type: 'string',
             example: '1',
           },
-          forecastDate: {
-            description: 'forecast date of the order',
-            type: 'string',
-            format: 'date-time',
-          },
           comments: {
             description: 'comments related to order rejection',
             type: 'string',
             maxLength: 255,
+            nullable: true,
           },
           imageAttachmentId: {
             description: 'id of the attachment',
             type: 'string',
             format: 'uuid',
+            nullable: true,
           },
         },
       },
@@ -669,18 +697,7 @@ const apiDoc = {
       PartMetadataUpdate: {
         description: 'An action on a build that adds arbitrary metadata',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
-        properties: {
-          metadata: {
-            description: 'metadata assigned to parts',
-            type: 'array',
-            nullable: true,
-            items: {
-              description: 'metadata for a part',
-              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
-            },
-          },
-        },
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
       },
     },
     ...securitySchemes,

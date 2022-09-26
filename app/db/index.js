@@ -26,7 +26,16 @@ async function postOrderDb(reqBody) {
       external_id: reqBody.externalId,
       price: reqBody.price,
       quantity: reqBody.quantity,
-      forecast_date: reqBody.forecastDate,
+      delivery_terms: reqBody.deliveryTerms,
+      delivery_address: reqBody.deliveryAddress,
+      price_type: reqBody.priceType,
+      unit_of_measure: reqBody.unitOfMeasure,
+      export_classification: reqBody.exportClassification,
+      line_text: reqBody.lineText,
+      business_partner_code: reqBody.businessPartnerCode,
+      currency: reqBody.currency,
+      confirmed_receipt_date: reqBody.confirmedReceiptDate,
+      description: reqBody.description,
     })
     .returning(['id', 'status'])
 }

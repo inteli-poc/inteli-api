@@ -1,6 +1,13 @@
 const db = require('../../../db')
 const { runProcess } = require('../../../utils/dscp-api')
-const { mapOrderData, getResponse, getResultForPartGet, getResultForPartTransactionGet } = require('./helpers')
+const {
+  mapPartData,
+  getResponse,
+  getResultForPartGet,
+  getResultForPartTransactionGet,
+  checkAttachment,
+  insertCertificationIntoPart,
+} = require('./helpers')
 const { InternalError, BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
@@ -42,10 +49,16 @@ module.exports = {
           throw new BadRequestError('missing params')
         }
         let transactionId
-        if (type == 'metadata-update') {
-          transactionId = req.params.updateId
-        } else if (type == 'order-assignment') {
-          transactionId = req.params.assignmentId
+        switch (type) {
+          case 'metadata-update':
+            transactionId = req.params.updateId
+            break
+          case 'order-assignment':
+            transactionId = req.params.assignmentId
+            break
+          case 'certification':
+            transactionId = req.params.certificationId
+            break
         }
         if (!transactionId) {
           throw new BadRequestError('missing params')
@@ -67,6 +80,7 @@ module.exports = {
         let attachment
         let itemIndex
         let order
+        let certificationIndex
         const { id } = req.params
         if (!id) {
           throw new BadRequestError('missing params')
@@ -111,6 +125,15 @@ module.exports = {
               throw new InternalError({ message: 'recipe id mismatch' })
             }
             break
+          case 'certification':
+            certificationIndex = req.body.certificationIndex
+            imageAttachmentId = req.body.attachmentId
+            await insertCertificationIntoPart(part, certificationIndex, imageAttachmentId)
+            attachment = await db.getAttachment(req.body.attachmentId)
+            await checkAttachment(attachment)
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
+            break
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
         const tokenId = recipe.latest_token_id
@@ -119,8 +142,20 @@ module.exports = {
         const transaction = await db.insertPartTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData(
-            { ...part, transaction, tokenId, supplier, buyer, binary_blob, filename, metadataType, imageAttachmentId },
+          payload = await mapPartData(
+            {
+              ...part,
+              transaction,
+              tokenId,
+              supplier,
+              buyer,
+              binary_blob,
+              filename,
+              metadataType,
+              imageAttachmentId,
+              certificationIndex,
+              itemIndex,
+            },
             type
           )
         } catch (err) {
@@ -130,7 +165,7 @@ module.exports = {
         try {
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
-            await db.updatePartTransaction(id, result[0])
+            await db.updatePartTransaction(transaction.id, result[0])
             let updateOriginalTokenIdForOrder = false
             if (!part.latest_token_id) {
               updateOriginalTokenIdForOrder = true

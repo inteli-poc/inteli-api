@@ -371,13 +371,27 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
+            token_id: 1,
           },
         ])
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         stubs.getOrderTransactions.restore()
         req = {}
         stubs.getOrder.restore()
+        nock.cleanAll()
       })
       describe('/order/{id}/submission - get all order transactions', () => {
         it('get all submission types of an order', async () => {
@@ -426,13 +440,27 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
+            token_id: 1,
           },
         ])
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         req = {}
         stubs.getOrderTransactionsById.restore()
         stubs.getOrder.restore()
+        nock.cleanAll()
       })
       describe('/order/{id}/submission/{submissionId} - get by id', () => {
         it('get submission type transactions by submissionid', async () => {

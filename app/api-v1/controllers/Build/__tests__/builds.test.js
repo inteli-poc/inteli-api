@@ -136,6 +136,7 @@ describe('build.transaction', () => {
           id: '00000000-0000-1000-3000-000000000001',
           status: 'Submitted',
           created_at: new Date(),
+          token_id: 1,
         },
       ])
       stubs.getBuildById = stub(db, 'getBuildById').resolves([
@@ -143,11 +144,15 @@ describe('build.transaction', () => {
           completion_estimate: new Date(),
         },
       ])
+      nock(dscpApiUrl)
+        .get((uri) => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
     })
     afterEach(async () => {
       req = {}
       stubs.getBuildTransactions.restore()
       stubs.getBuildById.restore()
+      nock.cleanAll()
     })
     it('should resolve 200', async () => {
       const result = await buildController.transaction.getAll('Schedule')(req)
@@ -160,30 +165,33 @@ describe('build.transaction', () => {
     let req = {
       params: { id: '00000000-0000-1000-3000-000000000001', scheduleId: '00000000-0000-1000-3000-000000000002' },
     }
-    describe('getAll', () => {
-      beforeEach(async () => {
-        stubs.getBuildTransactionsById = stub(db, 'getBuildTransactionsById').resolves([
-          {
-            id: '00000000-0000-1000-3000-000000000001',
-            status: 'Submitted',
-            created_at: new Date(),
-          },
-        ])
-        stubs.getBuildById = stub(db, 'getBuildById').resolves([
-          {
-            completion_estimate: new Date(),
-          },
-        ])
-      })
-      afterEach(async () => {
-        req = {}
-        stubs.getBuildTransactionsById.restore()
-        stubs.getBuildById.restore()
-      })
-      it('should resolve 200', async () => {
-        const result = await buildController.transaction.get('Schedule')(req)
-        expect(result.status).to.equal(200)
-      })
+    beforeEach(async () => {
+      stubs.getBuildTransactionsById = stub(db, 'getBuildTransactionsById').resolves([
+        {
+          id: '00000000-0000-1000-3000-000000000001',
+          status: 'Submitted',
+          created_at: new Date(),
+          token_id: 1,
+        },
+      ])
+      stubs.getBuildById = stub(db, 'getBuildById').resolves([
+        {
+          completion_estimate: new Date(),
+        },
+      ])
+      nock(dscpApiUrl)
+        .get((uri) => uri.includes('metadata'))
+        .reply(200, 'some-metadata')
+    })
+    afterEach(async () => {
+      req = {}
+      stubs.getBuildTransactionsById.restore()
+      stubs.getBuildById.restore()
+      nock.cleanAll()
+    })
+    it('should resolve 200', async () => {
+      const result = await buildController.transaction.get('Schedule')(req)
+      expect(result.status).to.equal(200)
     })
   })
 
