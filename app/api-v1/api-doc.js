@@ -704,7 +704,7 @@ const apiDoc = {
     ...securitySchemes,
   },
   paths: {},
-  security: [{bearerAuth : []}]
+  security: [{ bearerAuth: [] }],
 }
 
 // make all schema properties required
