@@ -105,7 +105,6 @@ describe('order controller', () => {
 
     describe('if identity service is unavailable or returned an error', () => {
       beforeEach(async () => {
-        stubs.identityByAlias.restore()
         stubs.identitySelf.throws('some error - identity self')
         stubs.identityByAlias.rejects('some error - identity alias')
         response = await postOrder({
@@ -332,11 +331,13 @@ describe('order controller', () => {
           forecast_date: new Date(),
         },
       ])
+      stubs.getPartsByOrderId = stub(db, 'getPartsByOrderId').resolves([])
     })
     afterEach(async () => {
       stubs.identityByAddress.restore()
       stubs.getOrder.restore()
       stubs.getOrders.restore()
+      stubs.getPartsByOrderId.restore()
     })
     it('get all orders', async () => {
       const result = await orderController.get(req)
@@ -504,6 +505,7 @@ describe('order controller', () => {
         stubs.getSelf = stub(identityService, 'getMemberBySelf').resolves(null)
         stubs.removeTransaction = stub(db, 'removeTransactionOrder').resolves(null)
         stubs.updateRecipe = stub(db, 'updateRecipe').resolves(null)
+        stubs.updateOrderTransaction = stub(db, 'updateOrderTransaction').resolves(null)
       })
       afterEach(() => {
         stubs.getSelf.restore()
@@ -513,6 +515,7 @@ describe('order controller', () => {
         stubs.removeTransaction.restore()
         stubs.updateOrder.restore()
         stubs.updateRecipe.restore()
+        stubs.updateOrderTransaction.restore()
       })
 
       describe('if invalid parameter supplied', () => {

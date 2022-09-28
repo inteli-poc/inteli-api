@@ -15,30 +15,30 @@ const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
 const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
 
 describeAuthOnly('recipes - authenticated', function () {
+  this.timeout(5000)
+  let app
+  let authToken
+  let jwksMock
+
+  before(async function () {
+    await seed()
+    app = await createHttpServer()
+    jwksMock = createJWKSMock(AUTH_ISSUER)
+    jwksMock.start()
+    authToken = jwksMock.token({
+      aud: AUTH_AUDIENCE,
+      iss: AUTH_ISSUER,
+    })
+  })
+
+  setupIdentityMock()
+
+  after(async function () {
+    await cleanup()
+    await jwksMock.stop()
+  })
+
   describe('POST recipes', function () {
-    this.timeout(5000)
-    let app
-    let authToken
-    let jwksMock
-
-    before(async function () {
-      await seed()
-      app = await createHttpServer()
-      jwksMock = createJWKSMock(AUTH_ISSUER)
-      jwksMock.start()
-      authToken = jwksMock.token({
-        aud: AUTH_AUDIENCE,
-        iss: AUTH_ISSUER,
-      })
-    })
-
-    setupIdentityMock()
-
-    after(async function () {
-      await cleanup()
-      await jwksMock.stop()
-    })
-
     it('should accept valid body', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
@@ -133,28 +133,6 @@ describeAuthOnly('recipes - authenticated', function () {
   })
 
   describe('GET recipes', function () {
-    let app
-    let authToken
-    let jwksMock
-
-    before(async () => {
-      await seed()
-      app = await createHttpServer()
-      jwksMock = createJWKSMock(AUTH_ISSUER)
-      jwksMock.start()
-      authToken = jwksMock.token({
-        aud: AUTH_AUDIENCE,
-        iss: AUTH_ISSUER,
-      })
-    })
-
-    setupIdentityMock()
-
-    after(async function () {
-      await cleanup()
-      await jwksMock.stop()
-    })
-
     it('should get recipe by id - 200', async function () {
       const newRecipe = {
         externalId: 'foobar3000',
@@ -166,7 +144,6 @@ describeAuthOnly('recipes - authenticated', function () {
         requiredCerts: [{ description: 'foobar3000' }],
         supplier: 'valid-1',
       }
-
       const recipe = await postRecipeRoute(newRecipe, app, authToken)
       const response = await getRecipeByIdRoute(app, recipe.body.id, authToken)
       expect(response.status).to.equal(200)
