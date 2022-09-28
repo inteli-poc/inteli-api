@@ -508,13 +508,14 @@ const apiDoc = {
           },
           price: {
             description: 'price of the order',
-            type: 'string',
+            type: 'number',
+            format: 'float',
             example: '1200.01',
           },
           quantity: {
             description: 'quantity of the order',
-            type: 'string',
-            example: '1',
+            type: 'integer',
+            example: 1,
           },
           comments: {
             description: 'comments related to order rejection',
@@ -703,6 +704,7 @@ const apiDoc = {
     ...securitySchemes,
   },
   paths: {},
+  security: [{ bearerAuth: [] }],
 }
 
 // make all schema properties required

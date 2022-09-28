@@ -97,8 +97,6 @@ const getCommonData = async (item, newItem) => {
   price = price.data
   quantity = await getMetadata(item.token_id, 'quantity')
   quantity = quantity.data
-  forecastDate = await getMetadata(item.token_id, 'forecastDate')
-  forecastDate = forecastDate.data
   requiredBy = await getMetadata(item.token_id, 'requiredBy')
   requiredBy = requiredBy.data
   newItem['price'] = price
