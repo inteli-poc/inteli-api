@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../../utils/routeRespons
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get('Acknowledgement'), {
+    GET: buildValidatedJsonHandler(order.transaction.getById('Acknowledgement'), {
       summary: 'Get Purchase Orders Rejection Action',
       description: 'Returns the details of the on-chain transaction {rejectionId} to reject the order {id}.',
       parameters: [

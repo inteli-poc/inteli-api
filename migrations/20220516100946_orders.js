@@ -12,7 +12,7 @@ exports.up = async (knex) => {
     def.specificType('items', 'uuid Array').notNullable()
     def.string('buyer', 48).notNullable()
     def
-      .enu('status', ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted'], {
+      .enu('status', ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'], {
         useNative: true,
         enumName: 'orderstatus',
       })

@@ -11,7 +11,7 @@ exports.up = async function (knex) {
     def.integer('token_id')
     def.uuid('order_id').notNullable()
     def
-      .enu('type', ['Submission', 'Acknowledgement', 'Acceptance', 'Amendment'], {
+      .enu('type', ['Submission', 'Acknowledgement', 'Acceptance', 'Amendment', 'Cancellation'], {
         enumName: 'order_type',
         useNative: true,
       })
