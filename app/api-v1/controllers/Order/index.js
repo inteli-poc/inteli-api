@@ -66,6 +66,8 @@ module.exports = {
           transactionId = req.params.acceptanceId
         } else if (type == 'Amendment') {
           transactionId = req.params.amendmentId
+        } else if (type == 'Cancellation') {
+          transactionId = req.params.cancellationId
         }
         if (!id) throw new BadRequestError('missing params')
         if (!transactionId) throw new BadRequestError('missing params')
@@ -142,6 +144,12 @@ module.exports = {
               throw new InternalError({ message: 'Order not in Submitted or Amended state' })
             }
             order.status = 'Accepted'
+            break
+          case 'Cancellation':
+            if (order.status != 'AcknowledgedWithExceptions') {
+              throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
+            }
+            order.status = 'Cancelled'
             break
         }
         const selfAddress = await identity.getMemberBySelf(req)

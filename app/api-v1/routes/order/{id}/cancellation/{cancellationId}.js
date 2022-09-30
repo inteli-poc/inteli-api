@@ -4,9 +4,9 @@ const { buildValidatedJsonHandler } = require('../../../../../utils/routeRespons
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.getById('Acceptance'), {
-      summary: 'Get Purchase Orders Acceptance Action',
-      description: 'Returns the details of the on-chain transaction {acceptanceId} to accept the order {id}.',
+    GET: buildValidatedJsonHandler(order.transaction.getById('Cancellation'), {
+      summary: 'Get Purchase Orders Cancellation Action',
+      description: 'Returns the details of the on-chain transaction {CancellationId} to accept the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',
@@ -20,10 +20,10 @@ module.exports = function () {
           },
         },
         {
-          description: 'Id of the purchase-order acceptance',
+          description: 'Id of the purchase-order Cancellation',
           in: 'path',
           required: true,
-          name: 'acceptanceId',
+          name: 'CancellationId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',
@@ -32,17 +32,17 @@ module.exports = function () {
       ],
       responses: {
         200: {
-          description: 'Return Purchase Order Acceptance Action',
+          description: 'Return Purchase Order Cancellation Action',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/OrderAcceptance',
+                $ref: '#/components/schemas/OrderCancellation',
               },
             },
           },
         },
         404: {
-          description: 'Order or Acceptance Action not found',
+          description: 'Order or Cancellation Action not found',
           content: {
             'application/json': {
               schema: {

@@ -405,7 +405,7 @@ const apiDoc = {
           status: {
             type: 'string',
             description: 'Status of the purchase-order',
-            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted'],
+            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
           },
           partIds: {
             type: 'array',
@@ -457,6 +457,16 @@ const apiDoc = {
       },
       OrderAcceptance: {
         description: 'An action on an order that causes it to be accepted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      NewOrderCancellation: {
+        description: 'A new action on an order that causes it to be cancelled',
+        type: 'object',
+        properties: {},
+      },
+      OrderCancellation: {
+        description: 'An action on an order that causes it to be cancelled',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
