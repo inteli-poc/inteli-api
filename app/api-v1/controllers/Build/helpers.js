@@ -64,12 +64,12 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
   if (build.length == 0) {
     throw new NotFoundError('build')
   }
-  let completionEstimate
-  let attachmentId
-  let startedAt
-  let completedAt
   const modifiedBuildTransactions = await Promise.all(
     buildTransactions.map(async (item) => {
+      let completionEstimate
+      let attachmentId
+      let startedAt
+      let completedAt
       let newItem = {}
       newItem['id'] = item['id']
       newItem['status'] = item['status']

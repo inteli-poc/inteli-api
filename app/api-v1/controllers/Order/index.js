@@ -109,13 +109,12 @@ module.exports = {
             order.status = 'Submitted'
             break
           case 'Acknowledgement':
-            if (order.status != 'Submitted') {
-              throw new InternalError({ message: 'Order not in Submitted state' })
+            if (order.status != 'Submitted' && order.status != 'Amended') {
+              throw new InternalError({ message: 'Order not in Submitted or Amended state' })
             }
             order.status = 'AcknowledgedWithExceptions'
-            order.required_by = req.body.requiredBy
+            order.confirmed_receipt_date = req.body.confirmedReceiptDate
             order.price = parseFloat(req.body.price)
-            order.forecast_date = req.body.forecastDate
             order.quantity = parseInt(req.body.quantity)
             order.image_attachment_id = req.body.imageAttachmentId
             order.comments = req.body.comments
@@ -131,10 +130,9 @@ module.exports = {
               throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
             }
             order.status = 'Amended'
-            order.required_by = req.body.requiredBy
+            order.confirmed_receipt_date = req.body.confirmedReceiptDate
             order.items = req.body.items
             order.price = parseFloat(req.body.price)
-            order.forecast_date = req.body.forecastDate
             order.quantity = parseInt(req.body.quantity)
             order.image_attachment_id = null
             order.comments = null
