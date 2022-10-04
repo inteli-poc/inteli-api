@@ -31,7 +31,6 @@ exports.getResponse = async (type, transaction, req) => {
     ...((type == 'Amendment' || type == 'Acknowledgement') && { price: req.body.price }),
     ...((type == 'Amendment' || type == 'Acknowledgement') && { items: req.body.items }),
     ...((type == 'Amendment' || type == 'Acknowledgement') && { quantity: req.body.quantity }),
-    ...((type == 'Amendment' || type == 'Acknowledgement') && { forecastDate: req.body.forecastDate }),
     ...(type == 'Acknowledgement' && { imageAttachmentId: req.body.imageAttachmentId }),
     ...(type == 'Acknowledgement' && { comments: req.body.comments }),
   }
@@ -91,18 +90,16 @@ exports.getResultForOrderGet = async (result, req) => {
 const getCommonData = async (item, newItem) => {
   let price
   let quantity
-  let requiredBy
-  let forecastDate
+  let confirmedReceiptDate
   price = await getMetadata(item.token_id, 'price')
   price = price.data
   quantity = await getMetadata(item.token_id, 'quantity')
   quantity = quantity.data
-  requiredBy = await getMetadata(item.token_id, 'requiredBy')
-  requiredBy = requiredBy.data
+  confirmedReceiptDate = await getMetadata(item.token_id, 'confirmedReceiptDate')
+  confirmedReceiptDate = confirmedReceiptDate.data
   newItem['price'] = price
   newItem['quantity'] = quantity
-  newItem['requiredBy'] = requiredBy
-  newItem['forecastDate'] = forecastDate
+  newItem['confirmedReceiptDate'] = confirmedReceiptDate
 }
 
 exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) => {
@@ -115,6 +112,7 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
   }
   let comments
   let imageAttachmentId
+  let recipes
   const modifiedOrderTransactions = await Promise.all(
     orderTransactions.map(async (item) => {
       const newItem = {}
@@ -141,6 +139,8 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
           break
         case 'Amendment':
           await getCommonData(item, newItem)
+          recipes = await getMetadata(item.token_id, 'recipes')
+          newItem['items'] = recipes
           break
       }
       return newItem
