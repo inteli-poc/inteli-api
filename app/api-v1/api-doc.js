@@ -474,8 +474,8 @@ const apiDoc = {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
         properties: {
-          requiredBy: {
-            description: 'Date and time at which the purchase-order must be completed',
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
             type: 'string',
             format: 'date-time',
           },
@@ -511,8 +511,8 @@ const apiDoc = {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
         properties: {
-          requiredBy: {
-            description: 'Date and time at which the purchase-order must be completed',
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
             type: 'string',
             format: 'date-time',
           },
