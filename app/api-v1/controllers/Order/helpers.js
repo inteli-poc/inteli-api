@@ -140,6 +140,7 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
         case 'Amendment':
           await getCommonData(item, newItem)
           recipes = await getMetadata(item.token_id, 'recipes')
+          recipes = recipes.data
           newItem['items'] = recipes
           break
       }
