@@ -109,8 +109,8 @@ module.exports = {
             order.status = 'Submitted'
             break
           case 'Acknowledgement':
-            if (order.status != 'Submitted') {
-              throw new InternalError({ message: 'Order not in Submitted state' })
+            if (order.status != 'Submitted' || order.status != 'Amended') {
+              throw new InternalError({ message: 'Order not in Submitted or Amended state' })
             }
             order.status = 'AcknowledgedWithExceptions'
             order.required_by = req.body.requiredBy
