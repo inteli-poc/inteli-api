@@ -110,15 +110,15 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
   if (order.length == 0) {
     throw new NotFoundError('order')
   }
-  let comments
-  let imageAttachmentId
-  let recipes
   const modifiedOrderTransactions = await Promise.all(
     orderTransactions.map(async (item) => {
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
       newItem['status'] = item['status']
+      let comments
+      let imageAttachmentId
+      let recipes
       switch (type) {
         case 'Acknowledgement':
           await getCommonData(item, newItem)

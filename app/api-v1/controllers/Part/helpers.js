@@ -91,13 +91,13 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
   if (!part) {
     throw new NotFoundError('part')
   }
-  let attachmentId
-  let metadataType
-  let orderId
-  let itemIndex
-  let certificationIndex
   const modifiedPartTransactions = await Promise.all(
     partTransanctions.map(async (item) => {
+      let attachmentId
+      let metadataType
+      let orderId
+      let itemIndex
+      let certificationIndex
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
