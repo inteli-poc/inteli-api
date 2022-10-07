@@ -133,7 +133,7 @@ const buildBuildOutputs = (data, type) => {
       partRecipeMap: { type: 'FILE', value: 'part_recipe.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
-      updateType: { type: 'LITERAL', value: data.update_type },
+      ...(type == 'progress-update' && { updateType: { type: 'LITERAL', value: data.update_type } }),
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
   }
