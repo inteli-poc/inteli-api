@@ -27,7 +27,7 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'Start' && { startedAt: req.body.startedAt }),
     ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
     ...(type == 'Complete' && { completedAt: req.body.completedAt }),
-    ...(type == 'progres-update' && { updateType: req.body.updateType }),
+    ...(type == 'progress-update' && { updateType: req.body.updateType }),
   }
 }
 
@@ -48,9 +48,18 @@ exports.getResultForBuildGet = async (build, req) => {
         return item.id
       })
       newItem.completionEstimate = item.completion_estimate.toISOString()
-      newItem.startedAt = item.started_at ? item.started_at.toISOString() : item.started_at
-      newItem.completedAt = item.completed_at ? item.completed_at.toISOString() : item.completed_at
-      newItem.attachmentId = item.attachment_id
+      if (item.started_at) {
+        newItem.startedAt = item.started_at.toISOString()
+      }
+      if (item.completed_at) {
+        newItem.completedAt = item.completed_at.toISOString()
+      }
+      if (item.attachment_id) {
+        newItem.attachmentId = item.attachment_id
+      }
+      if (item.update_type) {
+        newItem.updateType = item.update_type
+      }
       return newItem
     })
   )
@@ -71,6 +80,7 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
       let attachmentId
       let startedAt
       let completedAt
+      let updateType
       let newItem = {}
       newItem['id'] = item['id']
       newItem['status'] = item['status']
@@ -94,8 +104,11 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
           attachmentId = attachmentId.data
           completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
           completionEstimate = completionEstimate.data
+          updateType = await getMetadata(item.token_id, 'updateType')
+          updateType = updateType.data
           newItem['attachmentId'] = attachmentId
-          newItem['completionEstimate'] = build[0].completion_estimate.toISOString()
+          newItem['completionEstimate'] = completionEstimate
+          newItem['updateType'] = updateType
           break
         case 'Complete':
           attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')

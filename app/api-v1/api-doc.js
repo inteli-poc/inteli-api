@@ -225,24 +225,6 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
-          startedAt: {
-            description: 'Date and time on which the build started. Null if not started',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-          },
-          completedAt: {
-            description: 'Date and time at which the build completed. Null if not completed',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-          },
-          attachmentId: {
-            description: 'attachment related to progress update and completion',
-            type: 'string',
-            format: 'uuid',
-            nullable: true,
-          },
         },
       },
       NewPart: {
@@ -406,16 +388,6 @@ const apiDoc = {
             type: 'string',
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
-          },
-          partIds: {
-            type: 'array',
-            description: 'List of part Ids',
-            maxItems: 10,
-            items: {
-              description: 'id of the part to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
-            },
           },
         },
       },
