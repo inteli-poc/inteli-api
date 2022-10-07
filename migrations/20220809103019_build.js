@@ -10,6 +10,7 @@ exports.up = async function (knex) {
     def.uuid('id').defaultTo(uuidGenerateV4())
     def.string('external_id').notNullable()
     def.string('supplier').notNullable()
+    def.string('update_type')
     def
       .enu('status', ['Created', 'Scheduled', 'Started', 'Completed'], {
         useNative: true,

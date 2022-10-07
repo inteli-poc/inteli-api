@@ -167,6 +167,10 @@ describe('map order data helper function', () => {
               type: 'LITERAL',
               value: 'some-confirmed-receipt-date',
             },
+            actionType: {
+              type: 'LITERAL',
+              value: 'Submission',
+            },
           },
         },
       ],

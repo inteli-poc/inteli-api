@@ -645,6 +645,10 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
+          updateType: {
+            description: 'type of the build process',
+            type: 'string',
+          },
         },
       },
       BuildProgressUpdate: {

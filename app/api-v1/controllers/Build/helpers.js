@@ -27,6 +27,7 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'Start' && { startedAt: req.body.startedAt }),
     ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
     ...(type == 'Complete' && { completedAt: req.body.completedAt }),
+    ...(type == 'progres-update' && { updateType: req.body.updateType }),
   }
 }
 
@@ -131,7 +132,8 @@ const buildBuildOutputs = (data, type) => {
       }),
       partRecipeMap: { type: 'FILE', value: 'part_recipe.json' },
       id: { type: 'FILE', value: 'id.json' },
-      actionType: {type: 'LITERAL', value: type}
+      actionType: { type: 'LITERAL', value: type },
+      updateType: { type: 'LITERAL', value: data.update_type },
     },
     ...(type != 'Schedule' && { parent_index: 0 }),
   }
