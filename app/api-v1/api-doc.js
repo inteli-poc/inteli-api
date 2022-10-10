@@ -225,24 +225,6 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
-          startedAt: {
-            description: 'Date and time on which the build started. Null if not started',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-          },
-          completedAt: {
-            description: 'Date and time at which the build completed. Null if not completed',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-          },
-          attachmentId: {
-            description: 'attachment related to progress update and completion',
-            type: 'string',
-            format: 'uuid',
-            nullable: true,
-          },
         },
       },
       NewPart: {
@@ -407,16 +389,6 @@ const apiDoc = {
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
           },
-          partIds: {
-            type: 'array',
-            description: 'List of part Ids',
-            maxItems: 10,
-            items: {
-              description: 'id of the part to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
-            },
-          },
         },
       },
       ChainAction: {
@@ -469,6 +441,10 @@ const apiDoc = {
         description: 'An action on an order that causes it to be cancelled',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      orderHistory: {
+        description: 'History of the order',
+        type: 'object',
       },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
@@ -644,6 +620,10 @@ const apiDoc = {
             description: 'Updated Date and time at which the build is estimated to finish',
             type: 'string',
             format: 'date-time',
+          },
+          updateType: {
+            description: 'type of the build process',
+            type: 'string',
           },
         },
       },

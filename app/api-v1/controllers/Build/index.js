@@ -148,6 +148,7 @@ module.exports = {
             build.status = 'Started'
             build.completion_estimate = req.body.completionEstimate
             build.attachment_id = req.body.attachmentId
+            build.update_type = req.body.updateType
             attachment = await db.getAttachment(build.attachment_id)
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')

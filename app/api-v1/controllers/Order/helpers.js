@@ -181,6 +181,7 @@ const buildOrderOutput = (data, type) => {
       ...(type == 'Acknowledgement' && data.comments && { comments: { type: 'FILE', value: 'comments.json' } }),
       recipes: { type: 'FILE', value: 'recipes.json' },
       id: { type: 'FILE', value: 'id.json' },
+      actionType: { type: 'LITERAL', value: type },
     },
     ...(type != 'Submission' && { parent_index: 0 }),
   }
