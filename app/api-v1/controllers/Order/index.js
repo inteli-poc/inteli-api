@@ -9,7 +9,8 @@ const {
 } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
-
+const buildController = require('../Build/index')
+const partController = require('../Part/index')
 module.exports = {
   post: async function (req) {
     if (!req.body) {
@@ -188,6 +189,91 @@ module.exports = {
           status: 201,
           response: await getResponse(type, transaction, req),
         }
+      }
+    },
+    getHistory: async (req) => {
+      let { id } = req.params
+      if (!id) throw new BadRequestError('missing params')
+      let orderObj = {}
+      orderObj.order = {}
+      try {
+        let orderSubmissionResult = await module.exports.transaction.get('Submission')(req)
+        orderObj.order.submission = orderSubmissionResult.response
+      } catch (err) {
+        orderObj.order.submission = []
+      }
+      try {
+        let orderAcknowledgementResult = await module.exports.transaction.get('Acknowledgement')(req)
+        orderObj.order.acknowledgement = orderAcknowledgementResult.response
+      } catch (err) {
+        orderObj.order.acknowledgement = []
+      }
+      try {
+        let orderAmendmentResult = await module.exports.transaction.get('Amendment')(req)
+        orderObj.order.amendment = orderAmendmentResult.response
+      } catch (err) {
+        orderObj.order.amendment = []
+      }
+      try {
+        let orderCancellationResult = await module.exports.transaction.get('Cancellation')(req)
+        orderObj.order.cancellation = orderCancellationResult.response
+      } catch (err) {
+        orderObj.order.cancellation = []
+      }
+      try {
+        let orderAcceptanceResult = await module.exports.transaction.get('Acceptance')(req)
+        orderObj.order.acceptance = orderAcceptanceResult.response
+      } catch (err) {
+        orderObj.order.acceptance = []
+      }
+      let parts = await db.getPartsByOrderId(id)
+      orderObj.builds = []
+      orderObj.parts = []
+      for (const part of parts) {
+        let buildObj = {}
+        let partObj = {}
+        let req = {}
+        req.params = { id: part.build_id }
+        buildObj[part.build_id] = {}
+        partObj[part.id] = {}
+        try {
+          let buildScheduleResult = await buildController.transaction.getAll('Schedule')(req)
+          buildObj[part.build_id].schedule = buildScheduleResult.response
+        } catch (err) {
+          buildObj[part.build_id].schedule = []
+        }
+        try {
+          let buildStartResult = await buildController.transaction.getAll('Start')(req)
+          buildObj[part.build_id].start = buildStartResult.response
+        } catch (err) {
+          buildObj[part.build_id].start = []
+        }
+        try {
+          let buildProgressUpdateResult = await buildController.transaction.getAll('progess-update')(req)
+          buildObj[part.build_id].progressUpdate = buildProgressUpdateResult.response
+        } catch (err) {
+          buildObj[part.build_id].progressUpdate = []
+        }
+        try {
+          let buildCompleteResult = await buildController.transaction.getAll('Complete')(req)
+          buildObj[part.build_id].complete = buildCompleteResult.response
+        } catch (err) {
+          buildObj[part.build_id].complete = []
+        }
+        orderObj.builds.push(buildObj)
+        try {
+          let req = {}
+          req.params = { id: part.id }
+          let partMetadataUpdateResult = await partController.transaction.getAll('metadata-update')(req)
+          partObj[part.id].metadataUpdate = partMetadataUpdateResult.response
+        } catch (err) {
+          partObj[part.id].metadataUpdate = []
+        }
+        orderObj.parts.push(partObj)
+      }
+      return {
+        status: 200,
+        response: orderObj,
       }
     },
   },

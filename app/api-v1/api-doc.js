@@ -442,6 +442,10 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
+      orderHistory: {
+        description: 'History of the order',
+        type: 'object',
+      },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
