@@ -62,7 +62,7 @@ module.exports = {
         if (type == 'Submission') {
           transactionId = req.params.submissionId
         } else if (type == 'Acknowledgement') {
-          transactionId = req.params.AcknowledgementId
+          transactionId = req.params.acknowledgementId
         } else if (type == 'Acceptance') {
           transactionId = req.params.acceptanceId
         } else if (type == 'Amendment') {

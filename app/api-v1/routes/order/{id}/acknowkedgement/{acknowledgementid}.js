@@ -6,7 +6,7 @@ module.exports = function () {
   const doc = {
     GET: buildValidatedJsonHandler(order.transaction.getById('Acknowledgement'), {
       summary: 'Get Purchase Orders Rejection Action',
-      description: 'Returns the details of the on-chain transaction {rejectionId} to reject the order {id}.',
+      description: 'Returns the details of the on-chain transaction {acknowledgementId} to reject the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',
@@ -23,7 +23,7 @@ module.exports = function () {
           description: 'Id of the rejection action',
           in: 'path',
           required: true,
-          name: 'rejectionId',
+          name: 'acknowledgementId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',
