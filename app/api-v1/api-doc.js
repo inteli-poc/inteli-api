@@ -483,7 +483,7 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAmendment' }],
       },
-      NewOrderRejection: {
+      NewOrderAcknowledgement: {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
         properties: {
@@ -517,10 +517,10 @@ const apiDoc = {
           },
         },
       },
-      OrderRejection: {
+      OrderAcknowledgement: {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderRejection' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAcknowledgement' }],
       },
       NewPartOrderAssignment: {
         description: 'A new action on a part that causes it to be assigned to an order',

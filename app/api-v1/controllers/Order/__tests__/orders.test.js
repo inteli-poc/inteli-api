@@ -474,7 +474,7 @@ describe('order controller', () => {
       describe('/order/{id}/rejection/{rejectionId} - get by id', () => {
         it('get rejection type transactions by rejectionId', async () => {
           req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
-          req.params.AcknowledgementId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          req.params.acknowledgementId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Acknowledgement')(req)
           expect(result.status).to.equal(200)
         })

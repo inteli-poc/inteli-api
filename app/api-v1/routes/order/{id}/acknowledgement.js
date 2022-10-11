@@ -28,7 +28,7 @@ module.exports = function () {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/OrderRejection',
+                  $ref: '#/components/schemas/OrderAcknowledgement',
                 },
               },
             },
@@ -66,7 +66,7 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/NewOrderRejection',
+              $ref: '#/components/schemas/NewOrderAcknowledgement',
             },
           },
         },
@@ -77,7 +77,7 @@ module.exports = function () {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/OrderRejection',
+                $ref: '#/components/schemas/OrderAcknowledgement',
               },
             },
           },
