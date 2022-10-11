@@ -23,7 +23,7 @@ module.exports = function () {
           description: 'Id of the purchase-order Cancellation',
           in: 'path',
           required: true,
-          name: 'CancellationId',
+          name: 'cancellationId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',
