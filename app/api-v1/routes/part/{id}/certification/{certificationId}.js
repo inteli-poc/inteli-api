@@ -5,7 +5,7 @@ const { buildValidatedJsonHandler } = require('../../../../../utils/routeRespons
 // eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.get, {
+    GET: buildValidatedJsonHandler(partController.transaction.get('certification'), {
       summary: 'Get Part Certification Action',
       description:
         'Returns the details of the on-chain transaction {certificationId} to add a certificate to the part {id}.',

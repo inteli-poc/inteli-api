@@ -10,6 +10,12 @@ function check_versions_consistent () {
   local HELM_CHART_VERSION=$(yq eval '.version' ./helm/inteli-api/Chart.yaml)
   local HELM_CHART_APP_VERSION=$(yq eval '.appVersion' ./helm/inteli-api/Chart.yaml)
 
+  echo "PACKAGE_VERSION: $PACKAGE_VERSION"
+  echo "PACKAGE_LOCK_VERSION: $PACKAGE_LOCK_VERSION"
+  echo "HELM_VALUES_TAG_VERSION: $HELM_VALUES_TAG_VERSION"
+  echo "HELM_CHART_VERSION: $HELM_CHART_VERSION"
+  echo "HELM_CHART_APP_VERSION: $HELM_CHART_APP_VERSION"
+
   if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ] ||
      [ "v$PACKAGE_VERSION" != "$HELM_VALUES_TAG_VERSION" ] ||
      [ "$PACKAGE_VERSION" != "$HELM_CHART_VERSION" ] ||

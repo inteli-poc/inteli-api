@@ -3,24 +3,15 @@ const logger = require('../../../utils/Logger')
 
 const db = require('../../../db')
 
-const { createAttachmentFromFile, createAttachment } = require('../Attachment/helpers')
-const { NotFoundError, BadRequestError, NotAcceptableError } = require('../../../utils/errors')
-
-const returnOctet = ({ filename, binary_blob }) => ({
-  status: 200,
-  headers: {
-    immutable: true,
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-    'content-disposition': `attachment; filename="${filename}"`,
-    'access-control-expose-headers': 'content-disposition',
-    'content-type': 'application/octet-stream',
-  },
-  response: binary_blob,
-})
+const { createAttachmentFromFile, createAttachment, checkMimeType } = require('../Attachment/helpers')
+const { NotFoundError, BadRequestError } = require('../../../utils/errors')
 
 module.exports = {
   get: async function () {
     const attachments = await db.getAttachments()
+    if (attachments.length == 0) {
+      throw new NotFoundError('attachments')
+    }
     const res = attachments.map((item) => {
       return {
         id: item.id,
@@ -40,25 +31,15 @@ module.exports = {
     const [attachment] = await db.getAttachment(req.params.id)
     if (!attachment) throw new NotFoundError('Attachment Not Found')
     const orderedAccept = parseAccept(req.headers.accept)
-
+    let type
     if (attachment.filename === 'json') {
-      for (const mimeType of orderedAccept) {
-        if (mimeType === 'application/json' || mimeType === 'application/*' || mimeType === '*/*') {
-          const json = JSON.parse(attachment.binary_blob)
-          return { status: 200, response: json }
-        }
-        if (mimeType === 'application/octet-stream') {
-          return returnOctet(attachment)
-        }
-      }
-      throw new NotAcceptableError({ message: 'Client file request not supported' })
+      type = 'json'
+      const result = await checkMimeType(orderedAccept, attachment, type)
+      return result
     }
-    for (const mimeType of orderedAccept) {
-      if (mimeType === 'application/octet-stream' || mimeType === 'application/*' || mimeType === '*/*') {
-        return returnOctet(attachment)
-      }
-    }
-    throw new NotAcceptableError({ message: 'Client file request not supported' })
+    type = 'octet'
+    const result = await checkMimeType(orderedAccept, attachment, type)
+    return result
   },
   create: async (req) => {
     if (req.headers['content-type'] === 'application/json') {

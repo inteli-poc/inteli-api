@@ -226,22 +226,10 @@ const apiDoc = {
             type: 'string',
             enum: ['Created', 'Scheduled', 'Started', 'Completed'],
           },
-          completionEstimatedAt: {
+          completionEstimate: {
             description: 'Date and time at which the build is estimated to finish',
             type: 'string',
             format: 'date-time',
-          },
-          startedAt: {
-            description: 'Date and time on which the build started. Null if not started',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-          },
-          completedAt: {
-            description: 'Date and time at which the build completed. Null if not completed',
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
           },
         },
       },
@@ -290,12 +278,79 @@ const apiDoc = {
               },
             },
           },
+          metadata: {
+            type: 'array',
+            nullable: true,
+            description: 'metadata this part has been assigned',
+            maxItems: 10,
+            items: {
+              description: 'metadata for a part',
+              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+            },
+          },
         },
       },
       NewOrder: {
         type: 'object',
         description: 'A new purchase-order to be submitted',
         properties: {
+          price: {
+            description: 'price of the order',
+            type: 'number',
+            format: 'float',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'integer',
+            example: 1,
+          },
+          description: {
+            description: 'description of the order',
+            type: 'string',
+          },
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
+          deliveryTerms: {
+            description: 'delivery terms of the order',
+            type: 'string',
+          },
+          deliveryAddress: {
+            description: 'delivery address of the order',
+            type: 'string',
+          },
+          priceType: {
+            description: 'price type of the order',
+            type: 'string',
+          },
+          unitOfMeasure: {
+            description: 'unit of measure for the order',
+            type: 'string',
+          },
+          currency: {
+            description: 'currency for the order',
+            type: 'string',
+          },
+          exportClassification: {
+            description: 'export classification of the order',
+            type: 'string',
+          },
+          lineText: {
+            description: 'line text for the order',
+            type: 'string',
+          },
+          businessPartnerCode: {
+            description: 'business partner code for the order',
+            type: 'string',
+          },
+          externalId: {
+            description: 'id of the order in an external ERP',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
           supplier: {
             description:
               'Name of the supplier who will supply parts from this purchase-order. This information is not stored directly on-chain',
@@ -338,7 +393,7 @@ const apiDoc = {
           status: {
             type: 'string',
             description: 'Status of the purchase-order',
-            enum: ['Created', 'Submitted', 'Rejected', 'Amended', 'Accepted'],
+            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
           },
         },
       },
@@ -383,12 +438,26 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
+      NewOrderCancellation: {
+        description: 'A new action on an order that causes it to be cancelled',
+        type: 'object',
+        properties: {},
+      },
+      OrderCancellation: {
+        description: 'An action on an order that causes it to be cancelled',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      orderHistory: {
+        description: 'History of the order',
+        type: 'object',
+      },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
         properties: {
-          requiredBy: {
-            description: 'Date and time at which the purchase-order must be completed',
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
             type: 'string',
             format: 'date-time',
           },
@@ -401,6 +470,17 @@ const apiDoc = {
               allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
               example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
             },
+          },
+          price: {
+            description: 'price of the order',
+            type: 'number',
+            format: 'float',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'integer',
+            example: 1,
           },
         },
       },
@@ -409,31 +489,44 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAmendment' }],
       },
-      NewOrderRejection: {
+      NewOrderAcknowledgement: {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
         properties: {
-          requiredBy: {
-            description: 'Date and time at which the purchase-order must be completed',
+          confirmedReceiptDate: {
+            description: 'confirmed receipt date of the order',
             type: 'string',
             format: 'date-time',
           },
-          items: {
-            type: 'array',
-            description: 'List of parts to be supplied, identified by their recipe id',
-            maxItems: 10,
-            items: {
-              description: 'id of the recipe to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
-            },
+          price: {
+            description: 'price of the order',
+            type: 'number',
+            format: 'float',
+            example: '1200.01',
+          },
+          quantity: {
+            description: 'quantity of the order',
+            type: 'integer',
+            example: 1,
+          },
+          comments: {
+            description: 'comments related to order rejection',
+            type: 'string',
+            maxLength: 255,
+            nullable: true,
+          },
+          imageAttachmentId: {
+            description: 'id of the attachment',
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
           },
         },
       },
-      OrderRejection: {
+      OrderAcknowledgement: {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderRejection' }],
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAcknowledgement' }],
       },
       NewPartOrderAssignment: {
         description: 'A new action on a part that causes it to be assigned to an order',
@@ -534,6 +627,10 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
+          updateType: {
+            description: 'type of the build process',
+            type: 'string',
+          },
         },
       },
       BuildProgressUpdate: {
@@ -603,6 +700,7 @@ const apiDoc = {
     ...securitySchemes,
   },
   paths: {},
+  security: [{ bearerAuth: [] }],
 }
 
 // make all schema properties required

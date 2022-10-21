@@ -16,6 +16,20 @@ const payload = {
   transaction: {
     id: '50000000-e000-1000-5500-000000000001',
   },
+  external_id: 'some-external-id',
+  price: 1100,
+  quantity: 1,
+  currency: 'some-currency',
+  delivery_terms: 'some-delivery-terms',
+  delivery_address: 'some-delivery-address',
+  line_text: 'some-line-text',
+  export_classification: 'some-export-classification',
+  unit_of_measure: 'some-unit-of-measure',
+  price_type: 'some-price-type',
+  confirmed_receipt_date: 'some-confirmed-receipt-date',
+  description: 'some-description',
+  business_partner_code: 'some-business-partner-code',
+  id: '50000000-e000-1000-5500-000000000002',
 }
 
 describe('map order data helper function', () => {
@@ -66,7 +80,9 @@ describe('map order data helper function', () => {
     stubs.getRecipeIds.resolves([recipesExample[0]])
     output = await mapOrderData(payload, 'Submission')
     expect(output).to.deep.equal({
-      inputs: [20],
+      recipes: Buffer.from(JSON.stringify(payload.items)),
+      id: Buffer.from(JSON.stringify('50000000-e000-1000-5500-000000000002')),
+      inputs: [],
       outputs: [
         {
           roles: {
@@ -75,9 +91,9 @@ describe('map order data helper function', () => {
             Supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
           },
           metadata: {
-            20: {
-              type: 'TOKEN_ID',
-              value: 20,
+            recipes: {
+              type: 'FILE',
+              value: 'recipes.json',
             },
             type: {
               type: 'LITERAL',
@@ -95,21 +111,67 @@ describe('map order data helper function', () => {
               type: 'LITERAL',
               value: '50000000e00010005500000000000001',
             },
-          },
-        },
-        {
-          roles: {
-            Owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-            Buyer: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-            Supplier: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-          },
-          metadata: {
-            type: {
+            externalId: {
               type: 'LITERAL',
-              value: 'RECIPE',
+              value: 'some-external-id',
+            },
+            price: {
+              type: 'LITERAL',
+              value: '1100',
+            },
+            quantity: {
+              type: 'LITERAL',
+              value: '1',
+            },
+            id: {
+              type: 'FILE',
+              value: 'id.json',
+            },
+            currency: {
+              type: 'LITERAL',
+              value: 'some-currency',
+            },
+            exportClassification: {
+              type: 'LITERAL',
+              value: 'some-export-classification',
+            },
+            priceType: {
+              type: 'LITERAL',
+              value: 'some-price-type',
+            },
+            deliveryAddress: {
+              type: 'LITERAL',
+              value: 'some-delivery-address',
+            },
+            deliveryTerms: {
+              type: 'LITERAL',
+              value: 'some-delivery-terms',
+            },
+            description: {
+              type: 'LITERAL',
+              value: 'some-description',
+            },
+            businessPartnerCode: {
+              type: 'LITERAL',
+              value: 'some-business-partner-code',
+            },
+            lineText: {
+              type: 'LITERAL',
+              value: 'some-line-text',
+            },
+            unitOfMeasure: {
+              type: 'LITERAL',
+              value: 'some-unit-of-measure',
+            },
+            confirmedReceiptDate: {
+              type: 'LITERAL',
+              value: 'some-confirmed-receipt-date',
+            },
+            actionType: {
+              type: 'LITERAL',
+              value: 'Submission',
             },
           },
-          parent_index: 0,
         },
       ],
     })

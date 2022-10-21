@@ -1,16 +1,15 @@
-const { getDefaultSecurity } = require('../../../utils/auth')
-const buildController = require('../../controllers/Build')
-const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator')
+const { getDefaultSecurity } = require('../../../../utils/auth')
+const order = require('../../../controllers/Order')
+const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(buildController.getById, {
-      summary: 'Get Build',
-      description: 'Returns the build {id}.',
+    GET: buildValidatedJsonHandler(order.transaction.getHistory, {
+      summary: 'List Purchase Order history',
+      description: 'Returns the details of all on-chain transactions to cancel the order {id}.',
       parameters: [
         {
-          description: 'Id of the build to get',
+          description: 'Id of the purchase-order',
           in: 'path',
           required: true,
           name: 'id',
@@ -23,20 +22,17 @@ module.exports = function () {
       ],
       responses: {
         200: {
-          description: 'Return Build',
+          description: 'Return Purchase Order history',
           content: {
             'application/json': {
               schema: {
-                type: 'array',
-                items: {
-                  $ref: '#/components/schemas/Build',
-                },
+                $ref: '#/components/schemas/orderHistory',
               },
             },
           },
         },
         404: {
-          description: 'Build not found',
+          description: 'Order not found',
           content: {
             'application/json': {
               schema: {
@@ -47,7 +43,7 @@ module.exports = function () {
         },
       },
       security: getDefaultSecurity(),
-      tags: ['build'],
+      tags: ['order'],
     }),
   }
 

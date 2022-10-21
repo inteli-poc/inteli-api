@@ -5,7 +5,7 @@ const { buildValidatedJsonHandler } = require('../../../../../utils/routeRespons
 // eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(buildController.transaction.get, {
+    GET: buildValidatedJsonHandler(buildController.transaction.get('Schedule'), {
       summary: 'Get Build Schedule Action',
       description: 'Returns the details of the on-chain transaction {scheduleId} to schedule the build {id}.',
       parameters: [

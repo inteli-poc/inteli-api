@@ -38,9 +38,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with existing supplier - 201', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
 
@@ -50,9 +63,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order - Check ID & Supplier', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
       expect(response.body.supplier).to.equal('valid-1')
@@ -63,9 +89,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with non-existant supplier - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -74,9 +113,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with more than one item - 201', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -85,9 +137,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with 2 different items - 201', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -96,9 +161,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with incorrect supplier - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-2',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -107,9 +185,22 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order - Invalid UUID', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['00000000-0000-1000-8000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -118,8 +209,21 @@ describeAuthOnly('order - authenticated', function () {
 
     test('POST Order with required Params missing - 400', async function () {
       const newProject = {
+        externalId: 'some-external-id',
         supplier: 'foobar3000',
         requiredBy: new Date().toISOString(),
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
 
       const response = await postOrderRoute(newProject, app, authToken)
@@ -153,9 +257,22 @@ describeNoAuthOnly('order - no auth', function () {
 
     test('POST Order - Check ID & Manufacturer', async function () {
       const newOrder = {
+        externalId: 'some-external-id',
         supplier: 'valid-1',
         requiredBy: new Date().toISOString(),
         items: ['10000000-0000-1000-8000-000000000000'],
+        price: 1100,
+        quantity: 1,
+        currency: 'some-currency',
+        deliveryTerms: 'some-delivery-terms',
+        deliveryAddress: 'some-delivery-address',
+        lineText: 'some-line-text',
+        exportClassification: 'some-export-classification',
+        unitOfMeasure: 'some-unit-of-measure',
+        priceType: 'some-price-type',
+        confirmedReceiptDate: new Date().toISOString(),
+        description: 'some-description',
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, null)
       expect(response.body.supplier).to.equal('valid-1')
