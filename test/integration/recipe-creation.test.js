@@ -46,9 +46,8 @@ describeAuthOnly('get all recipe transactions - authenticated', () => {
     })
 
     it('returns 200 and an empty list', () => {
-      const { status, body } = response
-      expect(status).to.be.equal(200)
-      expect(body).to.deep.equal([])
+      const { status } = response
+      expect(status).to.equal(404)
     })
   })
 

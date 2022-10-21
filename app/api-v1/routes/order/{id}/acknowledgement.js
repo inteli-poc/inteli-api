@@ -1,41 +1,41 @@
 const { getDefaultSecurity } = require('../../../../utils/auth')
-const partController = require('../../../controllers/Part')
+const order = require('../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.getAll('certification'), {
-      summary: 'List Part Certification Actions',
-      description: 'Returns the details of all on-chain transactions to add certification to the part {id}.',
+    GET: buildValidatedJsonHandler(order.transaction.get('Acknowledgement'), {
+      summary: 'List Purchase Orders Rejection Actions',
+      description: 'Returns the details of all on-chain transactions to reject the order {id}.',
       parameters: [
         {
-          description: 'Id of the part',
+          description: 'Id of the purchase-order',
           in: 'path',
           required: true,
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid',
           },
         },
       ],
       responses: {
         200: {
-          description: 'Return Part Certification Actions',
+          description: 'Return Purchase Order Rejection Actions',
           content: {
             'application/json': {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/PartCertification',
+                  $ref: '#/components/schemas/OrderAcknowledgement',
                 },
               },
             },
           },
         },
         404: {
-          description: 'Part not found',
+          description: 'Order not found',
           content: {
             'application/json': {
               schema: {
@@ -45,14 +45,14 @@ module.exports = function () {
           },
         },
       },
-      tags: ['part'],
+      tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(partController.transaction.create('certification'), {
-      summary: 'Create Part Certification Action',
-      description: 'A Supplier adds a certificate file to the part {id}.',
+    POST: buildValidatedJsonHandler(order.transaction.create('Acknowledgement'), {
+      summary: 'Create Purchase Order Rejection Action',
+      description: 'A Supplier rejects the order {id}. Order must be in `Submitted` state.',
       parameters: [
         {
-          description: 'Id of the part',
+          description: 'Id of the purchase-order. Must be in "Submitted" state',
           in: 'path',
           required: true,
           name: 'id',
@@ -66,18 +66,18 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/NewPartCertification',
+              $ref: '#/components/schemas/NewOrderAcknowledgement',
             },
           },
         },
       },
       responses: {
         201: {
-          description: 'Part Certification Created',
+          description: 'Purchase Order Rejection Created',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/PartCertification',
+                $ref: '#/components/schemas/OrderAcknowledgement',
               },
             },
           },
@@ -94,7 +94,7 @@ module.exports = function () {
         },
       },
       security: getDefaultSecurity(),
-      tags: ['part'],
+      tags: ['order'],
     }),
   }
 

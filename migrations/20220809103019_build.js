@@ -6,26 +6,26 @@ exports.up = async function (knex) {
   const uuidGenerateV4 = () => knex.raw('uuid_generate_v4()')
   const now = () => knex.fn.now()
 
-  await knex.schema.createTable('order_transactions', (def) => {
+  await knex.schema.createTable('build', (def) => {
     def.uuid('id').defaultTo(uuidGenerateV4())
-    def.integer('token_id')
-    def.uuid('order_id').notNullable()
+    def.string('external_id').notNullable()
+    def.string('supplier').notNullable()
+    def.string('update_type')
     def
-      .enu('type', ['Submission', 'Acknowledgement', 'Acceptance', 'Amendment', 'Cancellation'], {
-        enumName: 'order_type',
+      .enu('status', ['Created', 'Scheduled', 'Started', 'Completed'], {
         useNative: true,
+        enumName: 'buildstatus',
       })
       .notNullable()
-    def.enu('status', ['Submitted', 'InBlock', 'Finalised', 'Failed'], {
-      enumName: 'tx_status',
-      existingType: true,
-      useNative: true,
-    })
+    def.datetime('completion_estimate').notNullable()
+    def.datetime('started_at')
+    def.datetime('completed_at')
     def.datetime('created_at').notNullable().default(now())
     def.datetime('updated_at').notNullable().default(now())
-
+    def.integer('latest_token_id')
+    def.integer('original_token_id')
+    def.uuid('attachment_id')
     def.primary(['id'])
-    def.foreign('order_id').references('id').on('orders')
   })
 }
 
@@ -34,5 +34,5 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex.schema.dropTable('order_transactions')
+  await knex.schema.dropTable('build')
 }

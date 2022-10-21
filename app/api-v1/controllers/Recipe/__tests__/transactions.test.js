@@ -91,10 +91,8 @@ describe('recipe transactions controller', () => {
         response = await getAllTransactions({ params: { id: 'RECIPE00-9000-1000-8000-000000000000' } })
       })
 
-      it('returns an empty list', () => {
-        const { status, response: body } = response
-        expect(status).to.be.equal(200)
-        expect(body).to.deep.equal([])
+      it('throws an error', () => {
+        expect(response).to.be.an.instanceOf(NotFoundError)
       })
     })
 

@@ -31,7 +31,9 @@ exports.up = async (knex) => {
     def.string('price').notNullable()
     def.json('required_certs').notNullable()
     def.string('supplier').notNullable()
-
+    def.string('owner', 48).notNullable()
+    def.integer('latest_token_id')
+    def.integer('original_token_id')
     def.primary(['id'])
 
     def.foreign('image_attachment_id').references('id').on('attachments').onDelete('CASCADE').onUpdate('CASCADE')

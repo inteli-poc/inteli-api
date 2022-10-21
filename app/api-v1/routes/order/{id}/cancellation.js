@@ -4,9 +4,9 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get('Rejection'), {
-      summary: 'List Purchase Orders Rejection Actions',
-      description: 'Returns the details of all on-chain transactions to reject the order {id}.',
+    GET: buildValidatedJsonHandler(order.transaction.get('Cancellation'), {
+      summary: 'List Purchase Orders Cancellation Actions',
+      description: 'Returns the details of all on-chain transactions to cancel the order {id}.',
       parameters: [
         {
           description: 'Id of the purchase-order',
@@ -22,13 +22,13 @@ module.exports = function () {
       ],
       responses: {
         200: {
-          description: 'Return Purchase Order Rejection Actions',
+          description: 'Return Purchase Order Cancellation Actions',
           content: {
             'application/json': {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/OrderRejection',
+                  $ref: '#/components/schemas/OrderCancellation',
                 },
               },
             },
@@ -45,14 +45,15 @@ module.exports = function () {
           },
         },
       },
+      security: getDefaultSecurity(),
       tags: ['order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create('Rejection'), {
-      summary: 'Create Purchase Order Rejection Action',
-      description: 'A Supplier rejects the order {id}. Order must be in `Submitted` state.',
+    POST: buildValidatedJsonHandler(order.transaction.create('Cancellation'), {
+      summary: 'Create Purchase Order Cancellation Action',
+      description: 'A Supplier accepts the order {id}. Order must be in `Submitted` or `Amended` state.',
       parameters: [
         {
-          description: 'Id of the purchase-order. Must be in "Submitted" state',
+          description: 'Id of the purchase-order. Must be in "Submitted" or "Amended" state',
           in: 'path',
           required: true,
           name: 'id',
@@ -66,18 +67,18 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/NewOrderRejection',
+              $ref: '#/components/schemas/NewOrderCancellation',
             },
           },
         },
       },
       responses: {
         201: {
-          description: 'Purchase Order Rejection Created',
+          description: 'Purchase Order Cancellation Created',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/OrderRejection',
+                $ref: '#/components/schemas/OrderAcceptance',
               },
             },
           },

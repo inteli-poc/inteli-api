@@ -1,9 +1,7 @@
 const { client } = require('../../app/db')
 
 const cleanup = async () => {
-  await client('orders').del()
-  await client('recipes').del()
-  await client('attachments').del()
+  await client.raw('TRUNCATE TABLE orders, recipes, attachments CASCADE')
 }
 
 const seed = async () => {
@@ -64,7 +62,7 @@ const seed = async () => {
   ])
 
   await Promise.all(
-    ['Created', 'Submitted', 'Rejected', 'Accepted', 'Amended'].map((status, i) =>
+    ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Accepted', 'Amended'].map((status, i) =>
       client('orders').insert([
         {
           id: `36345f4f-6535-42e2-83f9-79e2e195e11${i}`,
@@ -73,6 +71,19 @@ const seed = async () => {
           buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
           status,
           required_by: '2022-10-21T10:10:10.919Z',
+          external_id: 'some-external-id',
+          price: 1100,
+          quantity: 1,
+          currency: 'some-currency',
+          delivery_terms: 'some-delivery-terms',
+          delivery_address: 'some-delivery-address',
+          line_text: 'some-line-text',
+          export_classification: 'some-export-classification',
+          unit_of_measure: 'some-unit-of-measure',
+          price_type: 'some-price-type',
+          confirmed_receipt_date: new Date().toISOString(),
+          description: 'some-description',
+          business_partner_code: 'some-business-partner-code',
         },
       ])
     )
@@ -87,6 +98,19 @@ const seed = async () => {
       buyer: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       status: 'Created',
       required_by: '2022-10-21T11:45:46.919Z',
+      external_id: 'some-external-id',
+      price: 1100,
+      quantity: 1,
+      currency: 'some-currency',
+      delivery_terms: 'some-delivery-terms',
+      delivery_address: 'some-delivery-address',
+      line_text: 'some-line-text',
+      export_classification: 'some-export-classification',
+      unit_of_measure: 'some-unit-of-measure',
+      price_type: 'some-price-type',
+      confirmed_receipt_date: new Date().toISOString(),
+      description: 'some-description',
+      business_partner_code: 'some-business-partner-code',
     },
   ])
 }

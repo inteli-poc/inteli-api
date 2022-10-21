@@ -47,6 +47,22 @@ async function postOrderRoute(order, { app }, token) {
     })
 }
 
+async function postBuildRoute(build, { app }, token) {
+  return request(app)
+    .post(`/${API_MAJOR_VERSION}/build`)
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .set('Authorization', `Bearer ${token}`)
+    .send(build)
+    .then((response) => {
+      return response
+    })
+    .catch((err) => {
+      console.error(`postBuildErr ${err}`)
+      return err
+    })
+}
+
 async function postRecipeRoute(recipe, { app }, token) {
   return request(app)
     .post(`/${API_MAJOR_VERSION}/recipe`)
@@ -214,4 +230,5 @@ module.exports = {
   getAttachmentRouteJSON,
   getAttachmentRouteOctet,
   getAttachments,
+  postBuildRoute,
 }

@@ -105,7 +105,6 @@ describe('order controller', () => {
 
     describe('if identity service is unavailable or returned an error', () => {
       beforeEach(async () => {
-        stubs.identityByAlias.restore()
         stubs.identitySelf.throws('some error - identity self')
         stubs.identityByAlias.rejects('some error - identity alias')
         response = await postOrder({
@@ -300,6 +299,7 @@ describe('order controller', () => {
     let req = {}
     beforeEach(async () => {
       req.params = { id: '00000000-0000-1000-3000-000000000001' }
+      req.query = {}
       stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
       stubs.identityByAddress.onCall(0).resolves({ alias: 'supplier-alias' })
       stubs.identityByAddress.onCall(1).resolves({ alias: 'buyer-alias' })
@@ -312,6 +312,9 @@ describe('order controller', () => {
           description: 'some description - test',
           required_by: new Date(),
           items: recipeExamples.map((el) => el.id),
+          price: 1100,
+          quantity: 1,
+          forecast_date: new Date(),
         },
       ])
       stubs.getOrders = stub(db, 'getOrders').resolves([
@@ -323,13 +326,18 @@ describe('order controller', () => {
           description: 'some description - test',
           required_by: new Date(),
           items: recipeExamples.map((el) => el.id),
+          price: 1100,
+          quantity: 1,
+          forecast_date: new Date(),
         },
       ])
+      stubs.getPartsByOrderId = stub(db, 'getPartsByOrderId').resolves([])
     })
     afterEach(async () => {
       stubs.identityByAddress.restore()
       stubs.getOrder.restore()
       stubs.getOrders.restore()
+      stubs.getPartsByOrderId.restore()
     })
     it('get all orders', async () => {
       const result = await orderController.get(req)
@@ -364,13 +372,27 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
+            token_id: 1,
           },
         ])
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         stubs.getOrderTransactions.restore()
         req = {}
         stubs.getOrder.restore()
+        nock.cleanAll()
       })
       describe('/order/{id}/submission - get all order transactions', () => {
         it('get all submission types of an order', async () => {
@@ -419,16 +441,31 @@ describe('order controller', () => {
             created_at: new Date(),
             items: recipeExamples.map((el) => el.id),
             required_by: new Date(),
+            token_id: 1,
           },
         ])
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
+        nock(dscpApiUrl)
+          .get((uri) => uri.includes('metadata'))
+          .reply(200, 'some-metadata')
       })
       afterEach(async () => {
         req = {}
         stubs.getOrderTransactionsById.restore()
         stubs.getOrder.restore()
+        nock.cleanAll()
       })
       describe('/order/{id}/submission/{submissionId} - get by id', () => {
         it('get submission type transactions by submissionid', async () => {
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
           req.params.submissionId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Submission')(req)
           expect(result.status).to.equal(200)
@@ -436,13 +473,15 @@ describe('order controller', () => {
       })
       describe('/order/{id}/rejection/{rejectionId} - get by id', () => {
         it('get rejection type transactions by rejectionId', async () => {
-          req.params.rejectionId = '6908132e-36af-46bf-9758-85e9f95eb542'
-          const result = await orderController.transaction.getById('Rejection')(req)
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
+          req.params.acknowledgementId = '6908132e-36af-46bf-9758-85e9f95eb542'
+          const result = await orderController.transaction.getById('Acknowledgement')(req)
           expect(result.status).to.equal(200)
         })
       })
       describe('/order/{id}/acceptance/{acceptanceId} - get by id', () => {
         it('get acceptance type transactions by acceptanceId', async () => {
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
           req.params.acceptanceId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Acceptance')(req)
           expect(result.status).to.equal(200)
@@ -450,7 +489,8 @@ describe('order controller', () => {
       })
       describe('/order/{id}/amendment/{amendmentId} - get by id', () => {
         it('get amendment type transactions by amendmentId', async () => {
-          req.params.amendmentID = '6908132e-36af-46bf-9758-85e9f95eb542'
+          req.params.id = '6908132e-36af-46bf-9758-85e9f95eb543'
+          req.params.amendmentId = '6908132e-36af-46bf-9758-85e9f95eb542'
           const result = await orderController.transaction.getById('Amendment')(req)
           expect(result.status).to.equal(200)
         })
@@ -465,6 +505,7 @@ describe('order controller', () => {
         stubs.getSelf = stub(identityService, 'getMemberBySelf').resolves(null)
         stubs.removeTransaction = stub(db, 'removeTransactionOrder').resolves(null)
         stubs.updateRecipe = stub(db, 'updateRecipe').resolves(null)
+        stubs.updateOrderTransaction = stub(db, 'updateOrderTransaction').resolves(null)
       })
       afterEach(() => {
         stubs.getSelf.restore()
@@ -474,6 +515,7 @@ describe('order controller', () => {
         stubs.removeTransaction.restore()
         stubs.updateOrder.restore()
         stubs.updateRecipe.restore()
+        stubs.updateOrderTransaction.restore()
       })
 
       describe('if invalid parameter supplied', () => {
@@ -598,12 +640,17 @@ describe('order controller', () => {
           })
           stubs.getOrder.resolves([
             {
-              status: 'submitted',
+              id: '50000000-e000-1000-5500-000000000002',
+              status: 'Created',
               requiredBy: '2022-06-11T08:47:23.397Z',
               items: ['50000000-0000-1000-5500-000000000001'],
+              external_id: 'some-external-id',
+              price: 1100,
+              quantity: 1,
+              forecast_date: '2022-06-13T11:20:35.466Z',
             },
           ])
-          response = await createTransaction('AnyType', {
+          response = await createTransaction('Submission', {
             params: { id: '00000000-0000-1000-3000-000000000001' },
             body: {
               items: ['50000000-0000-1000-5500-000000000001'],
