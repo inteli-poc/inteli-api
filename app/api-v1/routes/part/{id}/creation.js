@@ -2,12 +2,11 @@ const { getDefaultSecurity } = require('../../../../utils/auth')
 const partController = require('../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.getAll('order-assignment'), {
-      summary: 'List Part Order Assignment Actions',
-      description: 'Returns the details of all on-chain transactions to assign the part {id} to an order.',
+    GET: buildValidatedJsonHandler(partController.transaction.getAll('Creation'), {
+      summary: 'List Part Creation Actions',
+      description: 'Returns the details of all on-chain transactions to create the part {id}.',
       parameters: [
         {
           description: 'Id of the part',
@@ -22,13 +21,13 @@ module.exports = function () {
       ],
       responses: {
         200: {
-          description: 'Return Part Order Assignment Actions',
+          description: 'Return Part Creation Actions',
           content: {
             'application/json': {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/PartOrderAssignment',
+                  $ref: '#/components/schemas/PartCreation',
                 },
               },
             },
@@ -45,15 +44,14 @@ module.exports = function () {
           },
         },
       },
-      security: getDefaultSecurity(),
       tags: ['part'],
     }),
-    POST: buildValidatedJsonHandler(partController.transaction.create('order-assignment'), {
-      summary: 'Create Part Order Assignment Action',
-      description: 'A Supplier assigns the part {id} to an order.',
+    POST: buildValidatedJsonHandler(partController.transaction.create('Creation'), {
+      summary: 'Create Part Creation Action',
+      description: 'A buyer creates the part {id}. Part is now viewable to other members',
       parameters: [
         {
-          description: 'Id of the part. Must not be assigned to a purchase-order',
+          description: 'Id of the part',
           in: 'path',
           required: true,
           name: 'id',
@@ -67,18 +65,18 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/NewPartOrderAssignment',
+              $ref: '#/components/schemas/NewPartCreation',
             },
           },
         },
       },
       responses: {
         201: {
-          description: 'Part Order Assignment Created',
+          description: 'Part Creation Created',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/PartOrderAssignment',
+                $ref: '#/components/schemas/PartCreation',
               },
             },
           },

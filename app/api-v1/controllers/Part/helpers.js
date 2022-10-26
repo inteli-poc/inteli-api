@@ -1,12 +1,12 @@
 const db = require('../../../db')
 const identity = require('../../services/identityService')
-const { NotFoundError, InternalError } = require('../../../utils/errors')
+const { NotFoundError, InternalError, NothingToProcess, NoTokenError } = require('../../../utils/errors')
 const { getMetadata } = require('../../../utils/dscp-api')
 
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
     roles: {
-      Owner: data.supplier,
+      Owner: type == 'acknowledgement' ? data.buyer : data.supplier,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },
@@ -25,6 +25,19 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       }),
       actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
+      price: { type: 'LITERAL', value: data.price.toString() },
+      quantity: { type: 'LITERAL', value: data.quantity.toString() },
+      description: { type: 'LITERAL', value: data.description },
+      deliveryTerms: { type: 'LITERAL', value: data.delivery_terms },
+      deliveryAddress: { type: 'LITERAL', value: data.delivery_address },
+      priceType: { type: 'LITERAL', value: data.price_type },
+      confirmedReceiptDate: { type: 'LITERAL', value: data.confirmed_receipt_date },
+      unitOfMeasure: { type: 'LITERAL', value: data.unit_of_measure },
+      currency: { type: 'LITERAL', value: data.currency },
+      exportClassification: { type: 'LITERAL', value: data.export_classification },
+      lineText: { type: 'LITERAL', value: data.line_text },
+      requiredBy: { type: 'LITERAL', value: data.required_by },
+      recipeId: { type: 'FILE', value: 'recipe_id.json' },
     },
     ...(parent_index_required && { parent_index: 0 }),
   }
@@ -38,8 +51,6 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'metadata-update' && { metadataType: req.body.metadataType }),
     ...((type == 'metadata-update' || type == 'certification') && { attachmentId: req.body.attachmentId }),
     ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
-    ...(type == 'order-assignment' && { orderId: req.body.orderId }),
-    ...(type == 'order-assignment' && { itemIndex: req.body.itemIndex }),
   }
 }
 
@@ -57,6 +68,18 @@ exports.getResultForPartGet = async (parts, req) => {
       newItem['id'] = item.id
       newItem['certifications'] = item.certifications
       newItem['metadata'] = item.metadata
+      newItem['price'] = item.price
+      newItem['quantity'] = item.quantity
+      newItem['deliveryTerms'] = item.delivery_terms
+      newItem['description'] = item.description
+      newItem['deliveryAddress'] = item.delivery_address
+      newItem['priceType'] = item.price_type
+      newItem['unitOfMeasure'] = item.unit_of_measure
+      newItem['exportClassification'] = item.export_classification
+      newItem['lineText'] = item.line_text
+      newItem['currency'] = item.currency
+      newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
+      newItem['requiredBy'] = item.required_by.toISOString()
       return newItem
     })
   )
@@ -95,8 +118,6 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
     partTransanctions.map(async (item) => {
       let attachmentId
       let metadataType
-      let orderId
-      let itemIndex
       let certificationIndex
       const newItem = {}
       newItem['id'] = item['id']
@@ -110,17 +131,6 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           attachmentId = attachmentId.data
           newItem['metadataType'] = metadataType
           newItem['attachmentId'] = attachmentId
-          break
-        case 'order-assignment':
-          if (!part.order_id) {
-            throw new NotFoundError('order')
-          }
-          orderId = await getMetadata(item.token_id, 'orderId')
-          orderId = orderId.data
-          itemIndex = await getMetadata(item.token_id, 'itemIndex')
-          itemIndex = itemIndex.data
-          newItem['orderId'] = orderId
-          newItem['itemIndex'] = itemIndex
           break
         case 'certification':
           certificationIndex = await getMetadata(item.token_id, 'certificationIndex')
@@ -137,10 +147,14 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
   return modifiedPartTransactions
 }
 exports.mapPartData = async (data, type) => {
+  if (!data.recipe_id) throw new NothingToProcess()
+  const records = await db.getRecipeByIDdb(data.recipe_id)
+  const tokenIds = records.map((el) => el.latest_token_id)
+  if (!tokenIds.every(Boolean)) throw new NoTokenError('recipes')
   let inputs
   let outputs
   let parent_index_required = false
-  if (data.latest_token_id) {
+  if (type != 'Creation') {
     inputs = [data.latest_token_id]
     parent_index_required = true
   } else {
@@ -152,6 +166,7 @@ exports.mapPartData = async (data, type) => {
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
+    recipeId: Buffer.from(JSON.stringify(data.recipe_id)),
     ...(type == 'order-assignment' && { orderId: Buffer.from(JSON.stringify(data.order_id)) }),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
     inputs,

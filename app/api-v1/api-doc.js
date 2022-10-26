@@ -179,12 +179,12 @@ const apiDoc = {
             allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
             example: 'some-external-system-id',
           },
-          parts: {
-            description: 'List of recipes describing parts to be created by this build',
+          partIds: {
+            description: 'List of parts to be created by this build',
             type: 'array',
             maxItems: 10,
             items: {
-              $ref: '#/components/schemas/NewPart',
+              $ref: '#/components/schemas/ObjectReference',
             },
           },
           completionEstimate: {
@@ -242,58 +242,6 @@ const apiDoc = {
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
           },
-        },
-      },
-      Part: {
-        type: 'object',
-        description: 'A part being or having been manufactured',
-        allOf: [{ $ref: '#/components/schemas/NewPart' }],
-        properties: {
-          id: {
-            description: 'local id of the part',
-            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-          },
-          buildId: {
-            description: 'id of the build that produces/produced this part',
-            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-          },
-          supplier: {
-            description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
-            type: 'string',
-            maxLength: 255,
-            example: 'SupplierAlias',
-          },
-          certifications: {
-            type: 'array',
-            description: 'Certifications this part has been assigned',
-            maxItems: 10,
-            items: {
-              description: 'Certification for a part',
-              allOf: [{ $ref: '#/components/schemas/CertificationRequirement' }],
-              properties: {
-                certificationAttachmentId: {
-                  description: 'Attachment Id of the certification evidence',
-                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-                },
-              },
-            },
-          },
-          metadata: {
-            type: 'array',
-            nullable: true,
-            description: 'metadata this part has been assigned',
-            maxItems: 10,
-            items: {
-              description: 'metadata for a part',
-              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
-            },
-          },
-        },
-      },
-      NewOrder: {
-        type: 'object',
-        description: 'A new purchase-order to be submitted',
-        properties: {
           price: {
             description: 'price of the order',
             type: 'number',
@@ -342,6 +290,54 @@ const apiDoc = {
             description: 'line text for the order',
             type: 'string',
           },
+        },
+      },
+      Part: {
+        type: 'object',
+        description: 'A part being or having been manufactured',
+        allOf: [{ $ref: '#/components/schemas/NewPart' }],
+        properties: {
+          id: {
+            description: 'local id of the part',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          supplier: {
+            description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+          certifications: {
+            type: 'array',
+            description: 'Certifications this part has been assigned',
+            maxItems: 10,
+            items: {
+              description: 'Certification for a part',
+              allOf: [{ $ref: '#/components/schemas/CertificationRequirement' }],
+              properties: {
+                certificationAttachmentId: {
+                  description: 'Attachment Id of the certification evidence',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+              },
+            },
+          },
+          metadata: {
+            type: 'array',
+            nullable: true,
+            description: 'metadata this part has been assigned',
+            maxItems: 10,
+            items: {
+              description: 'metadata for a part',
+              allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+            },
+          },
+        },
+      },
+      OrderRequest: {
+        type: 'object',
+        description: 'A new purchase-order to be submitted',
+        properties: {
           businessPartnerCode: {
             description: 'business partner code for the order',
             type: 'string',
@@ -358,26 +354,49 @@ const apiDoc = {
             maxLength: 255,
             example: 'SupplierAlias',
           },
-          requiredBy: {
-            description: 'Date and time at which the purchase-order must be completed',
-            type: 'string',
-            format: 'date-time',
-          },
+        },
+      },
+      NewOrder: {
+        type: 'object',
+        description: 'A new purchase-order to be submitted',
+        allOf: [{ $ref: '#/components/schemas/OrderRequest' }],
+        properties: {
           items: {
             type: 'array',
-            description: 'List of parts to be supplied, identified by their recipe id',
+            description: 'List of parts to be supplied',
             maxItems: 10,
             items: {
-              description: 'id of the recipe to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
+              description: 'properties of the part',
+              allOf: [{ $ref: '#/components/schemas/NewPart' }],
+              example: {
+                externalId: 'some-external-d',
+                supplier: 'bob',
+                items: [
+                  {
+                    requiredBy: '2022-09-23T09:30:51.190Z',
+                    recipeId: 'b50cb5ee-8932-40b9-8c1f-6a395f88dbaa',
+                    price: 1100,
+                    quantity: 1,
+                    currency: 'some-currency',
+                    deliveryTerms: 'some-delivery-terms',
+                    deliveryAddress: 'some-delivery-address',
+                    lineText: 'some-line-text',
+                    exportClassification: 'some-export-classification',
+                    unitOfMeasure: 'some-unit-of-measure',
+                    priceType: 'some-price-type',
+                    confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
+                    description: 'some-description',
+                  },
+                ],
+                businessPartnerCode: 'some-business-partner-code',
+              },
             },
           },
         },
       },
       Order: {
         description: 'A purchase-order',
-        allOf: [{ $ref: '#/components/schemas/NewOrder' }],
+        allOf: [{ $ref: '#/components/schemas/OrderRequest' }],
         properties: {
           id: {
             description: 'local id of the purchase-order',
@@ -394,6 +413,13 @@ const apiDoc = {
             type: 'string',
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
+          },
+          partIds: {
+            type: 'array',
+            description: 'list of part Ids',
+            items: {
+              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+            },
           },
         },
       },
@@ -456,19 +482,25 @@ const apiDoc = {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
         properties: {
-          confirmedReceiptDate: {
-            description: 'confirmed receipt date of the order',
-            type: 'string',
-            format: 'date-time',
-          },
           items: {
-            type: 'array',
-            description: 'List of parts to be supplied, identified by their recipe id',
-            maxItems: 10,
-            items: {
-              description: 'id of the recipe to be built',
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-              example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
+            type: 'object',
+            description: 'part details',
+            example: {
+              '7137a47b-5887-4333-8422-146c7d5eee8a': {
+                requiredBy: '2022-09-23T09:30:51.190Z',
+                recipeId: '1d2ec8fc-e063-4865-9dcd-dcddf4941025',
+                price: 1100,
+                quantity: 1,
+                currency: 'new-currency',
+                deliveryTerms: 'new-delivery-terms',
+                deliveryAddress: 'new-delivery-address',
+                lineText: 'new-line-text',
+                exportClassification: 'new-export-classification',
+                unitOfMeasure: 'new-unit-of-measure',
+                priceType: 'new-price-type',
+                confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
+                description: 'new-description',
+              },
             },
           },
           price: {
@@ -493,33 +525,36 @@ const apiDoc = {
         description: 'A new action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
         properties: {
-          confirmedReceiptDate: {
-            description: 'confirmed receipt date of the order',
-            type: 'string',
-            format: 'date-time',
-          },
-          price: {
-            description: 'price of the order',
-            type: 'number',
-            format: 'float',
-            example: '1200.01',
-          },
-          quantity: {
-            description: 'quantity of the order',
-            type: 'integer',
-            example: 1,
+          items: {
+            description: 'part details',
+            type: 'object',
+            example: {
+              '7137a47b-5887-4333-8422-146c7d5eee8a': {
+                requiredBy: '2022-09-23T09:30:51.190Z',
+                recipeId: '1d2ec8fc-e063-4865-9dcd-dcddf4941025',
+                price: 1100,
+                quantity: 1,
+                currency: 'new-currency',
+                deliveryTerms: 'new-delivery-terms',
+                deliveryAddress: 'new-delivery-address',
+                lineText: 'new-line-text',
+                exportClassification: 'new-export-classification',
+                unitOfMeasure: 'new-unit-of-measure',
+                priceType: 'new-price-type',
+                confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
+                description: 'new-description',
+              },
+            },
           },
           comments: {
             description: 'comments related to order rejection',
             type: 'string',
             maxLength: 255,
-            nullable: true,
           },
           imageAttachmentId: {
             description: 'id of the attachment',
             type: 'string',
             format: 'uuid',
-            nullable: true,
           },
         },
       },
@@ -527,28 +562,6 @@ const apiDoc = {
         description: 'An action on an order that causes it to be rejected along with amendment suggestions',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewOrderAcknowledgement' }],
-      },
-      NewPartOrderAssignment: {
-        description: 'A new action on a part that causes it to be assigned to an order',
-        type: 'object',
-        properties: {
-          orderId: {
-            description: 'id of the order to attach this part to',
-            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-            example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
-          },
-          itemIndex: {
-            description: 'Index in the item list of the order to assign this part to',
-            type: 'integer',
-            minimum: 0,
-            maximum: 9,
-          },
-        },
-      },
-      PartOrderAssignment: {
-        description: 'An action on a part that causes it to be assigned to an order',
-        type: 'object',
-        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartOrderAssignment' }],
       },
       NewPartCertification: {
         description: 'A new action that registers certification information against a part',
@@ -671,6 +684,16 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewRecipeCreation' }],
       },
+      NewPartCreation: {
+        description: 'A new action on a part that registers it on-chain',
+        type: 'object',
+        properties: {},
+      },
+      PartCreation: {
+        description: 'An action on a part that registers it on-chain',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartCreation' }],
+      },
       NewPartMetadataUpdate: {
         description: 'A new action on a part that adds arbitrary metadata',
         type: 'object',
@@ -703,10 +726,12 @@ const apiDoc = {
   security: [{ bearerAuth: [] }],
 }
 
+const notRequired = ['imageAttachmentId', 'comments']
 // make all schema properties required
 const makeSchemaPropsRequired = (schemaObj) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
-    const props = Object.keys(schemaObj.properties)
+    let props = Object.keys(schemaObj.properties)
+    props = props.filter((value) => !notRequired.includes(value))
     if (props.length > 0) {
       schemaObj.required = props
     }

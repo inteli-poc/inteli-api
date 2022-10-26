@@ -30,9 +30,15 @@ module.exports = {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
-    const items = req.body.parts.map((item) => {
-      return item.recipeId
-    })
+    const items = await Promise.all(
+      req.body.partIds.map(async (item) => {
+        let [part] = await db.getPartById(item)
+        if (!part) {
+          throw new NotFoundError('part not found')
+        }
+        return part.recipe_id
+      })
+    )
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: supplierAlias } = await identity.getMemberByAddress(req, selfAddress)
     await validate(items, selfAddress)
@@ -45,17 +51,12 @@ module.exports = {
     build.attachment_id = null
     build.status = 'Created'
     const [buildId] = await db.postBuildDb(build)
-    let parts = req.body.parts
-    let partIds = []
-    for (let value of parts) {
-      const part = {}
-      part.supplier = selfAddress
+    let partIds = req.body.partIds
+    let updateOriginalTokenId = false
+    for (let partId of partIds) {
+      let [part] = await db.getPartById(partId)
       part.build_id = buildId.id
-      part.recipe_id = value.recipeId
-      let [recipe] = await db.getRecipeByIDdb(part.recipe_id)
-      part.certifications = JSON.stringify(recipe.required_certs)
-      let [partId] = await db.postPartDb(part)
-      partIds.push(partId.id)
+      await db.updatePart(part, part.latest_token_id, updateOriginalTokenId)
     }
     build.id = buildId.id
     build.partIds = partIds

@@ -1,12 +1,6 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
-const {
-  validate,
-  mapOrderData,
-  getResponse,
-  getResultForOrderGet,
-  getResultForOrderTransactionGet,
-} = require('./helpers')
+const { mapOrderData, getResponse, getResultForOrderGet, getResultForOrderTransactionGet } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 const buildController = require('../Build/index')
@@ -19,14 +13,57 @@ module.exports = {
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
-    const validated = await validate({
-      ...req.body,
-      supplierAddress: supplierAddress,
-      status: 'Created',
-      buyerAddress: selfAddress,
-    })
-    const [result] = await db.postOrderDb(validated)
-
+    const order = { ...req.body, supplierAddress: supplierAddress, status: 'Created', buyerAddress: selfAddress }
+    const parts = req.body.items
+    let partResponseArray = []
+    for (const part of parts) {
+      let req = {}
+      req.body = part
+      let partResponse
+      try {
+        partResponse = await partController.post(req)
+      } catch (err) {
+        throw new InternalError({ message: 'failed to save part to db : ' + err.message })
+      }
+      partResponse = partResponse.response
+      req = {}
+      req.params = {}
+      req.params.id = partResponse.id
+      try {
+        await partController.transaction.create('Creation')(req)
+      } catch (err) {
+        throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
+      }
+      partResponseArray.push(partResponse)
+    }
+    order.items = await Promise.all(
+      partResponseArray.map(async (item) => {
+        return item.id
+      })
+    )
+    let result
+    try {
+      ;[result] = await db.postOrderDb(order)
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save order to db : ' + err.message })
+    }
+    let updateOriginalTokenId = false
+    const partsDb = await db.getPartByIDs(order.items)
+    for (const part of partsDb) {
+      part.order_id = result.id
+      let latest_token_id = part.latest_token_id
+      await db.updatePart(part, latest_token_id, updateOriginalTokenId)
+    }
+    try {
+      let req = {}
+      req.params = {}
+      req.params.id = result.id
+      await module.exports.transaction.create('Submission')(req)
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save order ro chain : ' + err.message })
+    }
+    req.body.partIds = order.items
+    delete req.body.items
     return {
       status: 201,
       response: {
@@ -97,6 +134,8 @@ module.exports = {
         let binary_blob = null
         let filename = null
         let attachment
+        let items
+        let updatedParts = []
         const { id } = req.params
         if (!id) throw new BadRequestError('missing params')
 
@@ -114,27 +153,48 @@ module.exports = {
               throw new InternalError({ message: 'Order not in Submitted or Amended state' })
             }
             order.status = 'AcknowledgedWithExceptions'
-            order.confirmed_receipt_date = req.body.confirmedReceiptDate
-            order.price = parseFloat(req.body.price)
-            order.quantity = parseInt(req.body.quantity)
+            items = req.body.items
+
+            for (let partId in items) {
+              updatedParts.push(partId)
+              let [partDetails] = await db.getPartById(partId)
+              if (!partDetails) {
+                throw new NotFoundError('part not found')
+              }
+              if (partDetails.order_id !== id) {
+                throw new InternalError({ message: 'part id mismatch' })
+              }
+              let req = {}
+              req.params = {}
+              req.params.id = partId
+              req.body = items[partId]
+              await partController.transaction.create('acknowledgement')(req)
+            }
             order.image_attachment_id = req.body.imageAttachmentId
             order.comments = req.body.comments
-            attachment = await db.getAttachment(order.image_attachment_id)
-            if (attachment.length == 0) {
-              throw new NotFoundError('attachment')
+            if (order.image_attachment_id) {
+              attachment = await db.getAttachment(order.image_attachment_id)
+              if (attachment.length == 0) {
+                throw new NotFoundError('attachment')
+              }
+              binary_blob = attachment[0].binary_blob
+              filename = attachment[0].filename
             }
-            binary_blob = attachment[0].binary_blob
-            filename = attachment[0].filename
             break
           case 'Amendment':
             if (order.status != 'AcknowledgedWithExceptions') {
               throw new InternalError({ message: 'Order not in AcknowledgedWithExceptions state' })
             }
             order.status = 'Amended'
-            order.confirmed_receipt_date = req.body.confirmedReceiptDate
-            order.items = req.body.items
-            order.price = parseFloat(req.body.price)
-            order.quantity = parseInt(req.body.quantity)
+            items = req.body.items
+            for (let partId in items) {
+              updatedParts.push(partId)
+              let req = {}
+              req.params = {}
+              req.params.id = partId
+              req.body = items[partId]
+              await partController.transaction.create('amendment')(req)
+            }
             order.image_attachment_id = null
             order.comments = null
             break
@@ -157,7 +217,10 @@ module.exports = {
         const transaction = await db.insertOrderTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapOrderData({ ...order, selfAddress, transaction, binary_blob, filename }, type)
+          payload = await mapOrderData(
+            { ...order, selfAddress, transaction, binary_blob, filename, updatedParts },
+            type
+          )
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
           throw err
