@@ -76,15 +76,27 @@ module.exports = {
     if (!attachment) {
       throw new BadRequestError('Attachment id not found')
     }
-    const [recipe] = await db.addRecipe({
-      ...rest,
-      external_id: externalId,
-      image_attachment_id: attachment.id,
-      required_certs: JSON.stringify(requiredCerts),
-      owner: selfAddress,
-      supplier: supplierAddress,
-    })
-
+    let recipe
+    try {
+      ;[recipe] = await db.addRecipe({
+        ...rest,
+        external_id: externalId,
+        image_attachment_id: attachment.id,
+        required_certs: JSON.stringify(requiredCerts),
+        owner: selfAddress,
+        supplier: supplierAddress,
+      })
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save recipe to db : ' + err.message })
+    }
+    try {
+      let req = {}
+      req.params = {}
+      req.params.id = recipe.id
+      await module.exports.transaction.create(req)
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save recipe on chain : ' + err.message })
+    }
     return {
       status: 201,
       response: {

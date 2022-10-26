@@ -2,13 +2,11 @@ const { getDefaultSecurity } = require('../../../../../utils/auth')
 const partController = require('../../../../controllers/Part')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.get('order-assignment'), {
-      summary: 'Get Part Order Assignment Action',
-      description:
-        'Returns the details of the on-chain transaction {assignmentId} to assign the part {id} to an order.',
+    GET: buildValidatedJsonHandler(partController.transaction.get('Creation'), {
+      summary: 'List Part Creation Actions',
+      description: 'Returns the details of all on-chain transactions to create the part {id}.',
       parameters: [
         {
           description: 'Id of the part',
@@ -20,30 +18,20 @@ module.exports = function () {
             $ref: '#/components/schemas/ObjectReference',
           },
         },
-        {
-          description: 'Id of the part order assignment action',
-          in: 'path',
-          required: true,
-          name: 'assignmentId',
-          allowEmptyValue: false,
-          schema: {
-            $ref: '#/components/schemas/ObjectReference',
-          },
-        },
       ],
       responses: {
         200: {
-          description: 'Return Part Order Assignment Action',
+          description: 'Return Part Creation Actions',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/PartOrderAssignment',
+                $ref: '#/components/schemas/PartCreation',
               },
             },
           },
         },
         404: {
-          description: 'Part or Order Assignment Action not found',
+          description: 'Part not found',
           content: {
             'application/json': {
               schema: {

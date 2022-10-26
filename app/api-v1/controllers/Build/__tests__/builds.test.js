@@ -75,11 +75,7 @@ describe('build.create', () => {
   let req = {}
   req.body = {
     externalId: 'some-external-system-id',
-    parts: [
-      {
-        recipeId: '95a81bd1-6caf-49ed-b077-5fcb651b2625',
-      },
-    ],
+    partIds: ['95a81bd1-6caf-49ed-b077-5fcb651b2625'],
     completionEstimate: new Date(),
   }
   beforeEach(async () => {
@@ -111,6 +107,12 @@ describe('build.create', () => {
         id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
       },
     ])
+    stubs.getPartById = stub(db, 'getPartById').resolves([
+      {
+        recipe_id: '7989218f-fdc3-4f4c-a772-bae5f9e06991',
+      },
+    ])
+    stubs.updatePart = stub(db, 'updatePart').resolves([])
   })
   afterEach(async () => {
     stubs.postBuildDb.restore()

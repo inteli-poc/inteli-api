@@ -19,23 +19,11 @@ async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
       supplier: reqBody.supplierAddress,
-      required_by: reqBody.requiredBy,
       items: reqBody.items,
       buyer: reqBody.buyerAddress,
       status: reqBody.status,
       external_id: reqBody.externalId,
-      price: reqBody.price,
-      quantity: reqBody.quantity,
-      delivery_terms: reqBody.deliveryTerms,
-      delivery_address: reqBody.deliveryAddress,
-      price_type: reqBody.priceType,
-      unit_of_measure: reqBody.unitOfMeasure,
-      export_classification: reqBody.exportClassification,
-      line_text: reqBody.lineText,
       business_partner_code: reqBody.businessPartnerCode,
-      currency: reqBody.currency,
-      confirmed_receipt_date: reqBody.confirmedReceiptDate,
-      description: reqBody.description,
     })
     .returning(['id', 'status'])
 }
@@ -110,6 +98,10 @@ async function addRecipe(recipe) {
 
 async function getRecipeByIDs(ids) {
   return client('recipes').select('*').whereIn('id', ids)
+}
+
+async function getPartByIDs(ids) {
+  return client('parts').select('*').whereIn('id', ids)
 }
 
 async function getRecipeByIDdb(id) {
@@ -353,4 +345,5 @@ module.exports = {
   getPartTransactions,
   getPartTransactionsById,
   getPartsByOrderId,
+  getPartByIDs,
 }

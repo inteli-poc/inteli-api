@@ -5,7 +5,19 @@ const { DSCP_API_PORT, DSCP_API_HOST } = require('../../env')
 
 module.exports = {
   async runProcess(
-    { orderId, partRecipeMap, recipes, comments, id, imageAttachmentId, image, requiredCerts, ...payload },
+    {
+      updatedParts,
+      recipeId,
+      orderId,
+      partRecipeMap,
+      parts,
+      comments,
+      id,
+      imageAttachmentId,
+      image,
+      requiredCerts,
+      ...payload
+    },
     authToken
   ) {
     const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/run-process`
@@ -17,9 +29,11 @@ module.exports = {
     if (id) formData.append('file', id, 'id.json')
     if (imageAttachmentId) formData.append('file', imageAttachmentId, 'image_attachment_id.json')
     if (comments) formData.append('file', comments, 'comments.json')
-    if (recipes) formData.append('file', recipes, 'recipes.json')
+    if (parts) formData.append('file', parts, 'parts.json')
     if (partRecipeMap) formData.append('file', partRecipeMap, 'part_recipe.json')
     if (orderId) formData.append('file', orderId, 'order_id.json')
+    if (recipeId) formData.append('file', recipeId, 'recipe_id.json')
+    if (updatedParts) formData.append('file', updatedParts, 'updated_parts.json')
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
