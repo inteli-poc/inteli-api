@@ -121,6 +121,8 @@ describe('build.create', () => {
     stubs.identityByAddress.restore()
     stubs.identityBySelf.restore()
     stubs.getRecipeByIDdb.restore()
+    stubs.getPartById.restore()
+    stubs.updatePart.restore()
   })
   it('should resolve to 201', async () => {
     const result = await buildController.create(req)

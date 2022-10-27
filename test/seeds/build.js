@@ -61,25 +61,25 @@ const seed = async () => {
     },
   ])
 
-  await client('build').insert([
-    {
-      id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
-      supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
-      completion_estimate: new Date().toISOString(),
-      completed_at: new Date().toISOString(),
-      started_at: new Date().toISOString(),
-      external_id: 'some-external-id',
-      status: 'Created',
-    },
-  ])
-
   await client('parts').insert([
     {
       id: '7989218f-fdc3-4f4c-a772-bae5f9e06994',
       supplier: '5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY',
       recipe_id: '36345f4f-0000-42e2-83f9-79e2e195e000',
-      build_id: 'db37f6e4-c447-4dcb-90e4-f97bf949a492',
-      certifications: null,
+      certifications: JSON.stringify([{ description: 'foobar3000' }]),
+      metadata: null,
+      required_by: '2022-09-23T09:30:51.190Z',
+      price: 1100,
+      quantity: 1,
+      currency: 'some-currency',
+      delivery_terms: 'some-delivery-terms',
+      delivery_address: 'some-delivery-address',
+      line_text: 'some-line-text',
+      export_classification: 'some-export-classification',
+      unit_of_measure: 'some-unit-of-measure',
+      price_type: 'some-price-type',
+      confirmed_receipt_date: '2022-09-23T09:30:51.190Z',
+      description: 'some-description',
     },
   ])
 }

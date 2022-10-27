@@ -236,10 +236,6 @@ module.exports = {
             } else {
               await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
             }
-            const updateOriginalTokenIdForRecipe = false
-            order.items.forEach(async (element, index) => {
-              await db.updateRecipe(element, result[index + 1], updateOriginalTokenIdForRecipe)
-            })
           } else {
             throw new InternalError({ message: result.message })
           }
