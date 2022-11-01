@@ -59,10 +59,25 @@ module.exports = {
       req.params = {}
       req.params.id = result.id
       await module.exports.transaction.create('Submission')(req)
+      result.status = 'Submitted'
     } catch (err) {
       throw new InternalError({ message: 'failed to save order ro chain : ' + err.message })
     }
-    req.body.partIds = order.items
+    let partsArr = []
+    for (let partId of order.items) {
+      let partObj = {}
+      partObj['partId'] = partId
+      let [part] = await db.getPartById(partId)
+      let [build] = await db.getBuildById(part.build_id)
+      if (build) {
+        partObj['buildStatus'] = build.status
+        if (build.update_type) {
+          partObj['update_type'] = build.update_type
+        }
+      }
+      partsArr.push(partObj)
+    }
+    req.body.parts = partsArr
     delete req.body.items
     return {
       status: 201,

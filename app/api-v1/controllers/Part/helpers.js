@@ -13,8 +13,6 @@ const buildPartOutputs = (data, type, parent_index_required) => {
     metadata: {
       type: { type: 'LITERAL', value: 'PART' },
       transactionId: { type: 'LITERAL', value: data.transaction.id.replace(/-/g, '') },
-      ...(type == 'order-assignment' && { orderId: { type: 'FILE', value: 'order_id.json' } }),
-      ...(type == 'order-assignment' && { itemIndex: { type: 'LITERAL', value: JSON.stringify(data.itemIndex) } }),
       ...((type == 'metadata-update' || type == 'certification') && { image: { type: 'FILE', value: data.filename } }),
       ...(type == 'metadata-update' && { metaDataType: { type: 'LITERAL', value: data.metadataType } }),
       ...((type == 'metadata-update' || type == 'certification') && {
@@ -22,6 +20,9 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       }),
       ...(type == 'certification' && {
         certificationIndex: { type: 'LITERAL', value: JSON.stringify(data.certificationIndex) },
+      }),
+      ...(type == 'certification' && {
+        certificationType: { type: 'LITERAL', value: JSON.stringify(data.certificationType) },
       }),
       actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
@@ -51,6 +52,7 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'metadata-update' && { metadataType: req.body.metadataType }),
     ...((type == 'metadata-update' || type == 'certification') && { attachmentId: req.body.attachmentId }),
     ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
+    ...(type == 'certification' && { certificationType: req.body.certificationType }),
   }
 }
 
@@ -106,6 +108,48 @@ exports.checkAttachment = async (attachment) => {
   }
 }
 
+async function gatherPartDetails(index, newItem) {
+  let requiredBy = await getMetadata(index, 'requiredBy')
+  let quantity = await getMetadata(index, 'quantity')
+  let price = await getMetadata(index, 'price')
+  let recipeId = await getMetadata(index, 'recipeId')
+  let description = await getMetadata(index, 'description')
+  let deliveryTerms = await getMetadata(index, 'deliveryTerms')
+  let deliveryAddress = await getMetadata(index, 'deliveryAddress')
+  let priceType = await getMetadata(index, 'priceType')
+  let unitOfMeasure = await getMetadata(index, 'unitOfMeasure')
+  let currency = await getMetadata(index, 'currency')
+  let exportClassification = await getMetadata(index, 'exportClassification')
+  let lineText = await getMetadata(index, 'lineText')
+  let confirmedReceiptDate = await getMetadata(index, 'confirmedReceiptDate')
+  requiredBy = requiredBy.data
+  quantity = quantity.data
+  price = price.data
+  recipeId = recipeId.data
+  description = description.data
+  deliveryTerms = deliveryTerms.data
+  deliveryAddress = deliveryAddress.data
+  priceType = priceType.data
+  unitOfMeasure = unitOfMeasure.data
+  currency = currency.data
+  exportClassification = exportClassification.data
+  lineText = lineText.data
+  confirmedReceiptDate = confirmedReceiptDate.data
+  newItem.description = description
+  newItem.delivery_terms = deliveryTerms
+  newItem.delivery_address = deliveryAddress
+  newItem.price_type = priceType
+  newItem.currency = currency
+  newItem.unit_of_measure = unitOfMeasure
+  newItem.export_classification = exportClassification
+  newItem.line_text = lineText
+  newItem.confirmed_receipt_date = confirmedReceiptDate
+  newItem.recipe_id = recipeId
+  newItem.price = price
+  newItem.quantity = quantity
+  newItem.required_by = requiredBy
+}
+
 exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => {
   if (partTransanctions.length == 0) {
     throw new NotFoundError('part_transactions')
@@ -119,6 +163,7 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
       let attachmentId
       let metadataType
       let certificationIndex
+      let certificationType
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
@@ -137,8 +182,17 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           certificationIndex = certificationIndex.data
           attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
           attachmentId = attachmentId.data
+          certificationType = await getMetadata(item.token_id, 'certificationType')
+          certificationType = certificationType.data
           newItem['certificationIndex'] = certificationIndex
           newItem['attachmentId'] = attachmentId
+          newItem['certificationType'] = certificationType
+          break
+        case 'acknowledgement':
+          await gatherPartDetails(item.token_id, newItem)
+          break
+        case 'amendment':
+          await gatherPartDetails(item.token_id, newItem)
           break
       }
       return newItem

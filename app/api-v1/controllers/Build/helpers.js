@@ -139,11 +139,13 @@ const buildBuildOutputs = (data, type) => {
       ...(type != 'Complete' && { completionEstimate: { type: 'LITERAL', value: data.completion_estimate } }),
       ...(type == 'Start' && { startedAt: { type: 'LITERAL', value: data.started_at } }),
       ...(type == 'Complete' && { completedAt: { type: 'LITERAL', value: data.completed_at } }),
-      ...((type == 'Complete' || type == 'progress-update') && { image: { type: 'FILE', value: data.filename } }),
-      ...((type == 'Complete' || type == 'progress-update') && {
-        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
-      }),
-      partRecipeMap: { type: 'FILE', value: 'part_recipe.json' },
+      ...((type == 'Complete' || type == 'progress-update') &&
+        data.filename && { image: { type: 'FILE', value: data.filename } }),
+      ...((type == 'Complete' || type == 'progress-update') &&
+        data.attachment_id && {
+          imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
+        }),
+      parts: { type: 'FILE', value: 'parts.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
       ...(type == 'progress-update' && { updateType: { type: 'LITERAL', value: data.update_type } }),
@@ -162,11 +164,12 @@ exports.mapBuildData = async (data, type) => {
   }
   outputs = [buildBuildOutputs(data, type)]
   return {
-    partRecipeMap: Buffer.from(JSON.stringify(data.parts_to_recipe)),
+    parts: Buffer.from(JSON.stringify(data.partIds)),
     id: Buffer.from(JSON.stringify(data.id)),
-    ...((type == 'progress-update' || type == 'Complete') && {
-      imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
-    }),
+    ...((type == 'progress-update' || type == 'Complete') &&
+      data.attachment_id && {
+        imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
+      }),
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
