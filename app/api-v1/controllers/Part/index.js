@@ -38,6 +38,7 @@ module.exports = {
     part.currency = req.body.currency
     part.confirmed_receipt_date = req.body.confirmedReceiptDate
     part.description = req.body.description
+    part.forecast_delivery_date = req.body.confirmedReceiptDate
     const [result] = await db.postPartDb(part)
     req.body.certifications = recipe.required_certs
     req.body.metadata = null
@@ -93,8 +94,11 @@ module.exports = {
           case 'metadata-update':
             transactionId = req.params.updateId
             break
-          case 'order-assignment':
-            transactionId = req.params.assignmentId
+          case 'amendment':
+            transactionId = req.params.amendmentId
+            break
+          case 'acknowledgement':
+            transactionId = req.params.acknowledgementId
             break
           case 'certification':
             transactionId = req.params.certificationId
@@ -119,6 +123,10 @@ module.exports = {
         let imageAttachmentId
         let attachment
         let certificationIndex
+        let build
+        let updateOriginalTokenId
+        let latest_token_id
+        let certificationType
         const { id } = req.params
         if (!id) {
           throw new BadRequestError('missing params')
@@ -146,7 +154,13 @@ module.exports = {
           case 'certification':
             certificationIndex = req.body.certificationIndex
             imageAttachmentId = req.body.attachmentId
+            certificationType = req.body.certificationType
             await insertCertificationIntoPart(part, certificationIndex, imageAttachmentId)
+            ;[build] = await db.getBuildById(part.build_id)
+            build.update_type = certificationType
+            latest_token_id = build.latest_token_id
+            updateOriginalTokenId = false
+            await db.updateBuild(build, latest_token_id, updateOriginalTokenId)
             attachment = await db.getAttachment(req.body.attachmentId)
             await checkAttachment(attachment)
             binary_blob = attachment[0].binary_blob
@@ -179,6 +193,7 @@ module.exports = {
               metadataType,
               imageAttachmentId,
               certificationIndex,
+              certificationType,
             },
             type
           )

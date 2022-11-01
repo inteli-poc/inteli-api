@@ -117,11 +117,11 @@ module.exports = {
         if (!build) throw new NotFoundError('build')
         const supplier = build.supplier
         const parts = await db.getPartsByBuildId(id)
-        const parts_to_recipe = parts.map((item) => {
-          return { id: item.id, recipe_id: item.recipe_id }
-        })
         const recipes = parts.map((item) => {
           return item.recipe_id
+        })
+        const partIds = parts.map((item) => {
+          return item.id
         })
         const records = await db.getRecipeByIDs(recipes)
         const buyer = records[0].owner
@@ -150,12 +150,14 @@ module.exports = {
             build.completion_estimate = req.body.completionEstimate
             build.attachment_id = req.body.attachmentId
             build.update_type = req.body.updateType
-            attachment = await db.getAttachment(build.attachment_id)
-            if (attachment.length == 0) {
-              throw new NotFoundError('attachment')
+            if (build.attachment_id) {
+              attachment = await db.getAttachment(build.attachment_id)
+              if (attachment.length == 0) {
+                throw new NotFoundError('attachment')
+              }
+              binary_blob = attachment[0].binary_blob
+              filename = attachment[0].filename
             }
-            binary_blob = attachment[0].binary_blob
-            filename = attachment[0].filename
             break
           case 'Complete':
             if (build.status != 'Started') {
@@ -164,6 +166,7 @@ module.exports = {
             build.status = 'Completed'
             build.completed_at = req.body.completedAt
             build.attachment_id = req.body.attachmentId
+            build.update_type = null
             attachment = await db.getAttachment(build.attachment_id)
             if (attachment.length == 0) {
               throw new NotFoundError('attachment')
@@ -175,10 +178,7 @@ module.exports = {
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
-          payload = await mapBuildData(
-            { ...build, transaction, parts_to_recipe, supplier, buyer, binary_blob, filename },
-            type
-          )
+          payload = await mapBuildData({ ...build, transaction, partIds, supplier, buyer, binary_blob, filename }, type)
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
           throw err

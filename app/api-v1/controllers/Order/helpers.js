@@ -2,7 +2,7 @@ const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
 const { getMetadata } = require('../../../utils/dscp-api')
-
+const partController = require('../Part/index')
 exports.validate = async (body) => {
   // Will add a get function at a later date to check for duplication
   // This section checks if the order supplier does not match the supplier
@@ -45,7 +45,26 @@ exports.getResultForOrderGet = async (result, req) => {
     newItem['supplier'] = supplierAlias
     newItem['id'] = item['id']
     newItem['status'] = item['status']
-    newItem['partIds'] = item['items']
+    let parts = []
+    for (let partId of item['items']) {
+      let partObj = {}
+      partObj['partId'] = partId
+      let [part] = await db.getPartById(partId)
+      if (part) {
+        if (part.forecast_delivery_date) {
+          partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
+        }
+        let [build] = await db.getBuildById(part.build_id)
+        if (build) {
+          partObj['buildStatus'] = build.status
+          if (build.update_type) {
+            partObj['updateType'] = build.update_type
+          }
+        }
+      }
+      parts.push(partObj)
+    }
+    newItem['parts'] = parts
     newItem['externalId'] = item['external_id']
     newItem['businessPartnerCode'] = item['business_partner_code']
     if (item['image_attachment_id']) {
@@ -66,21 +85,6 @@ exports.getResultForOrderGet = async (result, req) => {
   }
 }
 
-const getCommonData = async (item, newItem) => {
-  let price
-  let quantity
-  let confirmedReceiptDate
-  price = await getMetadata(item.token_id, 'price')
-  price = price.data
-  quantity = await getMetadata(item.token_id, 'quantity')
-  quantity = quantity.data
-  confirmedReceiptDate = await getMetadata(item.token_id, 'confirmedReceiptDate')
-  confirmedReceiptDate = confirmedReceiptDate.data
-  newItem['price'] = price
-  newItem['quantity'] = quantity
-  newItem['confirmedReceiptDate'] = confirmedReceiptDate
-}
-
 exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) => {
   if (orderTransactions.length == 0) {
     throw new NotFoundError('order_transactions')
@@ -97,10 +101,9 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
       newItem['status'] = item['status']
       let comments
       let imageAttachmentId
-      let recipes
+      let updatedParts
       switch (type) {
         case 'Acknowledgement':
-          await getCommonData(item, newItem)
           try {
             comments = await getMetadata(item.token_id, 'comments')
             comments = comments.data
@@ -113,14 +116,22 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
           } catch (err) {
             imageAttachmentId = null
           }
+          updatedParts = await getMetadata(item.token_id, 'updatedParts')
+          for (let partId of updatedParts) {
+            let req = { params: { id: partId } }
+            let partResponse = await partController.transaction.get('acknowledgement')(req)
+            newItem[partId] = partResponse.response
+          }
           newItem['comments'] = comments
           newItem['imageAttachmentId'] = imageAttachmentId
           break
         case 'Amendment':
-          await getCommonData(item, newItem)
-          recipes = await getMetadata(item.token_id, 'recipes')
-          recipes = recipes.data
-          newItem['items'] = recipes
+          updatedParts = await getMetadata(item.token_id, 'updatedParts')
+          for (let partId of updatedParts) {
+            let req = { params: { id: partId } }
+            let partResponse = await partController.transaction.get('acknowledgement')(req)
+            newItem[partId] = partResponse.response
+          }
           break
       }
       return newItem

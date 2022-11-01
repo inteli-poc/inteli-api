@@ -24,6 +24,16 @@ describe('order.get', () => {
       .onFirstCall()
       .resolves({ alias: 'supplier-alias' })
     stubs.identityByAddress.onSecondCall().resolves({ alias: 'buyer-alias' })
+    stubs.getPartById = stub(db, 'getPartById').resolves([
+      {
+        build_id: 'd3607fc8-442a-4394-a96e-042bd97f0625',
+      },
+    ])
+    stubs.getBuildById = stub(db, 'getBuildById').resolves([
+      {
+        status: 'Started',
+      },
+    ])
   })
   afterEach(async () => {
     stubs.getOrders.restore()

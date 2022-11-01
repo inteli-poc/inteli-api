@@ -414,11 +414,30 @@ const apiDoc = {
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
           },
-          partIds: {
+          parts: {
             type: 'array',
             description: 'list of part Ids',
             items: {
-              allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+              type: 'object',
+              properties: {
+                partId: {
+                  description: 'part id',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                buildStatus: {
+                  description: 'build status',
+                  type: 'string',
+                },
+                updateType: {
+                  description: 'type of build progress update',
+                  type: 'string',
+                },
+                forecastedDeliveryDate: {
+                  description: 'forecasted delivery date',
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
             },
           },
         },
@@ -503,17 +522,6 @@ const apiDoc = {
               },
             },
           },
-          price: {
-            description: 'price of the order',
-            type: 'number',
-            format: 'float',
-            example: '1200.01',
-          },
-          quantity: {
-            description: 'quantity of the order',
-            type: 'integer',
-            example: 1,
-          },
         },
       },
       OrderAmendment: {
@@ -577,6 +585,10 @@ const apiDoc = {
             type: 'integer',
             minimum: 0,
             maximum: 9,
+          },
+          certificationType: {
+            description: 'Type of certification Attachment',
+            type: 'string',
           },
         },
       },
@@ -726,18 +738,29 @@ const apiDoc = {
   security: [{ bearerAuth: [] }],
 }
 
-const notRequired = ['imageAttachmentId', 'comments']
+const notRequired = ['imageAttachmentId', 'comments', 'attachmentId']
+
 // make all schema properties required
-const makeSchemaPropsRequired = (schemaObj) => {
+const makeSchemaPropsRequired = (schemaObj, key) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
     let props = Object.keys(schemaObj.properties)
-    props = props.filter((value) => !notRequired.includes(value))
+    if (key == 'NewOrderAcknowledgement' || key == 'NewBuildProgressUpdate') {
+      props = props.filter((value) => !notRequired.includes(value))
+    }
     if (props.length > 0) {
       schemaObj.required = props
     }
-    Object.values(schemaObj.properties).forEach(makeSchemaPropsRequired)
+    let schemas = schemaObj.properties
+    for (let key in schemas) {
+      makeSchemaPropsRequired(schemas[key], key)
+    }
   }
 }
-Object.values(apiDoc.components.schemas).forEach(makeSchemaPropsRequired)
+
+let schemas = apiDoc.components.schemas
+
+for (let key in schemas) {
+  makeSchemaPropsRequired(schemas[key], key)
+}
 
 module.exports = apiDoc
