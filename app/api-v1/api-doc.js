@@ -497,6 +497,10 @@ const apiDoc = {
         description: 'History of the order',
         type: 'object',
       },
+      orderSummary: {
+        description: 'Summary of orders',
+        type: 'object',
+      },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
