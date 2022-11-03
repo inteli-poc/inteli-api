@@ -105,6 +105,47 @@ module.exports = {
     let response = await getResultForOrderGet(result, req)
     return response
   },
+  getSummary: async function () {
+    let orders = await db.getOrders()
+    let recipes = await db.getRecipes()
+    let recipeCount = recipes.length
+    let totalParts = []
+    let totalPartsCount
+    let manufactureCount = 0
+    let shipCount = 0
+    let orderCount = 0
+    for (let order of orders) {
+      let items = order.items
+      totalParts.push(items)
+      for (let item of items) {
+        let [part] = await db.getPartById(item)
+        if (part.build_id) {
+          let [build] = await db.getBuildById(part.build_id)
+          if (build.update_type) {
+            manufactureCount = manufactureCount + 1
+          } else if (build.status == 'Completed') {
+            shipCount = shipCount + 1
+          } else {
+            orderCount = orderCount + 1
+          }
+        } else {
+          orderCount = orderCount + 1
+        }
+      }
+    }
+    totalPartsCount = totalParts.length
+    let orderSummary = {
+      parts: totalPartsCount,
+      design: recipeCount,
+      manufacturing: manufactureCount,
+      ship: shipCount,
+      order: orderCount,
+    }
+    return {
+      status: 200,
+      response: orderSummary,
+    }
+  },
   transaction: {
     getById: (type) => {
       return async (req) => {
