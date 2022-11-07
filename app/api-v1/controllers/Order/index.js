@@ -1,9 +1,15 @@
 const { runProcess } = require('../../../utils/dscp-api')
 const db = require('../../../db')
-const { mapOrderData, getResponse, getResultForOrderGet, getResultForOrderTransactionGet } = require('./helpers')
+const {
+  mapOrderData,
+  getResponse,
+  getResultForOrderGet,
+  getResultForOrderTransactionGet,
+  getPartHistory,
+  getBuildHistory,
+} = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
-const buildController = require('../Build/index')
 const partController = require('../Part/index')
 module.exports = {
   post: async function (req) {
@@ -343,48 +349,24 @@ module.exports = {
       }
       let parts = await db.getPartsByOrderId(id)
       orderObj.builds = []
-      orderObj.parts = []
+      let processBuild = []
       for (const part of parts) {
         let buildObj = {}
         let partObj = {}
         let req = {}
+        if (processBuild.includes(part.build)) {
+          continue
+        }
         req.params = { id: part.build_id }
-        buildObj[part.build_id] = {}
-        partObj[part.id] = {}
-        try {
-          let buildScheduleResult = await buildController.transaction.getAll('Schedule')(req)
-          buildObj[part.build_id].schedule = buildScheduleResult.response
-        } catch (err) {
-          buildObj[part.build_id].schedule = []
-        }
-        try {
-          let buildStartResult = await buildController.transaction.getAll('Start')(req)
-          buildObj[part.build_id].start = buildStartResult.response
-        } catch (err) {
-          buildObj[part.build_id].start = []
-        }
-        try {
-          let buildProgressUpdateResult = await buildController.transaction.getAll('progess-update')(req)
-          buildObj[part.build_id].progressUpdate = buildProgressUpdateResult.response
-        } catch (err) {
-          buildObj[part.build_id].progressUpdate = []
-        }
-        try {
-          let buildCompleteResult = await buildController.transaction.getAll('Complete')(req)
-          buildObj[part.build_id].complete = buildCompleteResult.response
-        } catch (err) {
-          buildObj[part.build_id].complete = []
+        buildObj = await getBuildHistory(req, part)
+        buildObj[part.build_id].parts = []
+        let parts = await db.getPartsByBuildId(part.build_id)
+        for (let part of parts) {
+          partObj = await getPartHistory(part)
+          buildObj[part.build_id].parts.push(partObj)
         }
         orderObj.builds.push(buildObj)
-        try {
-          let req = {}
-          req.params = { id: part.id }
-          let partMetadataUpdateResult = await partController.transaction.getAll('metadata-update')(req)
-          partObj[part.id].metadataUpdate = partMetadataUpdateResult.response
-        } catch (err) {
-          partObj[part.id].metadataUpdate = []
-        }
-        orderObj.parts.push(partObj)
+        processBuild.push(part.build_id)
       }
       return {
         status: 200,

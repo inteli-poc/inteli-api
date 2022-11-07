@@ -100,8 +100,12 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
           newItem['completionEstimate'] = completionEstimate
           break
         case 'progress-update':
-          attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
-          attachmentId = attachmentId.data
+          try {
+            attachmentId = await getMetadata(item.token_id, 'imageAttachmentId')
+            attachmentId = attachmentId.data
+          } catch (err) {
+            attachmentId = null
+          }
           completionEstimate = await getMetadata(item.token_id, 'completionEstimate')
           completionEstimate = completionEstimate.data
           updateType = await getMetadata(item.token_id, 'updateType')
