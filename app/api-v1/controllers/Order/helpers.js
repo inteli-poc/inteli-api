@@ -3,6 +3,7 @@ const identity = require('../../services/identityService')
 const { NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
 const { getMetadata } = require('../../../utils/dscp-api')
 const partController = require('../Part/index')
+const buildController = require('../Build/index')
 exports.validate = async (body) => {
   // Will add a get function at a later date to check for duplication
   // This section checks if the order supplier does not match the supplier
@@ -22,6 +23,57 @@ exports.validate = async (body) => {
   return body
 }
 
+exports.getBuildHistory = async (req, part) => {
+  let buildObj = {}
+  buildObj[part.build_id] = {}
+  try {
+    let buildScheduleResult = await buildController.transaction.getAll('Schedule')(req)
+    buildObj[part.build_id].schedule = buildScheduleResult.response
+  } catch (err) {
+    buildObj[part.build_id].schedule = []
+  }
+  try {
+    let buildStartResult = await buildController.transaction.getAll('Start')(req)
+    buildObj[part.build_id].start = buildStartResult.response
+  } catch (err) {
+    buildObj[part.build_id].start = []
+  }
+  try {
+    let buildProgressUpdateResult = await buildController.transaction.getAll('progress-update')(req)
+    buildObj[part.build_id].progressUpdate = buildProgressUpdateResult.response
+  } catch (err) {
+    buildObj[part.build_id].progressUpdate = []
+  }
+  try {
+    let buildCompleteResult = await buildController.transaction.getAll('Complete')(req)
+    buildObj[part.build_id].complete = buildCompleteResult.response
+  } catch (err) {
+    buildObj[part.build_id].complete = []
+  }
+  return buildObj
+}
+
+exports.getPartHistory = async (part) => {
+  let partObj = {}
+  partObj[part.id] = {}
+  try {
+    let req = {}
+    req.params = { id: part.id }
+    let partMetadataUpdateResult = await partController.transaction.getAll('metadata-update')(req)
+    partObj[part.id].metadataUpdate = partMetadataUpdateResult.response
+  } catch (err) {
+    partObj[part.id].metadataUpdate = []
+  }
+  try {
+    let req = {}
+    req.params = { id: part.id }
+    let partMetadataUpdateResult = await partController.transaction.getAll('certification')(req)
+    partObj[part.id].certification = partMetadataUpdateResult.response
+  } catch (err) {
+    partObj[part.id].certification = []
+  }
+  return partObj
+}
 exports.getResponse = async (type, transaction, req) => {
   return {
     id: transaction.id,
@@ -94,7 +146,7 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
     throw new NotFoundError('order')
   }
   const modifiedOrderTransactions = await Promise.all(
-    orderTransactions.map(async (item) => {
+    orderTransactions.map(async (item, index) => {
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
@@ -117,20 +169,24 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
             imageAttachmentId = null
           }
           updatedParts = await getMetadata(item.token_id, 'updatedParts')
+          updatedParts = updatedParts.data
+          newItem['items'] = {}
           for (let partId of updatedParts) {
             let req = { params: { id: partId } }
-            let partResponse = await partController.transaction.get('acknowledgement')(req)
-            newItem[partId] = partResponse.response
+            let partResponse = await partController.transaction.getAll('acknowledgement')(req)
+            newItem['items'][partId] = partResponse.response[index]
           }
           newItem['comments'] = comments
           newItem['imageAttachmentId'] = imageAttachmentId
           break
         case 'Amendment':
           updatedParts = await getMetadata(item.token_id, 'updatedParts')
+          updatedParts = updatedParts.data
+          newItem['items'] = {}
           for (let partId of updatedParts) {
             let req = { params: { id: partId } }
-            let partResponse = await partController.transaction.get('acknowledgement')(req)
-            newItem[partId] = partResponse.response
+            let partResponse = await partController.transaction.getAll('amendment')(req)
+            newItem['items'][partId] = partResponse.response[index]
           }
           break
       }
@@ -160,7 +216,7 @@ const buildOrderOutput = (data, type) => {
       parts: { type: 'FILE', value: 'parts.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
-      ...((type == 'Acknowledgment' || type == 'Amendment') && {
+      ...((type == 'Acknowledgement' || type == 'Amendment') && {
         updatedParts: { type: 'FILE', value: 'updated_parts.json' },
       }),
     },

@@ -13,7 +13,7 @@ const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
 
 describeAuthOnly('recipe- authenticated', function () {
   describe('valid recipe', function () {
-    this.timeout(5000)
+    this.timeout(10000)
     let app
     let authToken
     let jwksMock
