@@ -172,6 +172,9 @@ module.exports = {
           case 'amendment':
             part = { ...part, ...jsConvert.snakeKeys(req.body) }
             break
+          case 'update-delivery-date':
+            part.forecast_delivery_date = req.body.forecastedDeliveryDate
+            break
         }
         const [recipe] = await db.getRecipeByIDdb(part.recipe_id)
         if (!recipe) {

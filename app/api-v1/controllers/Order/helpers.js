@@ -67,10 +67,18 @@ exports.getPartHistory = async (part) => {
   try {
     let req = {}
     req.params = { id: part.id }
-    let partMetadataUpdateResult = await partController.transaction.getAll('certification')(req)
-    partObj[part.id].certification = partMetadataUpdateResult.response
+    let partCertificationResult = await partController.transaction.getAll('certification')(req)
+    partObj[part.id].certification = partCertificationResult.response
   } catch (err) {
     partObj[part.id].certification = []
+  }
+  try {
+    let req = {}
+    req.params = { id: part.id }
+    let partUpdateDeilveryDateResult = await partController.transaction.getAll('update-delivery-date')(req)
+    partObj[part.id].updateDeliveryDate = partUpdateDeilveryDateResult.response
+  } catch (err) {
+    partObj[part.id].updateDeliveryDate = []
   }
   return partObj
 }
