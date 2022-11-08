@@ -290,6 +290,16 @@ const apiDoc = {
             description: 'line text for the order',
             type: 'string',
           },
+          requiredBy: {
+            description: 'required by date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
+          forecastedDeliveryDate: {
+            description: 'forecasted delivery date of the order',
+            type: 'string',
+            format: 'date-time',
+          },
         },
       },
       Part: {
@@ -369,26 +379,19 @@ const apiDoc = {
               description: 'properties of the part',
               allOf: [{ $ref: '#/components/schemas/NewPart' }],
               example: {
-                externalId: 'some-external-d',
-                supplier: 'bob',
-                items: [
-                  {
-                    requiredBy: '2022-09-23T09:30:51.190Z',
-                    recipeId: 'b50cb5ee-8932-40b9-8c1f-6a395f88dbaa',
-                    price: 1100,
-                    quantity: 1,
-                    currency: 'some-currency',
-                    deliveryTerms: 'some-delivery-terms',
-                    deliveryAddress: 'some-delivery-address',
-                    lineText: 'some-line-text',
-                    exportClassification: 'some-export-classification',
-                    unitOfMeasure: 'some-unit-of-measure',
-                    priceType: 'some-price-type',
-                    confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
-                    description: 'some-description',
-                  },
-                ],
-                businessPartnerCode: 'some-business-partner-code',
+                requiredBy: '2022-09-23T09:30:51.190Z',
+                recipeId: 'b50cb5ee-8932-40b9-8c1f-6a395f88dbaa',
+                price: 1100,
+                quantity: 1,
+                currency: 'some-currency',
+                deliveryTerms: 'some-delivery-terms',
+                deliveryAddress: 'some-delivery-address',
+                lineText: 'some-line-text',
+                exportClassification: 'some-export-classification',
+                unitOfMeasure: 'some-unit-of-measure',
+                priceType: 'some-price-type',
+                confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
+                description: 'some-description',
               },
             },
           },
@@ -731,9 +734,28 @@ const apiDoc = {
         },
       },
       PartMetadataUpdate: {
-        description: 'An action on a build that adds arbitrary metadata',
+        description: 'An action on a part that adds arbitrary metadata',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+      },
+      NewPartDeliveryDateUpdate: {
+        description: 'A new action on a part that updates forecasted delivery date',
+        type: 'object',
+        properties: {
+          forecastedDeliveryDate: {
+            description: 'forecasted delivery date"',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      PartDeliveryDateUpdate: {
+        description: 'A new action on a part that updates forecasted delivery date',
+        type: 'object',
+        allOf: [
+          { $ref: '#/components/schemas/ChainAction' },
+          { $ref: '#/components/schemas/NewPartDeliveryDateUpdate' },
+        ],
       },
     },
     ...securitySchemes,
@@ -742,13 +764,14 @@ const apiDoc = {
   security: [{ bearerAuth: [] }],
 }
 
-const notRequired = ['imageAttachmentId', 'comments', 'attachmentId']
+const notRequired = ['imageAttachmentId', 'comments', 'attachmentId', 'forecastedDeliveryDate']
+const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart']
 
 // make all schema properties required
 const makeSchemaPropsRequired = (schemaObj, key) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
     let props = Object.keys(schemaObj.properties)
-    if (key == 'NewOrderAcknowledgement' || key == 'NewBuildProgressUpdate') {
+    if (keys.includes(key)) {
       props = props.filter((value) => !notRequired.includes(value))
     }
     if (props.length > 0) {

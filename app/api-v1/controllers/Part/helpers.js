@@ -39,6 +39,7 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       lineText: { type: 'LITERAL', value: data.line_text },
       requiredBy: { type: 'LITERAL', value: data.required_by },
       recipeId: { type: 'FILE', value: 'recipe_id.json' },
+      forecastedDeliveryDate: { type: 'LITERAL', value: data.forecast_delivery_date },
     },
     ...(parent_index_required && { parent_index: 0 }),
   }
@@ -53,6 +54,7 @@ exports.getResponse = async (type, transaction, req) => {
     ...((type == 'metadata-update' || type == 'certification') && { attachmentId: req.body.attachmentId }),
     ...(type == 'certification' && { certificationIndex: req.body.certificationIndex }),
     ...(type == 'certification' && { certificationType: req.body.certificationType }),
+    ...(type == 'update-delivery-date' && { forecastedDeliveryDate: req.body.forecastedDeliveryDate }),
   }
 }
 
@@ -82,6 +84,7 @@ exports.getResultForPartGet = async (parts, req) => {
       newItem['currency'] = item.currency
       newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
       newItem['requiredBy'] = item.required_by.toISOString()
+      newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
       return newItem
     })
   )
@@ -164,6 +167,7 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
       let metadataType
       let certificationIndex
       let certificationType
+      let forecastedDeliveryDate
       const newItem = {}
       newItem['id'] = item['id']
       newItem['submittedAt'] = item['created_at'].toISOString()
@@ -193,6 +197,11 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           break
         case 'amendment':
           await gatherPartDetails(item.token_id, newItem)
+          break
+        case 'update-delivery-date':
+          forecastedDeliveryDate = await getMetadata(item.token_id, 'forecastedDeliveryDate')
+          forecastedDeliveryDate = forecastedDeliveryDate.data
+          newItem['forecastedDeliveryDate'] = forecastedDeliveryDate
           break
       }
       return newItem
