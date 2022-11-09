@@ -150,6 +150,13 @@ module.exports = {
             }
             binary_blob = attachment[0].binary_blob
             filename = attachment[0].filename
+            if (metadataType == 'goodsReceipt') {
+              ;[build] = await db.getBuildById(part.build_id)
+              build.status = 'Part Received'
+              latest_token_id = build.latest_token_id
+              updateOriginalTokenId = false
+              await db.updateBuild(build, latest_token_id, updateOriginalTokenId)
+            }
             break
           case 'certification':
             certificationIndex = req.body.certificationIndex
