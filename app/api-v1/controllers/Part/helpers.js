@@ -6,7 +6,7 @@ const { getMetadata } = require('../../../utils/dscp-api')
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
     roles: {
-      Owner: type == 'acknowledgement' ? data.buyer : data.supplier,
+      Owner: type == 'acknowledgement' || data.metadataType == 'finalLocation' ? data.buyer : data.supplier,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },
