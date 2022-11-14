@@ -48,6 +48,7 @@ module.exports = {
       })
     )
     let result
+    let transactionResponse
     try {
       ;[result] = await db.postOrderDb(order)
     } catch (err) {
@@ -64,7 +65,7 @@ module.exports = {
       let req = {}
       req.params = {}
       req.params.id = result.id
-      await module.exports.transaction.create('Submission')(req)
+      transactionResponse = await module.exports.transaction.create('Submission')(req)
       result.status = 'Submitted'
     } catch (err) {
       throw new InternalError({ message: 'failed to save order ro chain : ' + err.message })
@@ -90,6 +91,7 @@ module.exports = {
       response: {
         ...result,
         buyer: selfAlias,
+        updatedAt: transactionResponse.response.updatedAt,
         ...req.body,
       },
     }
@@ -125,7 +127,7 @@ module.exports = {
       totalParts.push(items)
       for (let item of items) {
         let [part] = await db.getPartById(item)
-        if (part.build_id) {
+        if (part && part.build_id) {
           let [build] = await db.getBuildById(part.build_id)
           if (build.update_type) {
             manufactureCount = manufactureCount + 1
@@ -217,9 +219,9 @@ module.exports = {
             order.status = 'AcknowledgedWithExceptions'
             items = req.body.items
 
-            for (let partId in items) {
-              updatedParts.push(partId)
-              let [partDetails] = await db.getPartById(partId)
+            for (let part of items) {
+              updatedParts.push(part.id)
+              let [partDetails] = await db.getPartById(part.id)
               if (!partDetails) {
                 throw new NotFoundError('part not found')
               }
@@ -228,8 +230,8 @@ module.exports = {
               }
               let req = {}
               req.params = {}
-              req.params.id = partId
-              req.body = items[partId]
+              req.params.id = part.id
+              req.body = part
               await partController.transaction.create('acknowledgement')(req)
             }
             order.image_attachment_id = req.body.imageAttachmentId
@@ -249,12 +251,12 @@ module.exports = {
             }
             order.status = 'Amended'
             items = req.body.items
-            for (let partId in items) {
-              updatedParts.push(partId)
+            for (let part of items) {
+              updatedParts.push(part.id)
               let req = {}
               req.params = {}
-              req.params.id = partId
-              req.body = items[partId]
+              req.params.id = part.id
+              req.body = part
               await partController.transaction.create('amendment')(req)
             }
             order.image_attachment_id = null
@@ -354,16 +356,19 @@ module.exports = {
         let buildObj = {}
         let partObj = {}
         let req = {}
+        if (!part.build_id) {
+          continue
+        }
         if (processBuild.includes(part.build)) {
           continue
         }
         req.params = { id: part.build_id }
         buildObj = await getBuildHistory(req, part)
-        buildObj[part.build_id].parts = []
+        buildObj.parts = []
         let parts = await db.getPartsByBuildId(part.build_id)
         for (let part of parts) {
           partObj = await getPartHistory(part)
-          buildObj[part.build_id].parts.push(partObj)
+          buildObj.parts.push(partObj)
         }
         orderObj.builds.push(buildObj)
         processBuild.push(part.build_id)

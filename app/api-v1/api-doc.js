@@ -417,6 +417,10 @@ const apiDoc = {
             description: 'Status of the purchase-order',
             enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
           },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
           parts: {
             type: 'array',
             description: 'list of part Ids',
@@ -440,6 +444,14 @@ const apiDoc = {
                   type: 'string',
                   format: 'date-time',
                 },
+                updatedAt: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+                requiredBy: {
+                  type: 'string',
+                  format: 'date-time',
+                },
               },
             },
           },
@@ -450,6 +462,9 @@ const apiDoc = {
         type: 'object',
         properties: {
           id: {
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          transactionId: {
             description: 'local id of the chain action',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
             example: '36345f4f-6535-42e2-83f9-79e2e195ec22',
@@ -499,33 +514,151 @@ const apiDoc = {
       orderHistory: {
         description: 'History of the order',
         type: 'object',
+        properties: {
+          order: {
+            description: 'order history',
+            type: 'object',
+            properties: {
+              submission: {
+                type: 'array',
+                items: {
+                  allOf: [{ $ref: '#/components/schemas/OrderSubmission' }],
+                },
+              },
+              acknowledgement: {
+                type: 'array',
+                items: {
+                  allOf: [{ $ref: '#/components/schemas/OrderAcknowledgement' }],
+                },
+              },
+              amendment: {
+                type: 'array',
+                items: {
+                  allOf: [{ $ref: '#/components/schemas/OrderAmendment' }],
+                },
+              },
+              cancellation: {
+                type: 'array',
+                items: {
+                  allOf: [{ $ref: '#/components/schemas/OrderCancellation' }],
+                },
+              },
+              acceptance: {
+                type: 'array',
+                items: {
+                  allOf: [{ $ref: '#/components/schemas/OrderAcceptance' }],
+                },
+              },
+            },
+          },
+          builds: {
+            description: 'build history',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: {
+                  oneOf: [{ $ref: '#/components/schemas/ObjectReference' }, { type: 'null' }],
+                },
+                schedule: {
+                  type: 'array',
+                  items: {
+                    allOf: [{ $ref: '#/components/schemas/BuildSchedule' }],
+                  },
+                },
+                start: {
+                  type: 'array',
+                  items: {
+                    allOf: [{ $ref: '#/components/schemas/BuildStart' }],
+                  },
+                },
+                progressUpdate: {
+                  type: 'array',
+                  items: {
+                    allOf: [{ $ref: '#/components/schemas/BuildProgressUpdate' }],
+                  },
+                },
+                complete: {
+                  type: 'array',
+                  items: {
+                    allOf: [{ $ref: '#/components/schemas/BuildCompletion' }],
+                  },
+                },
+                parts: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: {
+                        allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                      },
+                      metadataUpdate: {
+                        type: 'array',
+                        items: {
+                          allOf: [{ $ref: '#/components/schemas/PartMetadataUpdate' }],
+                        },
+                      },
+                      certification: {
+                        type: 'array',
+                        items: {
+                          allOf: [{ $ref: '#/components/schemas/PartCertification' }],
+                        },
+                      },
+                      updateDeliveryDate: {
+                        type: 'array',
+                        items: {
+                          allOf: [{ $ref: '#/components/schemas/PartDeliveryDateUpdate' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderSummary: {
         description: 'Summary of orders',
         type: 'object',
+        properties: {
+          parts: {
+            description: 'number of parts',
+            type: 'integer',
+          },
+          design: {
+            description: 'number of parts',
+            type: 'integer',
+          },
+          manufacturing: {
+            description: 'number of parts',
+            type: 'integer',
+          },
+          ship: {
+            description: 'number of parts',
+            type: 'integer',
+          },
+          order: {
+            description: 'number of parts',
+            type: 'integer',
+          },
+        },
       },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',
         properties: {
           items: {
-            type: 'object',
             description: 'part details',
-            example: {
-              '7137a47b-5887-4333-8422-146c7d5eee8a': {
-                requiredBy: '2022-09-23T09:30:51.190Z',
-                recipeId: '1d2ec8fc-e063-4865-9dcd-dcddf4941025',
-                price: 1100,
-                quantity: 1,
-                currency: 'new-currency',
-                deliveryTerms: 'new-delivery-terms',
-                deliveryAddress: 'new-delivery-address',
-                lineText: 'new-line-text',
-                exportClassification: 'new-export-classification',
-                unitOfMeasure: 'new-unit-of-measure',
-                priceType: 'new-price-type',
-                confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
-                description: 'new-description',
+            type: 'array',
+            items: {
+              description: 'part details',
+              allOf: [{ $ref: '#/components/schemas/NewPart' }],
+              properties: {
+                id: {
+                  description: 'id of the part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
               },
             },
           },
@@ -542,22 +675,15 @@ const apiDoc = {
         properties: {
           items: {
             description: 'part details',
-            type: 'object',
-            example: {
-              '7137a47b-5887-4333-8422-146c7d5eee8a': {
-                requiredBy: '2022-09-23T09:30:51.190Z',
-                recipeId: '1d2ec8fc-e063-4865-9dcd-dcddf4941025',
-                price: 1100,
-                quantity: 1,
-                currency: 'new-currency',
-                deliveryTerms: 'new-delivery-terms',
-                deliveryAddress: 'new-delivery-address',
-                lineText: 'new-line-text',
-                exportClassification: 'new-export-classification',
-                unitOfMeasure: 'new-unit-of-measure',
-                priceType: 'new-price-type',
-                confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
-                description: 'new-description',
+            type: 'array',
+            items: {
+              description: 'part details',
+              allOf: [{ $ref: '#/components/schemas/NewPart' }],
+              properties: {
+                id: {
+                  description: 'id of the part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
               },
             },
           },
