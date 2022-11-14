@@ -66,7 +66,10 @@ module.exports = {
     if (!req.body) {
       throw new BadRequestError('no body provided')
     }
-
+    let duplicateExternalId = await db.checkDuplicateExternalId(req.body.externalId, 'recipes')
+    if (duplicateExternalId.length != 0) {
+      throw new InternalError({ message: 'duplicate externalId found' })
+    }
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)

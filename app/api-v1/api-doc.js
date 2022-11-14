@@ -452,6 +452,9 @@ const apiDoc = {
                   type: 'string',
                   format: 'date-time',
                 },
+                buildExternalId: {
+                  type: 'string',
+                },
               },
             },
           },
