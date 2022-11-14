@@ -296,6 +296,10 @@ async function getBuildById(id) {
   return client('build').select().where({ id })
 }
 
+async function checkDuplicateExternalId(external_id, tableName) {
+  return client(tableName).select('external_id').where({ external_id })
+}
+
 module.exports = {
   client,
   getRecipe,
@@ -346,4 +350,5 @@ module.exports = {
   getPartTransactionsById,
   getPartsByOrderId,
   getPartByIDs,
+  checkDuplicateExternalId,
 }

@@ -30,6 +30,10 @@ module.exports = {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
+    let duplicateExternalId = await db.checkDuplicateExternalId(req.body.externalId, 'build')
+    if (duplicateExternalId.length != 0) {
+      throw new InternalError({ message: 'duplicate externalId found' })
+    }
     const items = await Promise.all(
       req.body.partIds.map(async (item) => {
         let [part] = await db.getPartById(item)

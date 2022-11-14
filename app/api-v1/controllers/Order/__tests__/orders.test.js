@@ -38,6 +38,7 @@ describe('order.get', () => {
       {
         status: 'Started',
         updated_at: new Date(),
+        external_id: 'some-external-id',
       },
     ])
   })

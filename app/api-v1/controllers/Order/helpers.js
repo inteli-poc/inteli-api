@@ -124,6 +124,7 @@ exports.getResultForOrderGet = async (result, req) => {
             partObj['updateType'] = build.update_type
           }
           partObj['updatedAt'] = build.updated_at.toISOString()
+          partObj['buildExternalId'] = build.external_id
         }
       }
       parts.push(partObj)
