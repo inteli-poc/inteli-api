@@ -20,7 +20,8 @@ exports.validate = async (items, supplier) => {
 
 exports.getResponse = async (type, transaction, req) => {
   return {
-    id: transaction.id,
+    id: req.params.id,
+    transactionId: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
     status: transaction.status,
     ...(type != 'Complete' && { completionEstimate: req.body.completionEstimate }),
@@ -82,7 +83,8 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
       let completedAt
       let updateType
       let newItem = {}
-      newItem['id'] = item['id']
+      newItem['transactionId'] = item['id']
+      newItem['id'] = item['build_id']
       newItem['status'] = item['status']
       newItem['submittedAt'] = item['created_at'].toISOString()
       switch (type) {
@@ -110,7 +112,9 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
           completionEstimate = completionEstimate.data
           updateType = await getMetadata(item.token_id, 'updateType')
           updateType = updateType.data
-          newItem['attachmentId'] = attachmentId
+          if (attachmentId) {
+            newItem['attachmentId'] = attachmentId
+          }
           newItem['completionEstimate'] = completionEstimate
           newItem['updateType'] = updateType
           break

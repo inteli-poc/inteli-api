@@ -166,7 +166,8 @@ module.exports = {
             status: 201,
             message: `transaction ${transaction.id} has been created`,
             response: {
-              id: transaction.id,
+              id: req.params.id,
+              transactionId: transaction.id,
               submittedAt: new Date(transaction.created_at).toISOString(),
               status: transaction.status,
             },

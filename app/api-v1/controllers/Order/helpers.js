@@ -25,67 +25,70 @@ exports.validate = async (body) => {
 
 exports.getBuildHistory = async (req, part) => {
   let buildObj = {}
-  buildObj[part.build_id] = {}
+  buildObj['id'] = part.build_id
   try {
     let buildScheduleResult = await buildController.transaction.getAll('Schedule')(req)
-    buildObj[part.build_id].schedule = buildScheduleResult.response
+    buildObj.schedule = buildScheduleResult.response
   } catch (err) {
-    buildObj[part.build_id].schedule = []
+    buildObj.schedule = []
   }
   try {
     let buildStartResult = await buildController.transaction.getAll('Start')(req)
-    buildObj[part.build_id].start = buildStartResult.response
+    buildObj.start = buildStartResult.response
   } catch (err) {
-    buildObj[part.build_id].start = []
+    buildObj.start = []
   }
   try {
     let buildProgressUpdateResult = await buildController.transaction.getAll('progress-update')(req)
-    buildObj[part.build_id].progressUpdate = buildProgressUpdateResult.response
+    buildObj.progressUpdate = buildProgressUpdateResult.response
   } catch (err) {
-    buildObj[part.build_id].progressUpdate = []
+    buildObj.progressUpdate = []
   }
   try {
     let buildCompleteResult = await buildController.transaction.getAll('Complete')(req)
-    buildObj[part.build_id].complete = buildCompleteResult.response
+    buildObj.complete = buildCompleteResult.response
   } catch (err) {
-    buildObj[part.build_id].complete = []
+    buildObj.complete = []
   }
   return buildObj
 }
 
 exports.getPartHistory = async (part) => {
   let partObj = {}
-  partObj[part.id] = {}
+  partObj['id'] = part.id
   try {
     let req = {}
     req.params = { id: part.id }
     let partMetadataUpdateResult = await partController.transaction.getAll('metadata-update')(req)
-    partObj[part.id].metadataUpdate = partMetadataUpdateResult.response
+    partObj.metadataUpdate = partMetadataUpdateResult.response
   } catch (err) {
-    partObj[part.id].metadataUpdate = []
+    partObj.metadataUpdate = []
   }
   try {
     let req = {}
     req.params = { id: part.id }
     let partCertificationResult = await partController.transaction.getAll('certification')(req)
-    partObj[part.id].certification = partCertificationResult.response
+    partObj.certification = partCertificationResult.response
   } catch (err) {
-    partObj[part.id].certification = []
+    partObj.certification = []
   }
   try {
     let req = {}
     req.params = { id: part.id }
     let partUpdateDeilveryDateResult = await partController.transaction.getAll('update-delivery-date')(req)
-    partObj[part.id].updateDeliveryDate = partUpdateDeilveryDateResult.response
+    partObj.updateDeliveryDate = partUpdateDeilveryDateResult.response
   } catch (err) {
-    partObj[part.id].updateDeliveryDate = []
+    partObj.updateDeliveryDate = []
   }
   return partObj
 }
 exports.getResponse = async (type, transaction, req) => {
+  let [order] = await db.getOrder(req.params.id)
   return {
-    id: transaction.id,
+    id: req.params.id,
+    transactionId: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
+    updatedAt: order.updated_at.toISOString(),
     status: transaction.status,
     ...((type == 'Amendment' || type == 'Acknowledgement') && { items: req.body.items }),
     ...(type == 'Acknowledgement' && req.body.imageAttachmentId && { imageAttachmentId: req.body.imageAttachmentId }),
@@ -105,21 +108,22 @@ exports.getResultForOrderGet = async (result, req) => {
     newItem['supplier'] = supplierAlias
     newItem['id'] = item['id']
     newItem['status'] = item['status']
+    newItem['updatedAt'] = item['updated_at'].toISOString()
     let parts = []
     for (let partId of item['items']) {
       let partObj = {}
       partObj['partId'] = partId
       let [part] = await db.getPartById(partId)
       if (part) {
-        if (part.forecast_delivery_date) {
-          partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
-        }
+        partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
+        partObj['requiredBy'] = part.required_by.toISOString()
         let [build] = await db.getBuildById(part.build_id)
         if (build) {
           partObj['buildStatus'] = build.status
           if (build.update_type) {
             partObj['updateType'] = build.update_type
           }
+          partObj['updatedAt'] = build.updated_at.toISOString()
         }
       }
       parts.push(partObj)
@@ -156,7 +160,8 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
   const modifiedOrderTransactions = await Promise.all(
     orderTransactions.map(async (item, index) => {
       const newItem = {}
-      newItem['id'] = item['id']
+      newItem['transactionId'] = item['id']
+      newItem['id'] = item['order_id']
       newItem['submittedAt'] = item['created_at'].toISOString()
       newItem['status'] = item['status']
       let comments
@@ -178,23 +183,27 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
           }
           updatedParts = await getMetadata(item.token_id, 'updatedParts')
           updatedParts = updatedParts.data
-          newItem['items'] = {}
+          newItem['items'] = []
           for (let partId of updatedParts) {
             let req = { params: { id: partId } }
             let partResponse = await partController.transaction.getAll('acknowledgement')(req)
-            newItem['items'][partId] = partResponse.response[index]
+            newItem['items'].push(partResponse.response[index])
           }
-          newItem['comments'] = comments
-          newItem['imageAttachmentId'] = imageAttachmentId
+          if (comments) {
+            newItem['comments'] = comments
+          }
+          if (imageAttachmentId) {
+            newItem['imageAttachmentId'] = imageAttachmentId
+          }
           break
         case 'Amendment':
           updatedParts = await getMetadata(item.token_id, 'updatedParts')
           updatedParts = updatedParts.data
-          newItem['items'] = {}
+          newItem['items'] = []
           for (let partId of updatedParts) {
             let req = { params: { id: partId } }
             let partResponse = await partController.transaction.getAll('amendment')(req)
-            newItem['items'][partId] = partResponse.response[index]
+            newItem['items'].push(partResponse.response[index])
           }
           break
       }

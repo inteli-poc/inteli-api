@@ -14,10 +14,13 @@ describe('order.get', () => {
   beforeEach(async () => {
     stubs.getOrders = stub(db, 'getOrders').resolves([
       {
-        externalId: 'some-external-d',
+        external_id: 'some-external-d',
         supplier: 'supplier-alias',
         items: ['d3607fc8-442a-4394-a96e-042bd97f0624'],
-        businessPartnerCode: 'some-business-partner-code',
+        business_partner_code: 'some-business-partner-code',
+        id: 'd3607fc8-442a-4394-a96e-042bd97f061',
+        status: 'Submitted',
+        updated_at: new Date(),
       },
     ])
     stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
@@ -27,11 +30,14 @@ describe('order.get', () => {
     stubs.getPartById = stub(db, 'getPartById').resolves([
       {
         build_id: 'd3607fc8-442a-4394-a96e-042bd97f0625',
+        forecast_delivery_date: new Date(),
+        required_by: new Date(),
       },
     ])
     stubs.getBuildById = stub(db, 'getBuildById').resolves([
       {
         status: 'Started',
+        updated_at: new Date(),
       },
     ])
   })
@@ -51,10 +57,13 @@ describe('order.getById', () => {
   beforeEach(async () => {
     stubs.getOrder = stub(db, 'getOrder').resolves([
       {
-        externalId: 'some-external-d',
+        external_id: 'some-external-d',
         supplier: 'supplier-alias',
         items: ['d3607fc8-442a-4394-a96e-042bd97f0624'],
-        businessPartnerCode: 'some-business-partner-code',
+        business_partner_code: 'some-business-partner-code',
+        id: 'd3607fc8-442a-4394-a96e-042bd97f061',
+        status: 'Submitted',
+        updated_at: new Date(),
       },
     ])
     stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
@@ -123,7 +132,11 @@ describe('order.create', () => {
       },
     ])
     stubs.updatePart = stub(db, 'updatePart').resolves([])
-    stubs.orderCreationInnerFn = stub().resolves([])
+    stubs.orderCreationInnerFn = stub().resolves({
+      response: {
+        updatedAt: new Date(),
+      },
+    })
     stubs.orderTransactionCreate = stub(orderController.transaction, 'create').returns(stubs.orderCreationInnerFn)
   })
   afterEach(async () => {
@@ -155,6 +168,7 @@ describe('order.transaction', () => {
           business_partner_code: 'some-business-partner-code',
           items: ['48d84d18-802e-4cb7-8997-f84dfc03b5a5'],
           id: '48d84d18-802e-4cb7-8997-f84dfc03b5a5',
+          updated_at: new Date(),
         },
       ])
       stubs.insertOrderTransaction = stub(db, 'insertOrderTransaction').resolves({

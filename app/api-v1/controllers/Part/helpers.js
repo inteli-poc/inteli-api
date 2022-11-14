@@ -47,7 +47,8 @@ const buildPartOutputs = (data, type, parent_index_required) => {
 
 exports.getResponse = async (type, transaction, req) => {
   return {
-    id: transaction.id,
+    id: req.params.id,
+    transactionId: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
     status: transaction.status,
     ...(type == 'metadata-update' && { metadataType: req.body.metadataType }),
@@ -125,6 +126,8 @@ async function gatherPartDetails(index, newItem) {
   let exportClassification = await getMetadata(index, 'exportClassification')
   let lineText = await getMetadata(index, 'lineText')
   let confirmedReceiptDate = await getMetadata(index, 'confirmedReceiptDate')
+  let forecastedDeliveryDate = await getMetadata(index, 'forecastedDeliveryDate')
+  forecastedDeliveryDate = forecastedDeliveryDate.data
   requiredBy = requiredBy.data
   quantity = quantity.data
   price = price.data
@@ -139,18 +142,19 @@ async function gatherPartDetails(index, newItem) {
   lineText = lineText.data
   confirmedReceiptDate = confirmedReceiptDate.data
   newItem.description = description
-  newItem.delivery_terms = deliveryTerms
-  newItem.delivery_address = deliveryAddress
-  newItem.price_type = priceType
+  newItem.deliveryTerms = deliveryTerms
+  newItem.deliveryAddress = deliveryAddress
+  newItem.priceType = priceType
   newItem.currency = currency
-  newItem.unit_of_measure = unitOfMeasure
-  newItem.export_classification = exportClassification
-  newItem.line_text = lineText
-  newItem.confirmed_receipt_date = confirmedReceiptDate
-  newItem.recipe_id = recipeId
+  newItem.unitOfMeasure = unitOfMeasure
+  newItem.exportClassification = exportClassification
+  newItem.lineText = lineText
+  newItem.confirmedReceiptDate = confirmedReceiptDate
+  newItem.recipeId = recipeId
   newItem.price = price
   newItem.quantity = quantity
-  newItem.required_by = requiredBy
+  newItem.requiredBy = requiredBy
+  newItem.forecastedDeliveryDate = forecastedDeliveryDate
 }
 
 exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => {
@@ -169,7 +173,8 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
       let certificationType
       let forecastedDeliveryDate
       const newItem = {}
-      newItem['id'] = item['id']
+      newItem['transactionId'] = item['id']
+      newItem['id'] = item['part_id']
       newItem['submittedAt'] = item['created_at'].toISOString()
       newItem['status'] = item['status']
       switch (type) {
