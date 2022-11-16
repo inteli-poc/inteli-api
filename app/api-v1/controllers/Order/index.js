@@ -353,33 +353,116 @@ module.exports = {
       } catch (err) {
         orderObj.order.acceptance = []
       }
-      let parts = await db.getPartsByOrderId(id)
-      orderObj.builds = []
-      let processBuild = []
-      for (const part of parts) {
-        let buildObj = {}
+      let orderHistory = {}
+      let [order] = await db.getOrder(id)
+      let items = order.items
+      orderHistory['id'] = order.id
+      orderHistory['externalId'] = order.external_id
+      orderHistory['parts'] = []
+      for (let partId of items) {
         let partObj = {}
+        let [part] = await db.getPartById(partId)
+        partObj['id'] = part.id
+        partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
+        partObj['requriedBy'] = part.required_by.toISOString()
+        partObj['history'] = []
+        let order = orderObj['order']
+        if (order.submission.length != 0) {
+          let stage = {}
+          stage['status'] = 'Purchase Order Shared'
+          stage['submittedAt'] = order.submission[order.submission.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        if (order.acknowledgement.length != 0) {
+          let stage = {}
+          stage['status'] = 'Purchase Order Acknowledged'
+          stage['submittedAt'] = order.acknowledgement[order.acknowledgement.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        if (order.amendment.length != 0) {
+          let stage = {}
+          stage['status'] = 'Purchase Order Amended'
+          stage['submittedAt'] = order.amendment[order.amendment.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        if (order.acceptance.length != 0) {
+          let stage = {}
+          stage['status'] = 'Purchase Order Accepted'
+          stage['submittedAt'] = order.acceptance[order.acceptance.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        if (order.cancellation.length != 0) {
+          let stage = {}
+          stage['status'] = 'Purchase Order Cancelled'
+          stage['submittedAt'] = order.cancellation[order.cancellation.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        let partHistory = await getPartHistory(part)
         let req = {}
-        if (!part.build_id) {
-          continue
-        }
-        if (processBuild.includes(part.build)) {
-          continue
-        }
         req.params = { id: part.build_id }
-        buildObj = await getBuildHistory(req, part)
-        buildObj.parts = []
-        let parts = await db.getPartsByBuildId(part.build_id)
-        for (let part of parts) {
-          partObj = await getPartHistory(part)
-          buildObj.parts.push(partObj)
+        let buildObj = await getBuildHistory(req, part)
+        if (buildObj.start.length != 0) {
+          let stage = {}
+          stage['status'] = 'Manufacturing Job Started'
+          stage['submittedAt'] = buildObj.start[buildObj.start.length - 1].submittedAt
+          partObj['history'].push(stage)
         }
-        orderObj.builds.push(buildObj)
-        processBuild.push(part.build_id)
+        if (buildObj.progressUpdate.length != 0) {
+          for (let item of buildObj.progressUpdate) {
+            let stage = {}
+            stage['status'] = item['updateType']
+            stage['submittedAt'] = item['submittedAt']
+            partObj['history'].push(stage)
+            if (item['updateType'] == 'Lime Tracking ID Attached') {
+              if (partHistory.certification.length != 0) {
+                for (let certification of partHistory.certification) {
+                  if (certification['certificationType'] == 'HIP Completed') {
+                    let stage = {}
+                    stage['status'] = 'HIP Completed'
+                    stage['submittedAt'] = certification['submittedAt']
+                    partObj['history'].push(stage)
+                    break
+                  }
+                }
+              }
+            }
+            if (item['updateType'] == 'Machining and NDT Completed') {
+              if (partHistory.certification.length != 0) {
+                for (let certification of partHistory.certification) {
+                  if (certification['certificationType'] == 'Final Inspection Completed') {
+                    let stage = {}
+                    stage['status'] = 'Final Inspection Completed'
+                    stage['submittedAt'] = certification['submittedAt']
+                    partObj['history'].push(stage)
+                    break
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (buildObj.complete.length != 0) {
+          let stage = {}
+          stage['status'] = 'Shipped & Invoice Received'
+          stage['submittedAt'] = buildObj.complete[buildObj.complete.length - 1].submittedAt
+          partObj['history'].push(stage)
+        }
+        if (partHistory.metadataUpdate.length != 0) {
+          for (let metadata of partHistory.metadataUpdate) {
+            if (metadata['metadataType'] == 'goodsReceipt') {
+              let stage = {}
+              stage['status'] = 'Part Received'
+              stage['submittedAt'] = metadata['submittedAt']
+              partObj['history'].push(stage)
+              break
+            }
+          }
+        }
+        orderHistory.parts.push(partObj)
       }
       return {
         status: 200,
-        response: orderObj,
+        response: orderHistory,
       }
     },
   },

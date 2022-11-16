@@ -164,8 +164,11 @@ module.exports = {
             }
             break
           case 'Complete':
-            if (build.status != 'Started') {
-              throw new InternalError({ message: 'Build not in Started state' })
+            if (
+              build.status != 'Started' ||
+              (build.update_type != 'ASN Uploaded' && build.update_type != 'Invoice Uploaded')
+            ) {
+              throw new InternalError({ message: 'Build not in Started state or ASN or Invoice not uploaded' })
             }
             build.status = 'Completed'
             build.completed_at = req.body.completedAt
