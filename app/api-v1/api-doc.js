@@ -224,7 +224,6 @@ const apiDoc = {
           status: {
             description: 'Status of the build',
             type: 'string',
-            enum: ['Created', 'Scheduled', 'Started', 'Completed'],
           },
           completionEstimate: {
             description: 'Date and time at which the build is estimated to finish',
@@ -518,100 +517,43 @@ const apiDoc = {
         description: 'History of the order',
         type: 'object',
         properties: {
-          order: {
-            description: 'order history',
-            type: 'object',
-            properties: {
-              submission: {
-                type: 'array',
-                items: {
-                  allOf: [{ $ref: '#/components/schemas/OrderSubmission' }],
-                },
-              },
-              acknowledgement: {
-                type: 'array',
-                items: {
-                  allOf: [{ $ref: '#/components/schemas/OrderAcknowledgement' }],
-                },
-              },
-              amendment: {
-                type: 'array',
-                items: {
-                  allOf: [{ $ref: '#/components/schemas/OrderAmendment' }],
-                },
-              },
-              cancellation: {
-                type: 'array',
-                items: {
-                  allOf: [{ $ref: '#/components/schemas/OrderCancellation' }],
-                },
-              },
-              acceptance: {
-                type: 'array',
-                items: {
-                  allOf: [{ $ref: '#/components/schemas/OrderAcceptance' }],
-                },
-              },
-            },
+          id: {
+            description: 'id of order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
-          builds: {
+          externalId: {
+            description: 'external of the order',
+            type: 'string',
+          },
+          parts: {
             description: 'build history',
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                id: {
-                  oneOf: [{ $ref: '#/components/schemas/ObjectReference' }, { type: 'null' }],
+                partId: {
+                  description: 'id of the part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
                 },
-                schedule: {
-                  type: 'array',
-                  items: {
-                    allOf: [{ $ref: '#/components/schemas/BuildSchedule' }],
-                  },
+                forecastedDeliveryDate: {
+                  type: 'string',
+                  format: 'date-time',
                 },
-                start: {
-                  type: 'array',
-                  items: {
-                    allOf: [{ $ref: '#/components/schemas/BuildStart' }],
-                  },
+                requiredBy: {
+                  type: 'string',
+                  format: 'date-time',
                 },
-                progressUpdate: {
-                  type: 'array',
-                  items: {
-                    allOf: [{ $ref: '#/components/schemas/BuildProgressUpdate' }],
-                  },
-                },
-                complete: {
-                  type: 'array',
-                  items: {
-                    allOf: [{ $ref: '#/components/schemas/BuildCompletion' }],
-                  },
-                },
-                parts: {
+                history: {
                   type: 'array',
                   items: {
                     type: 'object',
                     properties: {
-                      id: {
-                        allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                      status: {
+                        type: 'string',
                       },
-                      metadataUpdate: {
-                        type: 'array',
-                        items: {
-                          allOf: [{ $ref: '#/components/schemas/PartMetadataUpdate' }],
-                        },
-                      },
-                      certification: {
-                        type: 'array',
-                        items: {
-                          allOf: [{ $ref: '#/components/schemas/PartCertification' }],
-                        },
-                      },
-                      updateDeliveryDate: {
-                        type: 'array',
-                        items: {
-                          allOf: [{ $ref: '#/components/schemas/PartDeliveryDateUpdate' }],
-                        },
+                      submittedAt: {
+                        type: 'string',
+                        format: 'date-time',
                       },
                     },
                   },
