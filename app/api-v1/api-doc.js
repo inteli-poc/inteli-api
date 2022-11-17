@@ -230,6 +230,23 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
+          completedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          startedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updateType: {
+            type: 'string',
+          },
+          asnAttachmentId: {
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          invoiceAttachmentId: {
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
         },
       },
       NewPart: {
@@ -339,6 +356,15 @@ const apiDoc = {
             items: {
               description: 'metadata for a part',
               allOf: [{ $ref: '#/components/schemas/NewPartMetadataUpdate' }],
+            },
+          },
+          recipeAttachmentId: {
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          build: {
+            type: 'array',
+            items: {
+              allOf: [{ $ref: '#/components/schemas/Build' }],
             },
           },
         },
@@ -452,6 +478,59 @@ const apiDoc = {
                   format: 'date-time',
                 },
                 buildExternalId: {
+                  type: 'string',
+                },
+                recipeId: {
+                  description: 'id of the recipe that describes the design of this part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                  example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
+                },
+                price: {
+                  description: 'price of the order',
+                  type: 'number',
+                  format: 'float',
+                  example: '1200.01',
+                },
+                quantity: {
+                  description: 'quantity of the order',
+                  type: 'integer',
+                  example: 1,
+                },
+                description: {
+                  description: 'description of the order',
+                  type: 'string',
+                },
+                confirmedReceiptDate: {
+                  description: 'confirmed receipt date of the order',
+                  type: 'string',
+                  format: 'date-time',
+                },
+                deliveryTerms: {
+                  description: 'delivery terms of the order',
+                  type: 'string',
+                },
+                deliveryAddress: {
+                  description: 'delivery address of the order',
+                  type: 'string',
+                },
+                priceType: {
+                  description: 'price type of the order',
+                  type: 'string',
+                },
+                unitOfMeasure: {
+                  description: 'unit of measure for the order',
+                  type: 'string',
+                },
+                currency: {
+                  description: 'currency for the order',
+                  type: 'string',
+                },
+                exportClassification: {
+                  description: 'export classification of the order',
+                  type: 'string',
+                },
+                lineText: {
+                  description: 'line text for the order',
                   type: 'string',
                 },
               },
@@ -835,8 +914,19 @@ const apiDoc = {
   security: [{ bearerAuth: [] }],
 }
 
-const notRequired = ['imageAttachmentId', 'comments', 'attachmentId', 'forecastedDeliveryDate']
-const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart']
+const notRequired = [
+  'imageAttachmentId',
+  'comments',
+  'attachmentId',
+  'forecastedDeliveryDate',
+  'completedAt',
+  'startedAt',
+  'asnAttachmentId',
+  'invoiceAttachmentId',
+  'build',
+  'updateType',
+]
+const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part']
 
 // make all schema properties required
 const makeSchemaPropsRequired = (schemaObj, key) => {
