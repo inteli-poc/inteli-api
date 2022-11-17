@@ -115,8 +115,20 @@ exports.getResultForOrderGet = async (result, req) => {
       partObj['partId'] = partId
       let [part] = await db.getPartById(partId)
       if (part) {
-        partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         partObj['requiredBy'] = part.required_by.toISOString()
+        partObj['recipeId'] = part.recipe_id
+        partObj['price'] = part.price
+        partObj['quantity'] = part.quantity
+        partObj['currency'] = part.currency
+        partObj['deliveryTerms'] = part.delivery_terms
+        partObj['deliveryAddress'] = part.delivery_address
+        partObj['lineText'] = part.line_text
+        partObj['exportClassification'] = part.export_classification
+        partObj['unitOfMeasure'] = part.unit_of_measure
+        partObj['priceType'] = part.price_type
+        partObj['confirmedReceiptDate'] = part.confirmed_receipt_date.toISOString()
+        partObj['description'] = part.description
+        partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         let [build] = await db.getBuildById(part.build_id)
         if (build) {
           partObj['buildStatus'] = build.status

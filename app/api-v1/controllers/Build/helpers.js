@@ -55,9 +55,6 @@ exports.getResultForBuildGet = async (build, req) => {
       if (item.completed_at) {
         newItem.completedAt = item.completed_at.toISOString()
       }
-      if (item.attachment_id) {
-        newItem.attachmentId = item.attachment_id
-      }
       if (item.update_type) {
         newItem.updateType = item.update_type
       }

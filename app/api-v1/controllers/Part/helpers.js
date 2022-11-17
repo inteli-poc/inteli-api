@@ -2,6 +2,7 @@ const db = require('../../../db')
 const identity = require('../../services/identityService')
 const { NotFoundError, InternalError, NothingToProcess, NoTokenError } = require('../../../utils/errors')
 const { getMetadata } = require('../../../utils/dscp-api')
+const { getById } = require('../Build/index')
 
 const buildPartOutputs = (data, type, parent_index_required) => {
   return {
@@ -70,6 +71,8 @@ exports.getResultForPartGet = async (parts, req) => {
       newItem['supplier'] = supplierAlias
       newItem['buildId'] = item.build_id
       newItem['recipeId'] = item.recipe_id
+      let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
+      newItem['recipeAttachmentId'] = recipe.image_attachment_id
       newItem['id'] = item.id
       newItem['certifications'] = item.certifications
       newItem['metadata'] = item.metadata
@@ -86,6 +89,12 @@ exports.getResultForPartGet = async (parts, req) => {
       newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
       newItem['requiredBy'] = item.required_by.toISOString()
       newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
+      if (item.build_id) {
+        let req = {}
+        req.params = { id: item.build_id }
+        let result = await getById(req)
+        newItem['build'] = result.response
+      }
       return newItem
     })
   )

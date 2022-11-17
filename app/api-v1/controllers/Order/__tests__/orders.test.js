@@ -32,6 +32,7 @@ describe('order.get', () => {
         build_id: 'd3607fc8-442a-4394-a96e-042bd97f0625',
         forecast_delivery_date: new Date(),
         required_by: new Date(),
+        confirmed_receipt_date: new Date(),
       },
     ])
     stubs.getBuildById = stub(db, 'getBuildById').resolves([

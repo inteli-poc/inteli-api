@@ -15,6 +15,7 @@ module.exports = {
   getAll: async function (req) {
     const build = await db.getBuild()
     let result = await getResultForBuildGet(build, req)
+    await module.exports.getBuildAttachments(result)
     return result
   },
   getById: async function (req) {
@@ -24,7 +25,47 @@ module.exports = {
     }
     const build = await db.getBuildById(id)
     let result = await getResultForBuildGet(build, req)
+    await module.exports.getBuildAttachments(result)
     return result
+  },
+  getBuildAttachments: async function (result) {
+    for (let buildResponse of result.response) {
+      let req = {}
+      req.params = { id: buildResponse.id }
+      let buildObj = {}
+      try {
+        let buildProgressUpdateResult = await module.exports.transaction.getAll('progress-update')(req)
+        buildObj.progressUpdate = buildProgressUpdateResult.response
+      } catch (err) {
+        buildObj.progressUpdate = []
+      }
+      try {
+        let buildCompleteResult = await module.exports.transaction.getAll('Complete')(req)
+        buildObj.complete = buildCompleteResult.response
+      } catch (err) {
+        buildObj.complete = []
+      }
+      let asnUploaded = true
+      if (buildObj.progressUpdate.length != 0) {
+        for (let item of buildObj.progressUpdate) {
+          if (item['updateType'] == 'ASN Uploaded') {
+            buildResponse['asnAttachmentId'] = item['attachmentId']
+            break
+          } else if (item['updateType'] == 'Invoice Uploaded') {
+            buildResponse['invoiceAttachmentId'] = item['attachmentId']
+            asnUploaded = false
+            break
+          }
+        }
+      }
+      if (buildObj.complete.length != 0) {
+        if (asnUploaded) {
+          buildResponse['invoiceAttachmentId'] = buildObj.complete[buildObj.complete.length - 1]['attachmentId']
+        } else {
+          buildResponse['asnAttachmentId'] = buildObj.complete[buildObj.complete.length - 1]['attachmentId']
+        }
+      }
+    }
   },
   create: async function (req) {
     if (!req.body) {
@@ -50,9 +91,6 @@ module.exports = {
     build.supplier = selfAddress
     build.external_id = req.body.externalId
     build.completion_estimate = req.body.completionEstimate
-    build.completed_at = null
-    build.started_at = null
-    build.attachment_id = null
     build.status = 'Created'
     const [buildId] = await db.postBuildDb(build)
     let partIds = req.body.partIds
