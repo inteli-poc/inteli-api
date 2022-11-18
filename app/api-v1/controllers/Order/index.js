@@ -355,6 +355,9 @@ module.exports = {
       }
       let orderHistory = {}
       let [order] = await db.getOrder(id)
+      if (!order) {
+        throw new NotFoundError('order')
+      }
       let items = order.items
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
@@ -364,7 +367,7 @@ module.exports = {
         let [part] = await db.getPartById(partId)
         partObj['id'] = part.id
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
-        partObj['requriedBy'] = part.required_by.toISOString()
+        partObj['requiredBy'] = part.required_by.toISOString()
         if (part.build_id) {
           partObj['jobId'] = part.build_id
           let [build] = await db.getBuildById(part.build_id)
@@ -436,7 +439,7 @@ module.exports = {
         }
         orderHistory.parts.push(partObj)
       }
-      if (orderHistory && orderHistory.parts && orderHistory.parts) {
+      if (orderHistory && orderHistory.parts) {
         for (let part of orderHistory.parts) {
           part.history.sort((a, b) => {
             let time1 = new Date(a.submittedAt)
