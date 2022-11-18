@@ -365,6 +365,11 @@ module.exports = {
         partObj['id'] = part.id
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         partObj['requriedBy'] = part.required_by.toISOString()
+        if (part.build_id) {
+          partObj['jobId'] = part.build_id
+          let [build] = await db.getBuildById(part.build_id)
+          partObj['jobExternalId'] = build.external_id
+        }
         partObj['history'] = []
         let order = orderObj['order']
         if (order.submission.length != 0) {
@@ -397,7 +402,6 @@ module.exports = {
           stage['submittedAt'] = order.cancellation[order.cancellation.length - 1].submittedAt
           partObj['history'].push(stage)
         }
-        let partHistory = await getPartHistory(part)
         let req = {}
         req.params = { id: part.build_id }
         let buildObj = await getBuildHistory(req, part)
@@ -413,32 +417,6 @@ module.exports = {
             stage['status'] = item['updateType']
             stage['submittedAt'] = item['submittedAt']
             partObj['history'].push(stage)
-            if (item['updateType'] == 'Lime Tracking ID Attached') {
-              if (partHistory.certification.length != 0) {
-                for (let certification of partHistory.certification) {
-                  if (certification['certificationType'] == 'HIP Completed') {
-                    let stage = {}
-                    stage['status'] = 'HIP Completed'
-                    stage['submittedAt'] = certification['submittedAt']
-                    partObj['history'].push(stage)
-                    break
-                  }
-                }
-              }
-            }
-            if (item['updateType'] == 'Machining and NDT Completed') {
-              if (partHistory.certification.length != 0) {
-                for (let certification of partHistory.certification) {
-                  if (certification['certificationType'] == 'Final Inspection Completed') {
-                    let stage = {}
-                    stage['status'] = 'Final Inspection Completed'
-                    stage['submittedAt'] = certification['submittedAt']
-                    partObj['history'].push(stage)
-                    break
-                  }
-                }
-              }
-            }
           }
         }
         if (buildObj.complete.length != 0) {
@@ -447,18 +425,27 @@ module.exports = {
           stage['submittedAt'] = buildObj.complete[buildObj.complete.length - 1].submittedAt
           partObj['history'].push(stage)
         }
-        if (partHistory.metadataUpdate.length != 0) {
-          for (let metadata of partHistory.metadataUpdate) {
-            if (metadata['metadataType'] == 'goodsReceipt') {
-              let stage = {}
-              stage['status'] = 'Part Received'
-              stage['submittedAt'] = metadata['submittedAt']
-              partObj['history'].push(stage)
-              break
-            }
+        let partHistory = await getPartHistory(part)
+        if (partHistory.certification.length != 0) {
+          for (let certification of partHistory.certification) {
+            let stage = {}
+            stage['status'] = certification['certificationType']
+            stage['submittedAt'] = certification['submittedAt']
+            partObj['history'].push(stage)
           }
         }
         orderHistory.parts.push(partObj)
+      }
+      if (orderHistory && orderHistory.parts && orderHistory.parts) {
+        for (let part of orderHistory.parts) {
+          part.history.sort((a, b) => {
+            let time1 = new Date(a.submittedAt)
+            let timeStamp1 = time1.getTime()
+            let time2 = new Date(b.submittedAt)
+            let timeStamp2 = time2.getTime()
+            return timeStamp1 - timeStamp2
+          })
+        }
       }
       return {
         status: 200,
