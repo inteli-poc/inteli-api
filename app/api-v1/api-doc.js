@@ -622,6 +622,12 @@ const apiDoc = {
                   type: 'string',
                   format: 'date-time',
                 },
+                jobId: {
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                jobExternalId: {
+                  type: 'string',
+                },
                 history: {
                   type: 'array',
                   items: {
