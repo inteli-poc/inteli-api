@@ -622,10 +622,10 @@ const apiDoc = {
                   type: 'string',
                   format: 'date-time',
                 },
-                jobId: {
+                buildId: {
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
                 },
-                jobExternalId: {
+                buildExternalId: {
                   type: 'string',
                 },
                 history: {

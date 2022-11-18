@@ -369,9 +369,9 @@ module.exports = {
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         partObj['requiredBy'] = part.required_by.toISOString()
         if (part.build_id) {
-          partObj['jobId'] = part.build_id
+          partObj['buildId'] = part.build_id
           let [build] = await db.getBuildById(part.build_id)
-          partObj['jobExternalId'] = build.external_id
+          partObj['buildExternalId'] = build.external_id
         }
         partObj['history'] = []
         let order = orderObj['order']
