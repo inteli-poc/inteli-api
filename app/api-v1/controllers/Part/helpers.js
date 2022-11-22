@@ -89,16 +89,39 @@ exports.getResultForPartGet = async (parts, req) => {
       newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
       newItem['requiredBy'] = item.required_by.toISOString()
       newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
+      newItem['attachments'] = []
+      let attachment = {}
+      attachment['description'] = 'Design'
+      attachment['attachmentId'] = newItem['recipeAttachmentId']
+      newItem['attachments'].push(attachment)
       if (item.build_id) {
         let req = {}
         req.params = { id: item.build_id }
         let result = await getById(req)
         newItem['build'] = result.response
+        if (newItem['build'].asnAttachmentId) {
+          let attachment = {}
+          attachment['description'] = 'ASN'
+          attachment['attachmentId'] = newItem['build'].asnAttachmentId
+          newItem['attachments'].push(attachment)
+        }
+        if (newItem['build'].invoiceAttachmentId) {
+          let attachment = {}
+          attachment['description'] = 'Invoice'
+          attachment['attachmentId'] = newItem['build'].invoiceAttachmentId
+          newItem['attachments'].push(attachment)
+        }
+        if (newItem['build'].grnAttachmentId) {
+          let attachment = {}
+          attachment['description'] = 'GRN'
+          attachment['attachmentId'] = newItem['build'].grnAttachmentId
+          newItem['attachments'].push(attachment)
+        }
       }
       return newItem
     })
   )
-  return { status: 200, response: result }
+  return result
 }
 
 exports.insertCertificationIntoPart = async (part, certificationIndex, attachmentId) => {

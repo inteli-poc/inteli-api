@@ -26,10 +26,7 @@ module.exports = function () {
           content: {
             'application/json': {
               schema: {
-                type: 'array',
-                items: {
-                  $ref: '#/components/schemas/Part',
-                },
+                $ref: '#/components/schemas/Part',
               },
             },
           },

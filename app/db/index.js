@@ -256,7 +256,7 @@ async function removeTransactionBuild(id) {
 }
 
 async function removeTransactionPart(id) {
-  return client('part_transactions').delete().where(id)
+  return client('part_transactions').delete().where({ id })
 }
 
 async function removeTransactionRecipe(id) {

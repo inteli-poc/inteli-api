@@ -56,7 +56,10 @@ module.exports = {
     let parts
     parts = await db.getParts()
     let result = await getResultForPartGet(parts, req)
-    return result
+    return {
+      status: 200,
+      response: result,
+    }
   },
   get: async function (req) {
     let { id } = req.params
@@ -66,7 +69,10 @@ module.exports = {
     let parts
     parts = await db.getPartById(id)
     let result = await getResultForPartGet(parts, req)
-    return result
+    return {
+      status: 200,
+      response: result[0],
+    }
   },
   transaction: {
     getAll: (type) => {
@@ -150,13 +156,6 @@ module.exports = {
             }
             binary_blob = attachment[0].binary_blob
             filename = attachment[0].filename
-            if (metadataType == 'goodsReceipt') {
-              ;[build] = await db.getBuildById(part.build_id)
-              build.status = 'Part Received'
-              latest_token_id = build.latest_token_id
-              updateOriginalTokenId = false
-              await db.updateBuild(build, latest_token_id, updateOriginalTokenId)
-            }
             break
           case 'certification':
             certificationIndex = req.body.certificationIndex

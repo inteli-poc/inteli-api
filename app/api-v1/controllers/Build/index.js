@@ -16,7 +16,10 @@ module.exports = {
     const build = await db.getBuild()
     let result = await getResultForBuildGet(build, req)
     await module.exports.getBuildAttachments(result)
-    return result
+    return {
+      status: 200,
+      response: result,
+    }
   },
   getById: async function (req) {
     const { id } = req.params
@@ -26,10 +29,13 @@ module.exports = {
     const build = await db.getBuildById(id)
     let result = await getResultForBuildGet(build, req)
     await module.exports.getBuildAttachments(result)
-    return result
+    return {
+      status: 200,
+      response: result[0],
+    }
   },
   getBuildAttachments: async function (result) {
-    for (let buildResponse of result.response) {
+    for (let buildResponse of result) {
       let req = {}
       req.params = { id: buildResponse.id }
       let buildObj = {}
@@ -50,11 +56,11 @@ module.exports = {
         for (let item of buildObj.progressUpdate) {
           if (item['updateType'] == 'ASN Uploaded') {
             buildResponse['asnAttachmentId'] = item['attachmentId']
-            break
           } else if (item['updateType'] == 'Invoice Uploaded') {
             buildResponse['invoiceAttachmentId'] = item['attachmentId']
             asnUploaded = false
-            break
+          } else if (item['updateType'] == 'GRN Uploaded') {
+            buildResponse['grnAttachmentId'] = item['attachmentId']
           }
         }
       }
@@ -185,13 +191,19 @@ module.exports = {
             build.started_at = req.body.startedAt
             break
           case 'progress-update':
-            if (build.status != 'Started') {
-              throw new InternalError({ message: 'Build not in Started state' })
+            if (build.status != 'Started' && build.status != 'Completed') {
+              throw new InternalError({ message: 'Build not in Started or Completed state' })
             }
-            build.status = 'Started'
-            build.completion_estimate = req.body.completionEstimate
-            build.attachment_id = req.body.attachmentId
+            if (req.body.updateType == 'GRN Uploaded') {
+              build.status = 'Part Received'
+            } else {
+              build.status = 'Started'
+            }
             build.update_type = req.body.updateType
+            if (req.body.completionEstimate) {
+              build.completion_estimate = req.body.completionEstimate
+            }
+            build.attachment_id = req.body.attachmentId
             if (build.attachment_id) {
               attachment = await db.getAttachment(build.attachment_id)
               if (attachment.length == 0) {
