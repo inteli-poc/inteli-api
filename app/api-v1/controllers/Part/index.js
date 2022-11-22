@@ -10,7 +10,7 @@ const {
   checkAttachment,
   insertCertificationIntoPart,
 } = require('./helpers')
-const { InternalError, BadRequestError, NotFoundError } = require('../../../utils/errors')
+const { BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
   post: async function (req) {
@@ -222,7 +222,12 @@ module.exports = {
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
-            throw new InternalError({ message: result.message })
+            return {
+              status: 400,
+              response: {
+                message: 'No Token Ownership',
+              },
+            }
           }
         } catch (err) {
           await db.removeTransactionPart(transaction.id)

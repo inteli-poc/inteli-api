@@ -176,7 +176,12 @@ module.exports = {
             },
           }
         } else {
-          throw new InternalError({ message: result.message })
+          return {
+            status: 400,
+            response: {
+              message: 'No Token Ownership',
+            },
+          }
         }
       } catch (err) {
         await db.removeTransactionRecipe(transaction.id)
