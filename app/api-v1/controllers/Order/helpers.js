@@ -132,7 +132,7 @@ exports.getResultForOrderGet = async (result, req) => {
         let [build] = await db.getBuildById(part.build_id)
         if (build) {
           partObj['buildStatus'] = build.status
-          if (build.update_type) {
+          if (build.update_type && build.update_type != 'GRN Uploaded') {
             partObj['updateType'] = build.update_type
           }
           partObj['updatedAt'] = build.updated_at.toISOString()
@@ -156,10 +156,7 @@ exports.getResultForOrderGet = async (result, req) => {
   for await (let val of promises) {
     modifiedResult.push(val)
   }
-  return {
-    status: 200,
-    response: modifiedResult,
-  }
+  return modifiedResult
 }
 
 exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) => {

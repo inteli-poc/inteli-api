@@ -362,9 +362,20 @@ const apiDoc = {
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
           build: {
+            allOf: [{ $ref: '#/components/schemas/Build' }],
+          },
+          attachments: {
             type: 'array',
             items: {
-              allOf: [{ $ref: '#/components/schemas/Build' }],
+              type: 'object',
+              properties: {
+                description: {
+                  type: 'string',
+                },
+                attachmentId: {
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+              },
             },
           },
         },
@@ -931,6 +942,7 @@ const notRequired = [
   'invoiceAttachmentId',
   'build',
   'updateType',
+  'completionEstimate',
 ]
 const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part']
 

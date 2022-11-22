@@ -105,7 +105,10 @@ module.exports = {
     if (!id) throw new BadRequestError('missing params')
     const result = await db.getOrder(id)
     let response = await getResultForOrderGet(result, req)
-    return response
+    return {
+      status: 200,
+      response: response[0],
+    }
   },
   get: async function (req) {
     let result
@@ -115,7 +118,10 @@ module.exports = {
       result = await db.getOrders()
     }
     let response = await getResultForOrderGet(result, req)
-    return response
+    return {
+      status: 200,
+      response: response,
+    }
   },
   getSummary: async function () {
     let orders = await db.getOrders()
@@ -417,7 +423,11 @@ module.exports = {
         if (buildObj.progressUpdate.length != 0) {
           for (let item of buildObj.progressUpdate) {
             let stage = {}
-            stage['status'] = item['updateType']
+            if (item['updateType'] == 'GRN Uploaded') {
+              stage['status'] = 'Part Received'
+            } else {
+              stage['status'] = item['updateType']
+            }
             stage['submittedAt'] = item['submittedAt']
             partObj['history'].push(stage)
           }
