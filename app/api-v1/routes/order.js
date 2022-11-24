@@ -26,10 +26,15 @@ const docs = {
         content: {
           'application/json': {
             schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/Order',
-              },
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Order',
+                  },
+                },
+                { $ref: '#/components/schemas/Order' },
+              ],
             },
           },
         },
