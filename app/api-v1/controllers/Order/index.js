@@ -118,6 +118,12 @@ module.exports = {
       result = await db.getOrders()
     }
     let response = await getResultForOrderGet(result, req)
+    if (req.query.externalId) {
+      return {
+        status: 200,
+        response: response[0],
+      }
+    }
     return {
       status: 200,
       response: response,
