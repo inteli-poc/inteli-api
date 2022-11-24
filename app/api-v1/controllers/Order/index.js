@@ -311,7 +311,12 @@ module.exports = {
               await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
-            throw new InternalError({ message: result.message })
+            return {
+              status: 400,
+              response: {
+                message: 'No Token Ownership',
+              },
+            }
           }
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)

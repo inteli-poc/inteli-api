@@ -252,7 +252,12 @@ module.exports = {
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
-            throw new InternalError({ message: result.message })
+            return {
+              status: 400,
+              response: {
+                message: 'No Token Ownership',
+              },
+            }
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
