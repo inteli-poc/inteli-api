@@ -451,7 +451,15 @@ const apiDoc = {
           status: {
             type: 'string',
             description: 'Status of the purchase-order',
-            enum: ['Created', 'Submitted', 'AcknowledgedWithExceptions', 'Amended', 'Accepted', 'Cancelled'],
+            enum: [
+              'Created',
+              'Submitted',
+              'AcknowledgedWithExceptions',
+              'Amended',
+              'Accepted',
+              'Cancelled',
+              'Completed',
+            ],
           },
           updatedAt: {
             type: 'string',
@@ -491,10 +499,22 @@ const apiDoc = {
                 buildExternalId: {
                   type: 'string',
                 },
-                recipeId: {
-                  description: 'id of the recipe that describes the design of this part',
-                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
-                  example: 'A9F1aD4f-A8ca-1f19-A5a2-cABf4e0c5E34',
+                recipe: {
+                  type: 'object',
+                  properties: {
+                    id: {
+                      allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                    },
+                    externalId: {
+                      type: 'string',
+                    },
+                    description: {
+                      type: 'string',
+                    },
+                    price: {
+                      type: 'string',
+                    },
+                  },
                 },
                 price: {
                   description: 'price of the order',
