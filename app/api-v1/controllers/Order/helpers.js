@@ -116,7 +116,14 @@ exports.getResultForOrderGet = async (result, req) => {
       let [part] = await db.getPartById(partId)
       if (part) {
         partObj['requiredBy'] = part.required_by.toISOString()
-        partObj['recipeId'] = part.recipe_id
+        let [recipe] = await db.getRecipeByIDdb(part.recipe_id)
+        partObj['recipe'] = {
+          //adding details for design required by frontend
+          id: recipe.id,
+          externalId: recipe.external_id,
+          name: recipe.name,
+          price: recipe.price,
+        }
         partObj['price'] = part.price
         partObj['quantity'] = part.quantity
         partObj['currency'] = part.currency

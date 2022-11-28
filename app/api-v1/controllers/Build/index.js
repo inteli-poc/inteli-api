@@ -250,6 +250,21 @@ module.exports = {
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
             } else {
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
+              let [part_build] = await db.getPartsByBuildId(build.id)
+              let part_order = await db.getPartsByOrderId(part_build.order_id)
+              let orderComplete = true
+              for (let part of part_order) {
+                let [build] = await db.getBuildById(part.build_id)
+                if (build.status != 'Part Received') {
+                  orderComplete = false
+                  break
+                }
+              }
+              if (orderComplete) {
+                let [order] = await db.getOrder(part_build.order_id)
+                order.status = 'Completed'
+                await db.updateOrder(order, order.latest_token_id, false)
+              }
             }
           } else {
             return {

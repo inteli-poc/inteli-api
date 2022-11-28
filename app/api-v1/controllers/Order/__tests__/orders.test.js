@@ -42,10 +42,21 @@ describe('order.get', () => {
         external_id: 'some-external-id',
       },
     ])
+    stubs.getRecipeByIDdb = stub(db, 'getRecipeByIDdb').resolves([
+      {
+        id: 'some-id',
+        external_id: 'some-external-id',
+        name: 'some-name',
+        price: 'some-price',
+      },
+    ])
   })
   afterEach(async () => {
     stubs.getOrders.restore()
     stubs.identityByAddress.restore()
+    stubs.getPartById.restore()
+    stubs.getBuildById.restore()
+    stubs.getRecipeByIDdb.restore()
   })
   it('should resolve to 200', async () => {
     const result = await orderController.get(req)
@@ -140,6 +151,12 @@ describe('order.create', () => {
       },
     })
     stubs.orderTransactionCreate = stub(orderController.transaction, 'create').returns(stubs.orderCreationInnerFn)
+    stubs.getPartById = stub(db, 'getPartById').resolves([
+      {
+        build_id: 'd3607fc8-442a-4394-a96e-042bd97f0627',
+      },
+    ])
+    stubs.getBuildById = stub(db, 'getBuildById').resolves([])
   })
   afterEach(async () => {
     stubs.getMemberByAlias.restore()
@@ -151,6 +168,8 @@ describe('order.create', () => {
     stubs.getPartByIDs.restore()
     stubs.updatePart.restore()
     stubs.orderTransactionCreate.restore()
+    stubs.getPartById.restore()
+    stubs.getBuildById.restore()
   })
   it('should resolve to 201', async () => {
     const result = await orderController.post(req)
