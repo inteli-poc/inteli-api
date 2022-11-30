@@ -11,7 +11,6 @@ env:
 
 jobs:
   build-and-push-image:
-    if: github.event.pull_request.merged == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -33,10 +32,17 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Get last tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
 
       - name: Set outputs
         id: vars
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +%s)"
       
       - name: Check outputs
         run: echo ${{ steps.vars.outputs.sha_short }}
@@ -46,4 +52,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:v1.0.${{ steps.vars.outputs.sha_short }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }}-${{ steps.vars.outputs.sha_short }}-${{ steps.date.outputs.date }}
+            ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:latest
+        if: ${{ steps.get-latest-tag.outputs.tag != null }}

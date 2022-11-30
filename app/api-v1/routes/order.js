@@ -8,17 +8,33 @@ const docs = {
   GET: {
     summary: 'List Purchase Orders',
     description: 'Returns all orders.',
-    parameters: [],
+    parameters: [
+      {
+        description: 'externalId of the purchase-order to get',
+        in: 'query',
+        required: false,
+        name: 'externalId',
+        allowEmptyValue: false,
+        schema: {
+          type: 'string',
+        },
+      },
+    ],
     responses: {
       200: {
         description: 'Return Purchase Orders',
         content: {
           'application/json': {
             schema: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/Order',
-              },
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Order',
+                  },
+                },
+                { $ref: '#/components/schemas/Order' },
+              ],
             },
           },
         },

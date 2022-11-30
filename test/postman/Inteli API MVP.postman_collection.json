@@ -1,0 +1,1848 @@
+{
+	"info": {
+		"_postman_id": "d03de129-ab23-4df2-b2b8-6a3a61c315f9",
+		"name": "Inteli API MVP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15319929",
+		"description": "Collection to test Inteli MVP. Use Inteli-Dev Environment.postman_environment.json as Environment."
+	},
+	"item": [
+		{
+			"name": "Buyer Authentication",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"authToken\", jsonData.access_token);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{buyer_clientId}}\",\n    \"client_secret\": \"{{buyer_clientSecret}}\",\n    \"audience\": \"https://inteli-poc.com/api\",\n    \"grant_type\": \"client_credentials\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://inteli-poc.eu.auth0.com/oauth/token",
+					"protocol": "https",
+					"host": [
+						"inteli-poc",
+						"eu",
+						"auth0",
+						"com"
+					],
+					"path": [
+						"oauth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer uploads image attachment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"design_imageId\", jsonData.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"file\": \"Somedesign.png\",\n    \"description\": \"This is a sample json. Real test will involve a png file\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{buyer_url}}/v1/attachment",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer creates design",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"design_id\", jsonData.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"externalId\": \"{{design_externalId}}\",\r\n  \"name\": \"{{design_name}}\",\r\n  \"imageAttachmentId\": \"{{design_imageId}}\",\r\n  \"material\": \"{{design_material}}\",\r\n  \"alloy\": \"{{design_alloy}}\",\r\n  \"price\": \"{{design_price}}\",\r\n  \"requiredCerts\": [\r\n    {\r\n      \"description\": \"HIP CofC\"\r\n    },\r\n    {\r\n        \"description\": \"Final CofC Pack\"\r\n    }\r\n  ],\r\n  \"supplier\": \"{{supplier_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{buyer_url}}/v1/recipe",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"recipe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier views recipe",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{supplier_url}}/v1/recipe?externalId={{design_externalId}}",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"recipe"
+					],
+					"query": [
+						{
+							"key": "externalId",
+							"value": "{{design_externalId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer creates order",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"yourDate.setDate(yourDate.getDate() + 90);",
+							"pm.environment.set(\"order_reqDate\",yourDate.toISOString());",
+							"var extId = pm.variables.replaceIn('{{$randomBankAccount}}')",
+							"pm.environment.set(\"order_externalId\", extId);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"order_id\", jsonData.id);",
+							"pm.environment.set(\"part_id\", jsonData.partIds[0]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"externalId\": \"{{order_externalId}}\",\r\n    \"supplier\": \"{{supplier_id}}\",\r\n    \"items\": [\r\n        {\r\n            \"requiredBy\": \"{{order_reqDate}}\",\r\n            \"recipeId\": \"{{design_id}}\",\r\n            \"price\": {{design_price}},\r\n            \"quantity\": 1,\r\n            \"currency\": \"GBP\",\r\n            \"deliveryTerms\": \"CIP, Ex Works, etc.\",\r\n            \"deliveryAddress\": \"123 Street Name, London, SW1 2AB\",\r\n            \"lineText\": \"Specifications, Standards, T&Cs\",\r\n            \"exportClassification\": \"Packaging Regulation\",\r\n            \"unitOfMeasure\": \"UOM\",\r\n            \"priceType\": \"PriceType\",\r\n            \"confirmedReceiptDate\": \"{{order_reqDate}}\",\r\n            \"description\": \"This is part for {{design_name}}\"\r\n        }\r\n    ],\r\n    \"businessPartnerCode\": \"{{supplier_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{buyer_url}}/v1/order",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier views order",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{supplier_url}}/v1/order?externalId={{order_externalId}}",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"order"
+					],
+					"query": [
+						{
+							"key": "externalId",
+							"value": "{{order_externalId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier accepts order",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{supplier_url}}/v1/order/:id/acceptance",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id",
+						"acceptance"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views the order",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order/:id",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views all orders",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views the order history",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order/:id/history",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id",
+						"history"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier creates Job",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"yourDate.setDate(yourDate.getDate() + 20);",
+							"pm.environment.set(\"job_estDate\",yourDate.toISOString());",
+							"var extId = pm.variables.replaceIn('{{$randomBankAccount}}')",
+							"pm.environment.set(\"job_externalId\", extId);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"job_id\", jsonData.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"externalId\": \"{{job_externalId}}\",\r\n    \"partIds\": [\r\n        \"{{part_id}}\"\r\n    ],\r\n    \"completionEstimate\": \"{{job_estDate}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier views Job",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Suplier schedules Job",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"completionEstimate\": \"{{job_estDate}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/schedule",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"schedule"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer checks Job",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/build/:id",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier starts Job",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"pm.environment.set(\"job_startDate\",yourDate.toISOString());",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"startedAt\": \"{{job_startDate}}\",\r\n  \"completionEstimate\": \"{{job_estDate}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/start",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"start"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"Encapsulation Completed\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"Lime Tracking ID Attached\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier uploads HIP CofC",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"hip_cofc_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"HIPCofC.pdf\",\n    \"description\": \"This is a test file using json. Real world example will use a pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier adds certificate to part",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"{{hip_cofc_id}}\",\r\n  \"certificationIndex\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/part/:id/certification",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						"certification"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"HIP Completed\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"Machining and NDT Completed\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier uploads Final CofC",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"final_cofc_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"FinalCofc.pdf\",\n    \"description\": \"This is a test file using json. Real world example will use a pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier adds Final certificate to part",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"{{final_cofc_id}}\",\r\n  \"certificationIndex\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/part/:id/certification",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						"certification"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"Final Inspection Completed\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier uploads ASN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"asn_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"ASN.pdf\",\n    \"description\": \"This is a test file using json. Real world example will use a pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier uploads Invoice",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"invoice_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"filename\": \"Invoice.pdf\",\n    \"description\": \"This is a test file using json. Real world example will use a pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier submits progress update 6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"{{asn_id}}\",\r\n  \"completionEstimate\": \"{{job_estDate}}\",\r\n  \"updateType\": \"Shipped & Invoice Shared\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/progress-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"progress-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier completes Job",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"pm.collectionVariables.set(\"job_completion\", yourDate.toISOString());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"attachmentId\": \"{{invoice_id}}\",\r\n  \"completedAt\": \"{{job_completion}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/build/:id/completion",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"build",
+						":id",
+						"completion"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{job_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Location Tracking 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"location1_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"pm.environment.set(\"current_date\",yourDate.toISOString());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"Latitude\": 48.5,\n        \"Longitude\": 2.2,\n        \"GpsTS\": \"{{current_date}}\",\n        \"LocationName\": \"Maher Ltd\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Location Update 1",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"metadataType\": \"location\",\r\n  \"attachmentId\": \"{{location1_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/part/:id/metadata-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						"metadata-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Location Tracking 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"location2_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var yourDate = new Date();",
+							"pm.environment.set(\"current_date\",yourDate.toISOString());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"Latitude\": 53.2,\n        \"Longitude\": 2.14,\n        \"GpsTS\": \"{{current_date}}\",\n        \"LocationName\": \"Finishing Supplier\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/attachment",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"attachment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Location Update 2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"metadataType\": \"location\",\r\n  \"attachmentId\": \"{{location2_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{supplier_url}}/v1/part/:id/metadata-update",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						"metadata-update"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views part",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/part/:id/",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						""
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer receives Part",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/part/:id/",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id",
+						""
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "supplier views part",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{supplier_url}}/v1/part/:id",
+					"host": [
+						"{{supplier_url}}"
+					],
+					"path": [
+						"v1",
+						"part",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{part_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views order",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order/:id",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buyer views order history",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order/:id/history",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id",
+						"history"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Supplier views order history",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{buyer_url}}/v1/order/:id/history",
+					"host": [
+						"{{buyer_url}}"
+					],
+					"path": [
+						"v1",
+						"order",
+						":id",
+						"history"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{order_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "job_completion",
+			"value": ""
+		}
+	]
+}

@@ -19,24 +19,75 @@ async function postOrderDb(reqBody) {
   return client('orders')
     .insert({
       supplier: reqBody.supplierAddress,
-      required_by: reqBody.requiredBy,
       items: reqBody.items,
       buyer: reqBody.buyerAddress,
       status: reqBody.status,
+      external_id: reqBody.externalId,
+      business_partner_code: reqBody.businessPartnerCode,
     })
     .returning(['id', 'status'])
 }
 
+async function postBuildDb(build) {
+  return client('build').insert(build).returning(['id'])
+}
+
+async function postPartDb(part) {
+  return client('parts').insert(part).returning(['id'])
+}
+
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
   if (updateOriginalTokenId) {
     return client('orders')
       .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
       .where({ id: reqBody.id })
   } else {
-    return client('orders').update({ status: reqBody.status, updated_at, latest_token_id }).where({ id: reqBody.id })
+    return client('orders').update(reqBody).where({ id: reqBody.id })
   }
 }
+
+async function updateBuild(reqBody, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
+  if (updateOriginalTokenId) {
+    return client('build')
+      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .where({ id: reqBody.id })
+  } else {
+    return client('build').update(reqBody).where({ id: reqBody.id })
+  }
+}
+
+async function updatePart(reqBody, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
+  if (updateOriginalTokenId) {
+    return client('parts')
+      .update({
+        ...reqBody,
+        metadata: JSON.stringify(reqBody.metadata),
+        certifications: JSON.stringify(reqBody.certifications),
+        updated_at,
+        latest_token_id,
+        original_token_id: latest_token_id,
+      })
+      .where({ id: reqBody.id })
+  } else {
+    return client('parts')
+      .update({
+        ...reqBody,
+        metadata: JSON.stringify(reqBody.metadata),
+        certifications: JSON.stringify(reqBody.certifications),
+      })
+      .where({ id: reqBody.id })
+  }
+}
+
 async function getAttachment(id) {
   return client('attachments').select(['id', 'filename', 'binary_blob']).where({ id })
 }
@@ -49,6 +100,10 @@ async function getRecipeByIDs(ids) {
   return client('recipes').select('*').whereIn('id', ids)
 }
 
+async function getPartByIDs(ids) {
+  return client('parts').select('*').whereIn('id', ids)
+}
+
 async function getRecipeByIDdb(id) {
   return client('recipes').select('*').where({ id })
 }
@@ -57,12 +112,24 @@ async function getRecipes() {
   return client('recipes').select()
 }
 
+async function getParts() {
+  return client('parts').select()
+}
+
+async function getPartById(id) {
+  return client('parts').select().where({ id })
+}
+
+async function getPartsByOrderId(order_id) {
+  return client('parts').select().where({ order_id })
+}
+
 async function getAllRecipeTransactions(recipe_id) {
   return client.from('recipe_transactions').select().where({ recipe_id })
 }
 
 const insertAttachment = async (name, fileData) => {
-  return await client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
+  return client('attachments').insert({ filename: name, binary_blob: fileData }).returning(['id', 'filename'])
 }
 
 async function getAttachmentByIdDb(id) {
@@ -87,13 +154,39 @@ async function getOrder(id) {
 async function getOrderTransactions(order_id, type) {
   return client('order_transactions').select().where({ order_id, type })
 }
+
+async function getPartTransactions(part_id, type) {
+  return client('part_transactions').select().where({ part_id, type })
+}
+
+async function getBuildTransactions(build_id, type) {
+  return client('build_transactions').select().where({ build_id, type })
+}
+
+async function getBuildTransactionsById(transaction_id, build_id, type) {
+  return client('build_transactions').select().where({ build_id, type, id: transaction_id })
+}
+
 async function getOrderTransactionsById(transaction_id, order_id, type) {
   return client('order_transactions').select().where({ order_id, type, id: transaction_id })
+}
+
+async function getPartTransactionsById(transaction_id, part_id, type) {
+  return client('part_transactions').select().where({ part_id, type, id: transaction_id })
 }
 
 async function getOrders() {
   return client('orders').select()
 }
+
+async function getOrdersByExternalId(externalId) {
+  return client('orders').select().where({ external_id: externalId })
+}
+
+async function getRecipesByExternalId(externalId) {
+  return client('recipes').select().where({ external_id: externalId })
+}
+
 async function insertRecipeTransaction(id, status, type, token_id) {
   return client('recipe_transactions')
     .insert({
@@ -118,8 +211,52 @@ async function insertOrderTransaction(id, type, status, token_id) {
     .then((t) => t[0])
 }
 
+async function updateOrderTransaction(id, token_id) {
+  return client('order_transactions').update({ token_id }).where({ id })
+}
+
+async function updateBuildTransaction(id, token_id) {
+  return client('build_transactions').update({ token_id }).where({ id })
+}
+
+async function updatePartTransaction(id, token_id) {
+  return client('part_transactions').update({ token_id }).where({ id })
+}
+
+async function insertPartTransaction(id, type, status, token_id) {
+  return client('part_transactions')
+    .insert({
+      part_id: id,
+      status,
+      type,
+      token_id,
+    })
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
+async function insertBuildTransaction(id, type, status, token_id) {
+  return client('build_transactions')
+    .insert({
+      build_id: id,
+      status,
+      type,
+      token_id,
+    })
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
 async function removeTransactionOrder(id) {
   return client('order_transactions').delete().where({ id })
+}
+
+async function removeTransactionBuild(id) {
+  return client('build_transactions').delete().where({ id })
+}
+
+async function removeTransactionPart(id) {
+  return client('part_transactions').delete().where({ id })
 }
 
 async function removeTransactionRecipe(id) {
@@ -142,6 +279,27 @@ async function updateRecipe(id, latest_token_id, updateOriginalTokenId) {
     return client('recipes').update({ latest_token_id, updated_at }).where({ id })
   }
 }
+
+async function getBuild() {
+  return client('build').select()
+}
+
+async function getPartIdsByBuildId(build_id) {
+  return client('parts').select('id').where({ build_id })
+}
+
+async function getPartsByBuildId(build_id) {
+  return client('parts').select().where({ build_id })
+}
+
+async function getBuildById(id) {
+  return client('build').select().where({ id })
+}
+
+async function checkDuplicateExternalId(external_id, tableName) {
+  return client(tableName).select('external_id').where({ external_id })
+}
+
 module.exports = {
   client,
   getRecipe,
@@ -167,4 +325,30 @@ module.exports = {
   updateRecipeTransactions,
   removeTransactionRecipe,
   updateRecipe,
+  getBuild,
+  getBuildById,
+  postBuildDb,
+  postPartDb,
+  getOrdersByExternalId,
+  getRecipesByExternalId,
+  getPartIdsByBuildId,
+  insertBuildTransaction,
+  updateOrderTransaction,
+  updateBuildTransaction,
+  getPartsByBuildId,
+  updateBuild,
+  removeTransactionBuild,
+  getBuildTransactions,
+  getBuildTransactionsById,
+  getParts,
+  getPartById,
+  updatePart,
+  insertPartTransaction,
+  updatePartTransaction,
+  removeTransactionPart,
+  getPartTransactions,
+  getPartTransactionsById,
+  getPartsByOrderId,
+  getPartByIDs,
+  checkDuplicateExternalId,
 }

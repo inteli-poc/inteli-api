@@ -1,30 +1,29 @@
 const { getDefaultSecurity } = require('../../../../../utils/auth')
-const partController = require('../../../../controllers/Part')
+const order = require('../../../../controllers/Order')
 const { buildValidatedJsonHandler } = require('../../../../../utils/routeResponseValidator')
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(partController.transaction.get, {
-      summary: 'Get Part Order Assignment Action',
-      description:
-        'Returns the details of the on-chain transaction {assignmentId} to assign the part {id} to an order.',
+    GET: buildValidatedJsonHandler(order.transaction.getById('Cancellation'), {
+      summary: 'Get Purchase Orders Cancellation Action',
+      description: 'Returns the details of the on-chain transaction {CancellationId} to accept the order {id}.',
       parameters: [
         {
-          description: 'Id of the part',
+          description: 'Id of the purchase-order',
           in: 'path',
           required: true,
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            $ref: '#/components/schemas/ObjectReference',
+            type: 'string',
+            format: 'uuid',
           },
         },
         {
-          description: 'Id of the part order assignment action',
+          description: 'Id of the purchase-order Cancellation',
           in: 'path',
           required: true,
-          name: 'assignmentId',
+          name: 'cancellationId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',
@@ -33,17 +32,17 @@ module.exports = function () {
       ],
       responses: {
         200: {
-          description: 'Return Part Order Assignment Action',
+          description: 'Return Purchase Order Cancellation Action',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/PartOrderAssignment',
+                $ref: '#/components/schemas/OrderCancellation',
               },
             },
           },
         },
         404: {
-          description: 'Part or Order Assignment Action not found',
+          description: 'Order or Cancellation Action not found',
           content: {
             'application/json': {
               schema: {
@@ -54,7 +53,7 @@ module.exports = function () {
         },
       },
       security: getDefaultSecurity(),
-      tags: ['part'],
+      tags: ['order'],
     }),
   }
 

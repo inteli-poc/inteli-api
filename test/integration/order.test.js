@@ -1,19 +1,19 @@
+const createJWKSMock = require('mock-jwks').default
 const { describe, before, test } = require('mocha')
 const { expect } = require('chai')
-const createJWKSMock = require('mock-jwks').default
-
 const { createHttpServer } = require('../../app/server')
 const { postOrderRoute } = require('../helper/routeHelper')
 const { setupIdentityMock } = require('../helper/identityHelper')
 const { seed, cleanup } = require('../seeds/orders')
-const { AUTH_ISSUER, AUTH_AUDIENCE, AUTH_TYPE } = require('../../app/env')
+const { AUTH_ISSUER, AUTH_AUDIENCE, AUTH_TYPE, DSCP_API_HOST, DSCP_API_PORT } = require('../../app/env')
+const dscpApiUrl = `http://${DSCP_API_HOST}:${DSCP_API_PORT}`
+const nock = require('nock')
 
 const describeAuthOnly = AUTH_TYPE === 'JWT' ? describe : describe.skip
-const describeNoAuthOnly = AUTH_TYPE === 'NONE' ? describe : describe.skip
 
-describeAuthOnly('order - authenticated', function () {
+describeAuthOnly('order- authenticated', function () {
   describe('valid order', function () {
-    this.timeout(5000)
+    this.timeout(10000)
     let app
     let authToken
     let jwksMock
@@ -27,140 +27,51 @@ describeAuthOnly('order - authenticated', function () {
         aud: AUTH_AUDIENCE,
         iss: AUTH_ISSUER,
       })
+      nock(dscpApiUrl)
+        .post('/v3/run-process', () => {
+          return true
+        })
+        .reply(200, [20])
+      nock(dscpApiUrl)
+        .post('/v3/run-process', () => {
+          return true
+        })
+        .reply(200, [20])
     })
 
     after(async function () {
       await cleanup()
       await jwksMock.stop()
+      nock.cleanAll()
     })
 
     setupIdentityMock()
 
-    test('POST Order with existing supplier - 201', async function () {
+    test('POST order  - 201', async function () {
       const newOrder = {
+        externalId: 'some-external-d',
         supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000'],
+        items: [
+          {
+            requiredBy: '2022-09-23T09:30:51.190Z',
+            recipeId: '36345f4f-0000-42e2-83f9-79e2e195e000',
+            price: 1100,
+            quantity: 1,
+            currency: 'some-currency',
+            deliveryTerms: 'some-delivery-terms',
+            deliveryAddress: 'some-delivery-address',
+            lineText: 'some-line-text',
+            exportClassification: 'some-export-classification',
+            unitOfMeasure: 'some-unit-of-measure',
+            priceType: 'some-price-type',
+            confirmedReceiptDate: '2022-09-23T09:30:51.190Z',
+            description: 'some-description',
+          },
+        ],
+        businessPartnerCode: 'some-business-partner-code',
       }
       const response = await postOrderRoute(newOrder, app, authToken)
 
-      expect(response.status).to.equal(201)
-      expect(response.body.supplier).deep.equal(newOrder.supplier)
-    })
-
-    test('POST Order - Check ID & Supplier', async function () {
-      const newOrder = {
-        supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000'],
-      }
-      const response = await postOrderRoute(newOrder, app, authToken)
-      expect(response.body.supplier).to.equal('valid-1')
-      expect(response.body.buyer).to.equal('valid-2')
-      expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
-      expect(response.status).to.equal(201)
-    })
-
-    test('POST Order with non-existant supplier - 400', async function () {
-      const newProject = {
-        supplier: 'foobar3000',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000'],
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
-    })
-
-    test('POST Order with more than one item - 201', async function () {
-      const newProject = {
-        supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000', '10000000-0000-1000-8000-000000000000'],
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(201)
-    })
-
-    test('POST Order with 2 different items - 201', async function () {
-      const newProject = {
-        supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-9000-000000000000', '10000000-0000-1000-8000-000000000000'],
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(201)
-    })
-
-    test('POST Order with incorrect supplier - 400', async function () {
-      const newProject = {
-        supplier: 'valid-2',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000'],
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
-    })
-
-    test('POST Order - Invalid UUID', async function () {
-      const newProject = {
-        supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['00000000-0000-1000-8000'],
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
-    })
-
-    test('POST Order with required Params missing - 400', async function () {
-      const newProject = {
-        supplier: 'foobar3000',
-        requiredBy: new Date().toISOString(),
-      }
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
-    })
-
-    test('POST Order - Empty Request Body', async function () {
-      const newProject = {}
-
-      const response = await postOrderRoute(newProject, app, authToken)
-      expect(response.status).to.equal(400)
-    })
-  })
-})
-
-describeNoAuthOnly('order - no auth', function () {
-  describe('valid order', function () {
-    this.timeout(5000)
-    let app
-
-    before(async function () {
-      await seed()
-      app = await createHttpServer()
-    })
-
-    after(async function () {
-      await cleanup()
-    })
-
-    setupIdentityMock()
-
-    test('POST Order - Check ID & Manufacturer', async function () {
-      const newOrder = {
-        supplier: 'valid-1',
-        requiredBy: new Date().toISOString(),
-        items: ['10000000-0000-1000-8000-000000000000'],
-      }
-      const response = await postOrderRoute(newOrder, app, null)
-      expect(response.body.supplier).to.equal('valid-1')
-      expect(response.body.buyer).to.equal('valid-2')
-      expect(response.body.items).to.contain('10000000-0000-1000-8000-000000000000')
       expect(response.status).to.equal(201)
     })
   })

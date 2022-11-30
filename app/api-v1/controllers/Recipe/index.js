@@ -6,7 +6,15 @@ const { BadRequestError, NotFoundError, InternalError } = require('../../../util
 
 module.exports = {
   get: async function (req) {
-    const recipes = await db.getRecipes()
+    let recipes
+    if (req.query.externalId) {
+      recipes = await db.getRecipesByExternalId(req.query.externalId)
+    } else {
+      recipes = await db.getRecipes()
+    }
+    if (recipes.length == 0) {
+      throw new NotFoundError('recipes')
+    }
     const result = await Promise.all(
       recipes.map(async (recipe) => {
         const { alias: supplierAlias } = await identity.getMemberByAddress(req, recipe.supplier)
@@ -58,7 +66,10 @@ module.exports = {
     if (!req.body) {
       throw new BadRequestError('no body provided')
     }
-
+    let duplicateExternalId = await db.checkDuplicateExternalId(req.body.externalId, 'recipes')
+    if (duplicateExternalId.length != 0) {
+      throw new InternalError({ message: 'duplicate externalId found' })
+    }
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
     const selfAddress = await identity.getMemberBySelf(req)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
@@ -68,15 +79,27 @@ module.exports = {
     if (!attachment) {
       throw new BadRequestError('Attachment id not found')
     }
-    const [recipe] = await db.addRecipe({
-      ...rest,
-      external_id: externalId,
-      image_attachment_id: attachment.id,
-      required_certs: JSON.stringify(requiredCerts),
-      owner: selfAddress,
-      supplier: supplierAddress,
-    })
-
+    let recipe
+    try {
+      ;[recipe] = await db.addRecipe({
+        ...rest,
+        external_id: externalId,
+        image_attachment_id: attachment.id,
+        required_certs: JSON.stringify(requiredCerts),
+        owner: selfAddress,
+        supplier: supplierAddress,
+      })
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save recipe to db : ' + err.message })
+    }
+    try {
+      let req = {}
+      req.params = {}
+      req.params.id = recipe.id
+      await module.exports.transaction.create(req)
+    } catch (err) {
+      throw new InternalError({ message: 'failed to save recipe on chain : ' + err.message })
+    }
     return {
       status: 201,
       response: {
@@ -91,7 +114,9 @@ module.exports = {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')
       const transactions = await db.getAllRecipeTransactions(id)
-
+      if (transactions.length == 0) {
+        throw new NotFoundError('recipe_transactions')
+      }
       return {
         status: 200,
         response: transactions.map(({ id, created_at, status }) => ({
@@ -124,6 +149,8 @@ module.exports = {
       const payload = {
         image: recipe.binary_blob,
         requiredCerts: Buffer.from(JSON.stringify(recipe.required_certs)),
+        id: Buffer.from(JSON.stringify(id)),
+        imageAttachmentId: Buffer.from(JSON.stringify(recipe.image_attachment_id)),
         inputs: [],
         outputs: [
           {
@@ -142,13 +169,19 @@ module.exports = {
             status: 201,
             message: `transaction ${transaction.id} has been created`,
             response: {
-              id: transaction.id,
+              id: req.params.id,
+              transactionId: transaction.id,
               submittedAt: new Date(transaction.created_at).toISOString(),
               status: transaction.status,
             },
           }
         } else {
-          throw new InternalError({ message: result.message })
+          return {
+            status: 400,
+            response: {
+              message: 'No Token Ownership',
+            },
+          }
         }
       } catch (err) {
         await db.removeTransactionRecipe(transaction.id)

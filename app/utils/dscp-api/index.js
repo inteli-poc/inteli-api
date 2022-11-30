@@ -1,17 +1,25 @@
 const fetch = require('node-fetch')
 const FormData = require('form-data')
-
+const axios = require('axios')
 const { DSCP_API_PORT, DSCP_API_HOST } = require('../../env')
 
 module.exports = {
-  async runProcess({ image, requiredCerts, ...payload }, authToken) {
+  async runProcess(
+    { updatedParts, recipeId, parts, comments, id, imageAttachmentId, image, requiredCerts, ...payload },
+    authToken
+  ) {
     const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/run-process`
     const formData = new FormData()
 
     formData.append('request', JSON.stringify(payload))
     if (requiredCerts) formData.append('file', requiredCerts, 'required_certs.json')
     if (image) formData.append('file', image, payload.outputs[0].metadata.image.value)
-
+    if (id) formData.append('file', id, 'id.json')
+    if (imageAttachmentId) formData.append('file', imageAttachmentId, 'image_attachment_id.json')
+    if (comments) formData.append('file', comments, 'comments.json')
+    if (parts) formData.append('file', parts, 'parts.json')
+    if (recipeId) formData.append('file', recipeId, 'recipe_id.json')
+    if (updatedParts) formData.append('file', updatedParts, 'updated_parts.json')
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
@@ -21,5 +29,19 @@ module.exports = {
     })
 
     return res.json()
+  },
+
+  async getMetadata(tokenID, metadata) {
+    const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/item/${tokenID}/metadata/${metadata}`
+    if (metadata == 'image') {
+      return axios(url, {
+        method: 'GET',
+        responseType: 'arraybuffer',
+      })
+    } else {
+      return axios(url, {
+        method: 'GET',
+      })
+    }
   },
 }
