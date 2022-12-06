@@ -267,6 +267,7 @@ module.exports = {
               }
             }
           } else {
+            await db.removeTransactionBuild(transaction.id)
             return {
               status: 400,
               response: {
@@ -276,7 +277,6 @@ module.exports = {
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
-          await db.insertBuildTransaction(id, type, 'Failed', 0)
           throw err
         }
         return {

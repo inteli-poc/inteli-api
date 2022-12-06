@@ -317,6 +317,7 @@ module.exports = {
               await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
+            await db.removeTransactionOrder(transaction.id)
             return {
               status: 400,
               response: {
@@ -326,7 +327,6 @@ module.exports = {
           }
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
-          await db.insertOrderTransaction(id, type, 'Failed', 0)
           throw err
         }
         return {
