@@ -55,7 +55,7 @@ exports.getResultForBuildGet = async (build, req) => {
       if (item.completed_at) {
         newItem.completedAt = item.completed_at.toISOString()
       }
-      if (item.update_type && item.update_type != 'GRN Uploaded') {
+      if (item.update_type && item.update_type != '3-Way Match Completed') {
         newItem.updateType = item.update_type
       }
       return newItem
@@ -132,7 +132,7 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
 const buildBuildOutputs = (data, type) => {
   return {
     roles: {
-      Owner: type != 'Complete' && data.update_type != 'GRN Uploaded' ? data.supplier : data.buyer,
+      Owner: type != 'Complete' && data.update_type != '3-Way Match Completed' ? data.supplier : data.buyer,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },

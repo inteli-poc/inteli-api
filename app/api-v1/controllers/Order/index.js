@@ -434,7 +434,7 @@ module.exports = {
         if (buildObj.progressUpdate.length != 0) {
           for (let item of buildObj.progressUpdate) {
             let stage = {}
-            if (item['updateType'] == 'GRN Uploaded') {
+            if (item['updateType'] == '3-Way Match Completed') {
               stage['status'] = 'Part Received'
             } else {
               stage['status'] = item['updateType']

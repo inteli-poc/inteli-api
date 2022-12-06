@@ -194,7 +194,7 @@ module.exports = {
             if (build.status != 'Started' && build.status != 'Completed') {
               throw new InternalError({ message: 'Build not in Started or Completed state' })
             }
-            if (req.body.updateType == 'GRN Uploaded') {
+            if (req.body.updateType == '3-Way Match Completed') {
               build.status = 'Part Received'
             } else {
               build.status = 'Started'

@@ -139,7 +139,7 @@ exports.getResultForOrderGet = async (result, req) => {
         let [build] = await db.getBuildById(part.build_id)
         if (build) {
           partObj['buildStatus'] = build.status
-          if (build.update_type && build.update_type != 'GRN Uploaded') {
+          if (build.update_type && build.update_type != '3-Way Match Completed') {
             partObj['updateType'] = build.update_type
           }
           partObj['updatedAt'] = build.updated_at.toISOString()
