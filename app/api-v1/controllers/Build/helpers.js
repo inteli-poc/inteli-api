@@ -132,7 +132,10 @@ exports.getResultForBuildTransactionGet = async (buildTransactions, type, id) =>
 const buildBuildOutputs = (data, type) => {
   return {
     roles: {
-      Owner: type != 'Complete' && data.update_type != 'GRN Uploaded' ? data.supplier : data.buyer,
+      Owner:
+        type != 'Complete' && data.update_type != 'GRN Uploaded' && data.update_type != '3-Way Match Completed'
+          ? data.supplier
+          : data.buyer,
       Buyer: data.buyer,
       Supplier: data.supplier,
     },

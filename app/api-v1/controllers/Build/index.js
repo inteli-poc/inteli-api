@@ -191,10 +191,10 @@ module.exports = {
             build.started_at = req.body.startedAt
             break
           case 'progress-update':
-            if (build.status != 'Started' && build.status != 'Completed') {
+            if (build.status != 'Started' && build.status != 'Completed' && build.status != 'Part Received') {
               throw new InternalError({ message: 'Build not in Started or Completed state' })
             }
-            if (req.body.updateType == 'GRN Uploaded') {
+            if (req.body.updateType == 'GRN Uploaded' || req.body.updateType == '3-Way Match Completed') {
               build.status = 'Part Received'
             } else {
               build.status = 'Started'
@@ -267,6 +267,7 @@ module.exports = {
               }
             }
           } else {
+            await db.removeTransactionBuild(transaction.id)
             return {
               status: 400,
               response: {
@@ -276,7 +277,6 @@ module.exports = {
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
-          await db.insertBuildTransaction(id, type, 'Failed', 0)
           throw err
         }
         return {
