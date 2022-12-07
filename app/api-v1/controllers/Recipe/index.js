@@ -176,6 +176,7 @@ module.exports = {
             },
           }
         } else {
+          await db.removeTransactionRecipe(transaction.id)
           return {
             status: 400,
             response: {
@@ -185,7 +186,6 @@ module.exports = {
         }
       } catch (err) {
         await db.removeTransactionRecipe(transaction.id)
-        await db.insertRecipeTransaction(id, 'Failed', 'Creation', 0)
         throw err
       }
     },

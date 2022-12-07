@@ -222,6 +222,7 @@ module.exports = {
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
+            await db.removeTransactionPart(transaction.id)
             return {
               status: 400,
               response: {
@@ -231,7 +232,6 @@ module.exports = {
           }
         } catch (err) {
           await db.removeTransactionPart(transaction.id)
-          await db.insertPartTransaction(id, type, 'Failed', 0)
           throw err
         }
         return {
