@@ -31,13 +31,13 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       quantity: { type: 'LITERAL', value: data.quantity.toString() },
       description: { type: 'LITERAL', value: data.description },
       deliveryTerms: { type: 'LITERAL', value: data.delivery_terms },
-      deliveryAddress: { type: 'LITERAL', value: data.delivery_address },
+      deliveryAddress: { type: 'FILE', value: 'delivery_address.json' },
       priceType: { type: 'LITERAL', value: data.price_type },
       confirmedReceiptDate: { type: 'LITERAL', value: data.confirmed_receipt_date },
       unitOfMeasure: { type: 'LITERAL', value: data.unit_of_measure },
       currency: { type: 'LITERAL', value: data.currency },
       exportClassification: { type: 'LITERAL', value: data.export_classification },
-      lineText: { type: 'LITERAL', value: data.line_text },
+      lineText: { type: 'FILE', value: 'line_text.json' },
       requiredBy: { type: 'LITERAL', value: data.required_by },
       recipeId: { type: 'FILE', value: 'recipe_id.json' },
       forecastedDeliveryDate: { type: 'LITERAL', value: data.forecast_delivery_date },
@@ -263,6 +263,8 @@ exports.mapPartData = async (data, type) => {
   outputs = [buildPartOutputs(data, type, parent_index_required)]
   return {
     id: Buffer.from(JSON.stringify(data.id)),
+    lineText: Buffer.from(JSON.stringify(data.line_text)),
+    deliveryAddress: Buffer.from(JSON.stringify(data.delivery_address)),
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
