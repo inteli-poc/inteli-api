@@ -54,5 +54,6 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }}-${{ steps.vars.outputs.sha_short }}-${{ steps.date.outputs.date }}
+            ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:v1.3.${{ steps.vars.outputs.sha_short }}-${{ steps.date.outputs.date }}
             ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:latest
         if: ${{ steps.get-latest-tag.outputs.tag != null }}
