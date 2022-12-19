@@ -653,6 +653,10 @@ const apiDoc = {
                   type: 'string',
                   format: 'date-time',
                 },
+                confirmedReceiptDate: {
+                  type: 'string',
+                  format: 'date-time',
+                },
                 buildId: {
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
                 },

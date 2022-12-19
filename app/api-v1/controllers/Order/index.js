@@ -385,6 +385,7 @@ module.exports = {
         partObj['id'] = part.id
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         partObj['requiredBy'] = part.required_by.toISOString()
+        partObj['confirmedReceiptDate'] = part.confirmed_receipt_date.toISOString()
         if (part.build_id) {
           partObj['buildId'] = part.build_id
           let [build] = await db.getBuildById(part.build_id)
