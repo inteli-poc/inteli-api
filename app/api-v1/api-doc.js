@@ -327,6 +327,22 @@ const apiDoc = {
             description: 'local id of the part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
+          buildId: {
+            description: 'local id of the build',
+            oneOf: [{ $ref: '#/components/schemas/ObjectReference' }, { type: 'null' }],
+          },
+          buildExternalId: {
+            description: 'external id of the build',
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          orderId: {
+            description: 'local id of the order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          orderExternalId: {
+            description: 'external id of the order',
+            type: 'string',
+          },
           supplier: {
             description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
             type: 'string',
