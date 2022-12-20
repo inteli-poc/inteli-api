@@ -54,8 +54,9 @@ module.exports = {
   },
   getAll: async function (req) {
     let parts
+    let metadataType = req.query.metadataType
     parts = await db.getParts()
-    let result = await getResultForPartGet(parts, req)
+    let result = await getResultForPartGet(parts, req, metadataType)
     return {
       status: 200,
       response: result,

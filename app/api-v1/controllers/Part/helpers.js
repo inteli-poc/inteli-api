@@ -60,66 +60,88 @@ exports.getResponse = async (type, transaction, req) => {
   }
 }
 
-exports.getResultForPartGet = async (parts, req) => {
+exports.getResultForPartGet = async (parts, req, metadataType) => {
   if (parts.length == 0) {
     throw new NotFoundError('parts')
   }
   const result = await Promise.all(
-    parts.map(async (item) => {
-      const newItem = {}
-      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      newItem['supplier'] = supplierAlias
-      newItem['buildId'] = item.build_id
-      newItem['recipeId'] = item.recipe_id
-      let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
-      newItem['recipeAttachmentId'] = recipe.image_attachment_id
-      newItem['id'] = item.id
-      newItem['certifications'] = item.certifications
-      newItem['metadata'] = item.metadata
-      newItem['price'] = item.price
-      newItem['quantity'] = item.quantity
-      newItem['deliveryTerms'] = item.delivery_terms
-      newItem['description'] = item.description
-      newItem['deliveryAddress'] = item.delivery_address
-      newItem['priceType'] = item.price_type
-      newItem['unitOfMeasure'] = item.unit_of_measure
-      newItem['exportClassification'] = item.export_classification
-      newItem['lineText'] = item.line_text
-      newItem['currency'] = item.currency
-      newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
-      newItem['requiredBy'] = item.required_by.toISOString()
-      newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
-      newItem['attachments'] = []
-      let attachment = {}
-      attachment['description'] = 'Design'
-      attachment['attachmentId'] = newItem['recipeAttachmentId']
-      newItem['attachments'].push(attachment)
-      if (item.build_id) {
-        let req = {}
-        req.params = { id: item.build_id }
-        let result = await getById(req)
-        newItem['build'] = result.response
-        if (newItem['build'].asnAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'ASN'
-          attachment['attachmentId'] = newItem['build'].asnAttachmentId
-          newItem['attachments'].push(attachment)
+    parts
+      .filter((item) => {
+        if (metadataType) {
+          if (item.metadata) {
+            return item.metadata.some((item) => {
+              return item.metadataType == metadataType
+            })
+          } else {
+            return false
+          }
+        } else {
+          return true
         }
-        if (newItem['build'].invoiceAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'Invoice'
-          attachment['attachmentId'] = newItem['build'].invoiceAttachmentId
-          newItem['attachments'].push(attachment)
+      })
+      .map(async (item) => {
+        const newItem = {}
+        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+        newItem['supplier'] = supplierAlias
+        newItem['buildId'] = item.build_id
+        newItem['buildExternalId'] = null
+        if (item.build_id) {
+          let [build] = await db.getBuildById(item.build_id)
+          newItem['buildExternalId'] = build.external_id
         }
-        if (newItem['build'].grnAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'GRN'
-          attachment['attachmentId'] = newItem['build'].grnAttachmentId
-          newItem['attachments'].push(attachment)
+        newItem['orderId'] = item.order_id
+        let [order] = await db.getOrder(item.order_id)
+        newItem['orderExternalId'] = order.external_id
+        newItem['recipeId'] = item.recipe_id
+        let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
+        newItem['recipeAttachmentId'] = recipe.image_attachment_id
+        newItem['id'] = item.id
+        newItem['certifications'] = item.certifications
+        newItem['metadata'] = item.metadata
+        newItem['price'] = item.price
+        newItem['quantity'] = item.quantity
+        newItem['deliveryTerms'] = item.delivery_terms
+        newItem['description'] = item.description
+        newItem['deliveryAddress'] = item.delivery_address
+        newItem['priceType'] = item.price_type
+        newItem['unitOfMeasure'] = item.unit_of_measure
+        newItem['exportClassification'] = item.export_classification
+        newItem['lineText'] = item.line_text
+        newItem['currency'] = item.currency
+        newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
+        newItem['requiredBy'] = item.required_by.toISOString()
+        newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
+        newItem['attachments'] = []
+        let attachment = {}
+        attachment['description'] = 'Design'
+        attachment['attachmentId'] = newItem['recipeAttachmentId']
+        newItem['attachments'].push(attachment)
+        if (item.build_id) {
+          let req = {}
+          req.params = { id: item.build_id }
+          let result = await getById(req)
+          newItem['build'] = result.response
+          if (newItem['build'].asnAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'ASN'
+            attachment['attachmentId'] = newItem['build'].asnAttachmentId
+            newItem['attachments'].push(attachment)
+          }
+          if (newItem['build'].invoiceAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'Invoice'
+            attachment['attachmentId'] = newItem['build'].invoiceAttachmentId
+            newItem['attachments'].push(attachment)
+          }
+          if (newItem['build'].grnAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'GRN'
+            attachment['attachmentId'] = newItem['build'].grnAttachmentId
+            newItem['attachments'].push(attachment)
+          }
         }
-      }
-      return newItem
-    })
+        return newItem
+      })
   )
   return result
 }
