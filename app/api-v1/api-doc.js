@@ -344,7 +344,13 @@ const apiDoc = {
             type: 'string',
           },
           supplier: {
-            description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
+            description: 'Name of the supplier who created the part. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+          buyer: {
+            description: 'Name of the buyer who created the part. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
             example: 'SupplierAlias',

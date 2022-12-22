@@ -95,6 +95,8 @@ exports.getResultForPartGet = async (parts, req, metadataType) => {
         newItem['recipeId'] = item.recipe_id
         let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
         newItem['recipeAttachmentId'] = recipe.image_attachment_id
+        const { alias: buyerAlias } = await identity.getMemberByAddress(req, recipe.owner)
+        newItem['buyer'] = buyerAlias
         newItem['id'] = item.id
         newItem['certifications'] = item.certifications
         newItem['metadata'] = item.metadata
