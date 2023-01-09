@@ -127,6 +127,10 @@ async function getRecipes(limit, page) {
   }
 }
 
+async function getRecipeCount() {
+  return client('recipes').count('*')
+}
+
 async function getParts() {
   return client('parts').select()
 }
@@ -207,6 +211,10 @@ async function getOrders(limit, page) {
   } else {
     return client('orders').select()
   }
+}
+
+async function getOrderCount() {
+  return client('orders').count('*')
 }
 
 async function getOrdersByExternalId(externalId) {
@@ -381,4 +389,6 @@ module.exports = {
   getPartsByOrderId,
   getPartByIDs,
   checkDuplicateExternalId,
+  getOrderCount,
+  getRecipeCount,
 }

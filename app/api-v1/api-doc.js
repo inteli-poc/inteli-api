@@ -731,6 +731,24 @@ const apiDoc = {
           },
         },
       },
+      orderCount: {
+        description: 'Total number of orders',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
+      recipeCount: {
+        description: 'Total number of recipes',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
       NewOrderAmendment: {
         description: 'A new action on an order that causes it to be amended following a rejection',
         type: 'object',

@@ -109,6 +109,15 @@ module.exports = {
       },
     }
   },
+  getCount: async function () {
+    let totalRecipeCount = await db.getRecipeCount()
+    return {
+      status: 200,
+      response: {
+        count: parseInt(totalRecipeCount[0].count),
+      },
+    }
+  },
   transaction: {
     get: async (req) => {
       const { id } = req.params
