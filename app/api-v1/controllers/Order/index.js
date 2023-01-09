@@ -115,7 +115,7 @@ module.exports = {
     if (req.query.externalId) {
       result = await db.getOrdersByExternalId(req.query.externalId)
     } else {
-      result = await db.getOrders()
+      result = await db.getOrders(req.query.limit, req.query.page)
     }
     let response = await getResultForOrderGet(result, req)
     if (req.query.externalId) {

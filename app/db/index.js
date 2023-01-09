@@ -108,8 +108,23 @@ async function getRecipeByIDdb(id) {
   return client('recipes').select('*').where({ id })
 }
 
-async function getRecipes() {
-  return client('recipes').select()
+async function getRecipes(limit, page) {
+  if (limit && page) {
+    return client('recipes')
+      .select()
+      .orderBy('id')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('recipes').select().orderBy('id').limit(parseInt(limit))
+  } else if (page) {
+    return client('recipes')
+      .select()
+      .orderBy('id')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('recipes').select()
+  }
 }
 
 async function getParts() {
@@ -175,8 +190,23 @@ async function getPartTransactionsById(transaction_id, part_id, type) {
   return client('part_transactions').select().where({ part_id, type, id: transaction_id })
 }
 
-async function getOrders() {
-  return client('orders').select()
+async function getOrders(limit, page) {
+  if (limit && page) {
+    return client('orders')
+      .select()
+      .orderBy('id')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('orders').select().orderBy('id').limit(parseInt(limit))
+  } else if (page) {
+    return client('orders')
+      .select()
+      .orderBy('id')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('orders').select()
+  }
 }
 
 async function getOrdersByExternalId(externalId) {
