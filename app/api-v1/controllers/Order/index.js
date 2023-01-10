@@ -170,6 +170,15 @@ module.exports = {
       response: orderSummary,
     }
   },
+  getCount: async function () {
+    let totalOrderCount = await db.getOrderCount()
+    return {
+      status: 200,
+      response: {
+        count: parseInt(totalOrderCount[0].count),
+      },
+    }
+  },
   transaction: {
     getById: (type) => {
       return async (req) => {
