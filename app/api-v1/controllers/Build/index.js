@@ -255,9 +255,11 @@ module.exports = {
               let orderComplete = true
               for (let part of part_order) {
                 let [build] = await db.getBuildById(part.build_id)
-                if (build.status != 'Part Received') {
-                  orderComplete = false
-                  break
+                if (typeof build.status !== typeof undefined) {
+                  if (build.status != 'Part Received') {
+                    orderComplete = false
+                    break
+                  }
                 }
               }
               if (orderComplete) {
