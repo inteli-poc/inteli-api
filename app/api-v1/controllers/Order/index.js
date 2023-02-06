@@ -135,6 +135,7 @@ module.exports = {
     let recipeCount = recipes.length
     let totalParts = []
     let totalPartsCount
+    let totalJobsCount = 0
     let manufactureCount = 0
     let shipCount = 0
     let orderCount = 0
@@ -144,10 +145,11 @@ module.exports = {
       for (let item of items) {
         let [part] = await db.getPartById(item)
         if (part && part.build_id) {
+          totalJobsCount = totalJobsCount + 1
           let [build] = await db.getBuildById(part.build_id)
-          if (build.update_type) {
+          if (build.status == 'Started') {
             manufactureCount = manufactureCount + 1
-          } else if (build.status == 'Completed') {
+          } else if (build.status == 'Completed' || build.status == 'Part Received') {
             shipCount = shipCount + 1
           } else {
             orderCount = orderCount + 1
@@ -157,13 +159,14 @@ module.exports = {
         }
       }
     }
-    totalPartsCount = totalParts.length
+    totalPartsCount = totalParts.flat().length
     let orderSummary = {
       parts: totalPartsCount,
       design: recipeCount,
       manufacturing: manufactureCount,
       ship: shipCount,
       order: orderCount,
+      jobs: totalJobsCount,
     }
     return {
       status: 200,

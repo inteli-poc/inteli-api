@@ -729,6 +729,10 @@ const apiDoc = {
             description: 'number of parts',
             type: 'integer',
           },
+          jobs: {
+            description: 'number of jobs',
+            type: 'integer',
+          },
         },
       },
       orderCount: {
