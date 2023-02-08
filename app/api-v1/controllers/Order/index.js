@@ -112,7 +112,9 @@ module.exports = {
   },
   get: async function (req) {
     let result
-    if (req.query.externalId) {
+    if (req.query.searchQuery) {
+      result = await db.getOrdersBySearchQuery(req.query.searchQuery)
+    } else if (req.query.externalId) {
       result = await db.getOrdersByExternalId(req.query.externalId)
     } else {
       result = await db.getOrders(req.query.limit, req.query.page)
