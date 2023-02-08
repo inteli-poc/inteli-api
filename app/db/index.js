@@ -221,6 +221,18 @@ async function getOrdersByExternalId(externalId) {
   return client('orders').select().where({ external_id: externalId })
 }
 
+async function getOrdersBySearchQuery(searchQuery) {
+  let result = client('orders')
+    .select()
+    .whereILike({ external_id: `%${searchQuery}%` })
+  if (result.length !== 0) {
+    return result
+  }
+  return client('orders')
+    .select()
+    .whereILike({ id: `%${searchQuery}%` })
+}
+
 async function getRecipesByExternalId(externalId) {
   return client('recipes').select().where({ external_id: externalId })
 }
@@ -391,4 +403,5 @@ module.exports = {
   checkDuplicateExternalId,
   getOrderCount,
   getRecipeCount,
+  getOrdersBySearchQuery,
 }
