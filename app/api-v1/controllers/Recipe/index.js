@@ -7,7 +7,9 @@ const { BadRequestError, NotFoundError, InternalError } = require('../../../util
 module.exports = {
   get: async function (req) {
     let recipes
-    if (req.query.externalId) {
+    if (req.query.searchQuery) {
+      recipes = await db.getRecipesBySearchQuery(req.query.searchQuery)
+    } else if (req.query.externalId) {
       recipes = await db.getRecipesByExternalId(req.query.externalId)
     } else {
       recipes = await db.getRecipes()

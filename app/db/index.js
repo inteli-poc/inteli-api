@@ -229,6 +229,18 @@ async function getOrdersBySearchQuery(searchQuery) {
   return client('orders').select().whereILike('id', `%${searchQuery}%`)
 }
 
+async function getRecipesBySearchQuery(searchQuery) {
+  let result = client('recipes').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  result = client('recipes').select().whereILike('id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  return client('recipes').select().whereILike('name', `%${searchQuery}%`)
+}
+
 async function getRecipesByExternalId(externalId) {
   return client('recipes').select().where({ external_id: externalId })
 }
@@ -400,4 +412,5 @@ module.exports = {
   getOrderCount,
   getRecipeCount,
   getOrdersBySearchQuery,
+  getRecipesBySearchQuery,
 }
