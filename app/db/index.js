@@ -226,7 +226,31 @@ async function getOrdersBySearchQuery(searchQuery) {
   if (result.length !== 0) {
     return result
   }
-  return client('orders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+  result = await client('orders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+  if (result.length !== 0) {
+    return result
+  }
+  let build = await getBuildsBySearchQuery(searchQuery)
+  let parts = []
+  let orders = []
+  if (build.length !== 0) {
+    for (let index = 0; index < build.length; index++) {
+      let [result] = await getPartsByBuildId(build[index].id)
+      parts.push(result)
+    }
+    for (let index = 0; index < parts.length; index++) {
+      let [result] = await getOrder(parts[index].order_id)
+      orders.push(result)
+    }
+  }
+  let part = await getPartsBySearchQuery(searchQuery)
+  if (part.length !== 0) {
+    for (let index = 0; index < part.length; index++) {
+      let [result] = await getOrder(part[index].order_id)
+      orders.push(result)
+    }
+  }
+  return orders
 }
 
 async function getRecipesBySearchQuery(searchQuery) {
