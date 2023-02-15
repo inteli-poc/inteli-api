@@ -55,7 +55,11 @@ module.exports = {
   getAll: async function (req) {
     let parts
     let metadataType = req.query.metadataType
-    parts = await db.getParts()
+    if (req.query.searchQuery) {
+      parts = await db.getPartsBySearchQuery(req.query.searchQuery)
+    } else {
+      parts = await db.getParts()
+    }
     let result = await getResultForPartGet(parts, req, metadataType)
     return {
       status: 200,

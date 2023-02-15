@@ -222,23 +222,35 @@ async function getOrdersByExternalId(externalId) {
 }
 
 async function getOrdersBySearchQuery(searchQuery) {
-  let result = client('orders').select().whereILike('external_id', `%${searchQuery}%`)
+  let result = await client('orders').select().whereILike('external_id', `%${searchQuery}%`)
   if (result.length !== 0) {
     return result
   }
-  return client('orders').select().whereILike('id', `%${searchQuery}%`)
+  return client('orders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
 }
 
 async function getRecipesBySearchQuery(searchQuery) {
-  let result = client('recipes').select().whereILike('external_id', `%${searchQuery}%`)
+  let result = await client('recipes').select().whereILike('external_id', `%${searchQuery}%`)
   if (result.length !== 0) {
     return result
   }
-  result = client('recipes').select().whereILike('id', `%${searchQuery}%`)
+  result = await client('recipes').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
   if (result.length !== 0) {
     return result
   }
   return client('recipes').select().whereILike('name', `%${searchQuery}%`)
+}
+
+async function getBuildsBySearchQuery(searchQuery) {
+  let result = await client('build').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  return client('build').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+}
+
+async function getPartsBySearchQuery(searchQuery) {
+  return client('parts').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
 }
 
 async function getRecipesByExternalId(externalId) {
@@ -413,4 +425,6 @@ module.exports = {
   getRecipeCount,
   getOrdersBySearchQuery,
   getRecipesBySearchQuery,
+  getBuildsBySearchQuery,
+  getPartsBySearchQuery,
 }

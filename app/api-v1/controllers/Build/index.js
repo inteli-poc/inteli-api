@@ -13,7 +13,12 @@ const {
 
 module.exports = {
   getAll: async function (req) {
-    const build = await db.getBuild()
+    let build
+    if (req.query.searchQuery) {
+      build = await db.getBuildsBySearchQuery(req.query.searchQuery)
+    } else {
+      build = await db.getBuild()
+    }
     let result = await getResultForBuildGet(build, req)
     await module.exports.getBuildAttachments(result)
     return {
