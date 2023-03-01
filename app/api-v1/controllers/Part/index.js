@@ -191,8 +191,13 @@ module.exports = {
         if (!recipe) {
           throw new BadRequestError('recipe not found')
         }
+        let machiningOrder = await db.getMachiningOrderByPartId(part.id)
+        let partSupplier
+        if (machiningOrder.length !== 0 && machiningOrder[0].status === 'Started') {
+          partSupplier = machiningOrder[0].supplier
+        }
         const buyer = recipe.owner
-        const supplier = recipe.supplier
+        const supplier = partSupplier || recipe.supplier
         const transaction = await db.insertPartTransaction(id, type, 'Submitted')
         let payload
         try {

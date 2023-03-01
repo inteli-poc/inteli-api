@@ -170,6 +170,52 @@ const apiDoc = {
           },
         },
       },
+      NewMachiningOrder: {
+        type: 'object',
+        description: 'A manufacture run that produces machining order',
+        properties: {
+          externalId: {
+            description: 'machining id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
+          partId: {
+            $ref: '#/components/schemas/ObjectReference',
+          },
+          supplier: {
+            description:
+              'Name of the supplier who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+        },
+      },
+      MachiningOrder: {
+        type: 'object',
+        description: 'A manufacture run that produces machining order',
+        properties: {
+          id: {
+            description: 'local id of the build',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          externalId: {
+            description: 'machining id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
+          partId: {
+            $ref: '#/components/schemas/ObjectReference',
+          },
+          supplier: {
+            description:
+              'Name of the supplier who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+        },
+      },
       NewBuild: {
         type: 'object',
         description: 'A manufacture run that produces parts',
@@ -615,6 +661,36 @@ const apiDoc = {
           },
         },
       },
+      NewMachiningOrderSubmission: {
+        description: 'A new action on an order that causes it to be submitted',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderSubmission: {
+        description: 'An action on an order that causes it to be submitted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      NewMachiningOrderAcceptance: {
+        description: 'A new action on an order that causes it to be accepted',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderAcceptance: {
+        description: 'An action on an order that causes it to be accepted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      NewMachiningOrderPartShipped: {
+        description: 'A new action on an order that causes it to be part shipped',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderPartShipped: {
+        description: 'An action on an order that causes it to be part shipped',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
       NewOrderSubmission: {
         description: 'A new action on an order that causes it to be submitted',
         type: 'object',
@@ -856,6 +932,46 @@ const apiDoc = {
           'An action on a build that causes it to be registered on-chain. Build schedule actions also result in the creation of the Part entities that are being constructed in the build',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
+      },
+      NewMachiningOrderStart: {
+        description: 'A new action on a Machining that causes it to be registered on-chain as started',
+        type: 'object',
+        properties: {
+          startedAt: {
+            description: 'Date and time at which the Machining order actually started',
+            type: 'string',
+            format: 'date-time',
+          },
+          taskNumber: {
+            description: 'task number of the machining order in an external ERP',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-task-number',
+          },
+        },
+      },
+      MachiningOrderStart: {
+        description: 'An action on a Machining Order that causes it to be registered on-chain as started',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewMachiningOrderStart' }],
+      },
+      NewMachiningOrderComplete: {
+        description: 'A new action on a Machining that causes it to be registered on-chain as started',
+        type: 'object',
+        properties: {
+          completedAt: {
+            description: 'Date and time at which the Machining order actually completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      MachiningOrderComplete: {
+        description: 'An action on a Machining Order that causes it to be registered on-chain as started',
+        type: 'object',
+        allOf: [
+          { $ref: '#/components/schemas/ChainAction' },
+          { $ref: '#/components/schemas/NewMachiningOrderComplete' },
+        ],
       },
       NewBuildStart: {
         description: 'A new action on a build that causes it to be registered on-chain as started',
