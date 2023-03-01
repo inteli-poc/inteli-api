@@ -32,6 +32,10 @@ async function postBuildDb(build) {
   return client('build').insert(build).returning(['id'])
 }
 
+async function postMachiningOrderDb(machiningOrder) {
+  return client('machiningorders').insert(machiningOrder).returning(['id'])
+}
+
 async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
@@ -59,6 +63,19 @@ async function updateBuild(reqBody, latest_token_id, updateOriginalTokenId) {
       .where({ id: reqBody.id })
   } else {
     return client('build').update(reqBody).where({ id: reqBody.id })
+  }
+}
+
+async function updateMachiningOrder(reqBody, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
+  if (updateOriginalTokenId) {
+    return client('machiningorders')
+      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .where({ id: reqBody.id })
+  } else {
+    return client('machiningorders').update(reqBody).where({ id: reqBody.id })
   }
 }
 
@@ -182,8 +199,16 @@ async function getBuildTransactions(build_id, type) {
   return client('build_transactions').select().where({ build_id, type })
 }
 
+async function getMachiningOrderTransactions(machining_order_id, type) {
+  return client('machining_order_transactions').select().where({ machining_order_id, type })
+}
+
 async function getBuildTransactionsById(transaction_id, build_id, type) {
   return client('build_transactions').select().where({ build_id, type, id: transaction_id })
+}
+
+async function getMachiningOrderTransactionsById(transaction_id, machining_order_id, type) {
+  return client('machining_order_transactions').select().where({ machining_order_id, type, id: transaction_id })
 }
 
 async function getOrderTransactionsById(transaction_id, order_id, type) {
@@ -273,6 +298,14 @@ async function getBuildsBySearchQuery(searchQuery) {
   return client('build').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
 }
 
+async function getMachiningOrdersBySearchQuery(searchQuery) {
+  let result = await client('machiningorders').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  return client('machiningorders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+}
+
 async function getPartsBySearchQuery(searchQuery) {
   return client('parts').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
 }
@@ -313,6 +346,10 @@ async function updateBuildTransaction(id, token_id) {
   return client('build_transactions').update({ token_id }).where({ id })
 }
 
+async function updateMachiningOrderTransaction(id, token_id) {
+  return client('machining_order_transactions').update({ token_id }).where({ id })
+}
+
 async function updatePartTransaction(id, token_id) {
   return client('part_transactions').update({ token_id }).where({ id })
 }
@@ -341,12 +378,28 @@ async function insertBuildTransaction(id, type, status, token_id) {
     .then((t) => t[0])
 }
 
+async function insertMachiningOrderTransaction(id, type, status, token_id) {
+  return client('machining_order_transactions')
+    .insert({
+      machining_order_id: id,
+      status,
+      type,
+      token_id,
+    })
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
 async function removeTransactionOrder(id) {
   return client('order_transactions').delete().where({ id })
 }
 
 async function removeTransactionBuild(id) {
   return client('build_transactions').delete().where({ id })
+}
+
+async function removeTransactionMachiningOrder(id) {
+  return client('machining_order_transactions').delete().where({ id })
 }
 
 async function removeTransactionPart(id) {
@@ -378,6 +431,10 @@ async function getBuild() {
   return client('build').select()
 }
 
+async function getMachiningOrder() {
+  return client('machiningorders').select()
+}
+
 async function getPartIdsByBuildId(build_id) {
   return client('parts').select('id').where({ build_id })
 }
@@ -390,8 +447,20 @@ async function getBuildById(id) {
   return client('build').select().where({ id })
 }
 
+async function getMachiningOrderById(id) {
+  return client('machiningorders').select().where({ id })
+}
+
+async function getMachiningOrderByPartId(partId) {
+  return client('machiningorders').select().where({ part_id: partId })
+}
+
 async function checkDuplicateExternalId(external_id, tableName) {
   return client(tableName).select('external_id').where({ external_id })
+}
+
+async function checkDuplicateTaskNumber(taskNumber, tableName) {
+  return client(tableName).select('task_id').where({ task_id: taskNumber })
 }
 
 module.exports = {
@@ -451,4 +520,16 @@ module.exports = {
   getRecipesBySearchQuery,
   getBuildsBySearchQuery,
   getPartsBySearchQuery,
+  postMachiningOrderDb,
+  getMachiningOrdersBySearchQuery,
+  getMachiningOrder,
+  getMachiningOrderById,
+  insertMachiningOrderTransaction,
+  removeTransactionMachiningOrder,
+  updateMachiningOrderTransaction,
+  updateMachiningOrder,
+  getMachiningOrderTransactions,
+  getMachiningOrderTransactionsById,
+  getMachiningOrderByPartId,
+  checkDuplicateTaskNumber,
 }
