@@ -16,7 +16,7 @@ module.exports = {
     if (req.query.searchQuery) {
       machiningOrder = await db.getMachiningOrdersBySearchQuery(req.query.searchQuery)
     } else {
-      machiningOrder = await db.getMachiningOrder()
+      machiningOrder = await db.getMachiningOrder(req.query.limit, req.query.page)
     }
     const result = await getResultForMachiningOrderGet(machiningOrder, req)
     return {
@@ -58,7 +58,10 @@ module.exports = {
     machiningOrder.status = 'Created'
     const [machiningOrderId] = await db.postMachiningOrderDb(machiningOrder)
     machiningOrder.id = machiningOrderId.id
+    const { alias: selfAlias } = await identity.getMemberByAddress(req, buyer)
+    machiningOrder.buyer = selfAlias
     machiningOrder.supplier = req.body.supplier
+    machiningOrder.taskNumber = null
     return { status: 201, response: camelcaseObjectDeep(machiningOrder) }
   },
   transaction: {

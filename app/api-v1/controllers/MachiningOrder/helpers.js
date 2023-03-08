@@ -29,6 +29,7 @@ exports.getResultForMachiningOrderGet = async (result, req) => {
       newItem['status'] = item['status']
       newItem['partId'] = item['part_id']
       newItem['externalId'] = item['external_id']
+      newItem['taskNumber'] = item['task_id']
       return newItem
     })
   )

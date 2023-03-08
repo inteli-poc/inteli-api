@@ -303,6 +303,10 @@ async function getMachiningOrdersBySearchQuery(searchQuery) {
   if (result.length !== 0) {
     return result
   }
+  result = await client('machiningorders').select().whereILike('task_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
   return client('machiningorders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
 }
 
@@ -431,8 +435,23 @@ async function getBuild() {
   return client('build').select()
 }
 
-async function getMachiningOrder() {
-  return client('machiningorders').select()
+async function getMachiningOrder(limit, page) {
+  if (limit && page) {
+    return client('machiningorders')
+      .select()
+      .orderBy('id')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('machiningorders').select().orderBy('id').limit(parseInt(limit))
+  } else if (page) {
+    return client('machiningorders')
+      .select()
+      .orderBy('id')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('machiningorders').select()
+  }
 }
 
 async function getPartIdsByBuildId(build_id) {
