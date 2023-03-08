@@ -214,6 +214,11 @@ const apiDoc = {
             maxLength: 255,
             example: 'SupplierAlias',
           },
+          taskNumber: {
+            description: 'task number of the machining order in an external ERP',
+            oneOf: [{ $ref: '#/components/schemas/OnChainLiteral' }, { type: 'null' }],
+            example: 'some-task-number',
+          },
         },
       },
       NewBuild: {
