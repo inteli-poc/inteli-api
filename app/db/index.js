@@ -242,8 +242,16 @@ async function getOrderCount() {
   return client('orders').count('*')
 }
 
+async function getMachiningOrderCount() {
+  return client('machiningorders').count('*')
+}
+
 async function getOrdersByExternalId(externalId) {
   return client('orders').select().where({ external_id: externalId })
+}
+
+async function getMachiningOrdersByExternalId(externalId) {
+  return client('machiningorders').select().where({ external_id: externalId })
 }
 
 async function getOrdersBySearchQuery(searchQuery) {
@@ -551,4 +559,6 @@ module.exports = {
   getMachiningOrderTransactionsById,
   getMachiningOrderByPartId,
   checkDuplicateTaskNumber,
+  getMachiningOrdersByExternalId,
+  getMachiningOrderCount,
 }

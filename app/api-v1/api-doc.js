@@ -825,6 +825,15 @@ const apiDoc = {
           },
         },
       },
+      machiningOrderCount: {
+        description: 'Total number of machining orders',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
       recipeCount: {
         description: 'Total number of recipes',
         type: 'object',
