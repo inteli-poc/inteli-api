@@ -15,6 +15,8 @@ module.exports = {
     let machiningOrder
     if (req.query.searchQuery) {
       machiningOrder = await db.getMachiningOrdersBySearchQuery(req.query.searchQuery)
+    } else if (req.query.externalId) {
+      machiningOrder = await db.getMachiningOrdersByExternalId(req.query.externalId)
     } else {
       machiningOrder = await db.getMachiningOrder(req.query.limit, req.query.page)
     }
@@ -34,6 +36,15 @@ module.exports = {
     return {
       status: 200,
       response: result[0],
+    }
+  },
+  getCount: async function () {
+    let totalOrderCount = await db.getMachiningOrderCount()
+    return {
+      status: 200,
+      response: {
+        count: parseInt(totalOrderCount[0].count),
+      },
     }
   },
   post: async function (req) {
