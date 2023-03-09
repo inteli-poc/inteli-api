@@ -55,7 +55,7 @@ exports.getResultForMachiningOrderTransactionGet = async (machiningOrderTransact
       newItem['status'] = item['status']
       newItem['submittedAt'] = item['created_at'].toISOString()
       switch (type) {
-        case 'Started':
+        case 'Start':
           startedAt = await getMetadata(item.token_id, 'startedAt')
           startedAt = startedAt.data
           newItem['startedAt'] = startedAt

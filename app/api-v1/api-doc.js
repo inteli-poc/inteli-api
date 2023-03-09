@@ -726,6 +726,40 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
+      machiningOrderHistory: {
+        description: 'History of the order',
+        type: 'object',
+        properties: {
+          id: {
+            description: 'id of machining order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          externalId: {
+            description: 'external of machining order',
+            type: 'string',
+          },
+          partId: {
+            description: 'id of part',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          history: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                },
+                submittedAt: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
+            },
+          },
+        },
+      },
+
       orderHistory: {
         description: 'History of the order',
         type: 'object',
