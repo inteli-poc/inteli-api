@@ -21,6 +21,12 @@ module.exports = {
       machiningOrder = await db.getMachiningOrder(req.query.limit, req.query.page)
     }
     const result = await getResultForMachiningOrderGet(machiningOrder, req)
+    if (req.query.externalId) {
+      return {
+        status: 200,
+        response: result[0],
+      }
+    }
     return {
       status: 200,
       response: result,
@@ -196,6 +202,90 @@ module.exports = {
           status: 201,
           response: await getResponse(type, transaction, req),
         }
+      }
+    },
+    getHistory: async (req) => {
+      let { id } = req.params
+      if (!id) throw new BadRequestError('missing params')
+      let [machining] = await db.getMachiningOrderById(id)
+      let machiningOrder = {}
+      try {
+        let machineOrderSubmission = await module.exports.transaction.getAll('Submitted')(req)
+        machiningOrder.submission = machineOrderSubmission.response
+      } catch (err) {
+        machiningOrder.submission = []
+      }
+      try {
+        let machineOrderStart = await module.exports.transaction.getAll('Start')(req)
+        machiningOrder.start = machineOrderStart.response
+      } catch (err) {
+        machiningOrder.start = []
+      }
+      try {
+        let machineOrderAcceptance = await module.exports.transaction.getAll('Accepted')(req)
+        machiningOrder.acceptance = machineOrderAcceptance.response
+      } catch (err) {
+        machiningOrder.acceptance = []
+      }
+      try {
+        let machineOrderCompletion = await module.exports.transaction.getAll('Completed')(req)
+        machiningOrder.completion = machineOrderCompletion.response
+      } catch (err) {
+        machiningOrder.completion = []
+      }
+      try {
+        let machineOrderPartShipped = await module.exports.transaction.getAll('Part Shipped')(req)
+        machiningOrder.partshipped = machineOrderPartShipped.response
+      } catch (err) {
+        machiningOrder.partshipped = []
+      }
+      let machiningOrderHistory = {}
+      machiningOrderHistory['history'] = []
+      machiningOrderHistory['id'] = machining.id
+      machiningOrderHistory['externalId'] = machining.external_id
+      machiningOrderHistory['partId'] = machining.part_id
+      if (machiningOrder.submission.length != 0) {
+        let stage = {}
+        stage['status'] = 'Machining Order Submitted'
+        stage['submittedAt'] = machiningOrder.submission[machiningOrder.submission.length - 1].submittedAt
+        machiningOrderHistory['history'].push(stage)
+      }
+      if (machiningOrder.acceptance.length != 0) {
+        let stage = {}
+        stage['status'] = 'Machining Order Accepted'
+        stage['submittedAt'] = machiningOrder.submission[machiningOrder.acceptance.length - 1].submittedAt
+        machiningOrderHistory['history'].push(stage)
+      }
+      if (machiningOrder.start.length != 0) {
+        let stage = {}
+        stage['status'] = 'Machining Order Started'
+        stage['submittedAt'] = machiningOrder.submission[machiningOrder.start.length - 1].submittedAt
+        machiningOrderHistory['history'].push(stage)
+      }
+      if (machiningOrder.completion.length != 0) {
+        let stage = {}
+        stage['status'] = 'Machining Order Completed'
+        stage['submittedAt'] = machiningOrder.submission[machiningOrder.completion.length - 1].submittedAt
+        machiningOrderHistory['history'].push(stage)
+      }
+      if (machiningOrder.partshipped.length != 0) {
+        let stage = {}
+        stage['status'] = 'Part Shipped'
+        stage['submittedAt'] = machiningOrder.submission[machiningOrder.partshipped.length - 1].submittedAt
+        machiningOrderHistory['history'].push(stage)
+      }
+      if (machiningOrderHistory && machiningOrderHistory.history) {
+        machiningOrderHistory.history.sort((a, b) => {
+          let time1 = new Date(a.submittedAt)
+          let timeStamp1 = time1.getTime()
+          let time2 = new Date(b.submittedAt)
+          let timeStamp2 = time2.getTime()
+          return timeStamp1 - timeStamp2
+        })
+      }
+      return {
+        status: 200,
+        response: machiningOrderHistory,
       }
     },
     get: (type) => {
