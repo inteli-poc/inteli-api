@@ -23,6 +23,7 @@ exports.getResultForMachiningOrderGet = async (result, req) => {
   const response = await Promise.all(
     result.map(async (item) => {
       const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+      const { alias: buyerAlias } = await identity.getMemberByAddress(req, item.buyer)
       const newItem = {}
       newItem['supplier'] = supplierAlias
       newItem['id'] = item['id']
@@ -30,6 +31,7 @@ exports.getResultForMachiningOrderGet = async (result, req) => {
       newItem['partId'] = item['part_id']
       newItem['externalId'] = item['external_id']
       newItem['taskNumber'] = item['task_id']
+      newItem['buyer'] = buyerAlias
       return newItem
     })
   )
