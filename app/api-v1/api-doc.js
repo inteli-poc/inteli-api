@@ -219,6 +219,13 @@ const apiDoc = {
             oneOf: [{ $ref: '#/components/schemas/OnChainLiteral' }, { type: 'null' }],
             example: 'some-task-number',
           },
+          buyer: {
+            description:
+              'Name of the buyer who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'BuyerAlias',
+          },
         },
       },
       NewBuild: {
