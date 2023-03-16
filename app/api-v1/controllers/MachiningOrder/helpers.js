@@ -29,6 +29,9 @@ exports.getResultForMachiningOrderGet = async (result, req) => {
       newItem['id'] = item['id']
       newItem['status'] = item['status']
       newItem['partId'] = item['part_id']
+      let [part] = await db.getPartById(item['part_id'])
+      let [build] = await db.getBuildById(part.build_id)
+      newItem['buildExternalId'] = build.external_id
       newItem['externalId'] = item['external_id']
       newItem['taskNumber'] = item['task_id']
       newItem['buyer'] = buyerAlias
