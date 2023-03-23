@@ -145,6 +145,10 @@ exports.getResultForOrderGet = async (result, req) => {
           partObj['updatedAt'] = build.updated_at.toISOString()
           partObj['buildExternalId'] = build.external_id
         }
+        let [machiningOrder] = await db.getMachiningOrderByPartId(partId)
+        if (machiningOrder) {
+          partObj['machiningOrderExternalId'] = machiningOrder.external_id
+        }
       }
       parts.push(partObj)
     }

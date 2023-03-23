@@ -579,6 +579,9 @@ const apiDoc = {
                 buildExternalId: {
                   type: 'string',
                 },
+                machiningOrderExternalId: {
+                  type: 'string',
+                },
                 recipe: {
                   type: 'object',
                   properties: {
