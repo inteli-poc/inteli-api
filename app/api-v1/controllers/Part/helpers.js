@@ -89,6 +89,11 @@ exports.getResultForPartGet = async (parts, req, metadataType) => {
           let [build] = await db.getBuildById(item.build_id)
           newItem['buildExternalId'] = build.external_id
         }
+        newItem['machiningOrderExternalId'] = null
+        let [machiningOrder] = await db.getMachiningOrderByPartId(item.id)
+        if (machiningOrder) {
+          newItem['machiningOrderExternalId'] = machiningOrder.external_id
+        }
         newItem['orderId'] = item.order_id
         let [order] = await db.getOrder(item.order_id)
         newItem['orderExternalId'] = order.external_id

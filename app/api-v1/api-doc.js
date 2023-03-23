@@ -458,6 +458,10 @@ const apiDoc = {
               },
             },
           },
+          machiningOrderExternalId: {
+            description: 'external id of the machining order',
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
         },
       },
       OrderRequest: {
