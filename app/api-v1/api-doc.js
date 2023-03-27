@@ -226,6 +226,11 @@ const apiDoc = {
             maxLength: 255,
             example: 'BuyerAlias',
           },
+          buildExternalId: {
+            description: 'build id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
         },
       },
       NewBuild: {

@@ -79,6 +79,8 @@ module.exports = {
     machiningOrder.buyer = selfAlias
     machiningOrder.supplier = req.body.supplier
     machiningOrder.taskNumber = null
+    const [build] = await db.getBuildById(part_id[0].build_id)
+    machiningOrder.buildExternalId = build.external_id
     return { status: 201, response: camelcaseObjectDeep(machiningOrder) }
   },
   transaction: {
