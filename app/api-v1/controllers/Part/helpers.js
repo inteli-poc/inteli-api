@@ -41,6 +41,8 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       requiredBy: { type: 'LITERAL', value: data.required_by },
       recipeId: { type: 'FILE', value: 'recipe_id.json' },
       forecastedDeliveryDate: { type: 'LITERAL', value: data.forecast_delivery_date },
+      ...((type == 'acknowledgement' || type == 'amendment') &&
+        data.comments && { comments: { type: 'FILE', value: 'comments.json' } }),
     },
     ...(parent_index_required && { parent_index: 0 }),
   }
@@ -113,6 +115,7 @@ exports.getResultForPartGet = async (parts, req, metadataType) => {
         newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
         newItem['requiredBy'] = item.required_by.toISOString()
         newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
+        newItem['comments'] = item.comments
         newItem['attachments'] = []
         let attachment = {}
         attachment['description'] = 'Design'
@@ -228,6 +231,7 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
       let certificationIndex
       let certificationType
       let forecastedDeliveryDate
+      let comments
       const newItem = {}
       newItem['transactionId'] = item['id']
       newItem['id'] = item['part_id']
@@ -254,9 +258,16 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           newItem['certificationType'] = certificationType
           break
         case 'acknowledgement':
+          comments = await getMetadata(item.token_id, 'comments')
+          newItem['comments'] = comments.data
           await gatherPartDetails(item.token_id, newItem)
           break
         case 'amendment':
+          comments = await getMetadata(item.token_id, 'comments')
+          newItem['comments'] = comments.data
+          await gatherPartDetails(item.token_id, newItem)
+          break
+        case 'Creation':
           await gatherPartDetails(item.token_id, newItem)
           break
         case 'update-delivery-date':
@@ -295,6 +306,8 @@ exports.mapPartData = async (data, type) => {
     recipeId: Buffer.from(JSON.stringify(data.recipe_id)),
     ...(type == 'order-assignment' && { orderId: Buffer.from(JSON.stringify(data.order_id)) }),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
+    ...((type == 'acknowledgement' || type == 'amendment') &&
+      data.comments && { comments: Buffer.from(JSON.stringify(data.comments)) }),
     inputs,
     outputs,
   }
