@@ -72,7 +72,7 @@ module.exports = {
       transactionResponse = await module.exports.transaction.create('Submission')(req)
       result.status = 'Submitted'
     } catch (err) {
-      throw new InternalError({ message: 'failed to save order ro chain : ' + err.message })
+      throw new InternalError({ message: 'failed to save order to chain : ' + err.message })
     }
     let partsArr = []
     for (let partId of order.items) {

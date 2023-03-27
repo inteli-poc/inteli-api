@@ -28,7 +28,7 @@ module.exports = function () {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/OrderSubmission',
+                  $ref: '#/components/schemas/OrderSubmissionGet',
                 },
               },
             },

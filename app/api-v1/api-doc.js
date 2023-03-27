@@ -463,6 +463,10 @@ const apiDoc = {
               },
             },
           },
+          comments: {
+            description: 'comments on part',
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
         },
       },
       OrderRequest: {
@@ -652,6 +656,10 @@ const apiDoc = {
                   description: 'line text for the order',
                   type: 'string',
                 },
+                comments: {
+                  description: 'comments on line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
+                },
               },
             },
           },
@@ -720,6 +728,27 @@ const apiDoc = {
         description: 'An action on an order that causes it to be submitted',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      OrderSubmissionGet: {
+        description: 'An action on an order that causes it to be submitted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        properties: {
+          items: {
+            description: 'part details',
+            type: 'array',
+            items: {
+              description: 'part details',
+              allOf: [{ $ref: '#/components/schemas/NewPart' }],
+              properties: {
+                id: {
+                  description: 'id of the part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+              },
+            },
+          },
+        },
       },
       NewOrderAcceptance: {
         description: 'A new action on an order that causes it to be accepted',
@@ -907,6 +936,10 @@ const apiDoc = {
                   description: 'id of the part',
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
                 },
+                comments: {
+                  description: 'comments for line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
+                },
               },
             },
           },
@@ -931,6 +964,10 @@ const apiDoc = {
                 id: {
                   description: 'id of the part',
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                comments: {
+                  description: 'comments for line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
                 },
               },
             },

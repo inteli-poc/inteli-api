@@ -36,7 +36,7 @@ module.exports = function () {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/OrderSubmission',
+                $ref: '#/components/schemas/OrderSubmissionGet',
               },
             },
           },
