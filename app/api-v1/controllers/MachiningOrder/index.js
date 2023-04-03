@@ -113,7 +113,6 @@ module.exports = {
         let partId
         let partLatestToken
         let transactionPart
-        let duplicateTaskNumber
         switch (type) {
           case 'Submitted':
             if (machiningOrder.status !== 'Created') {
@@ -131,13 +130,8 @@ module.exports = {
             if (machiningOrder.status !== 'Accepted') {
               throw new InternalError({ message: 'machinining order not in Accepted state' })
             }
-            duplicateTaskNumber = await db.checkDuplicateTaskNumber(req.body.taskNumber, 'machiningorders')
-            if (duplicateTaskNumber.length != 0) {
-              throw new InternalError({ message: 'duplicate externalId found' })
-            }
             machiningOrder.status = 'Started'
             machiningOrder.started_at = req.body.startedAt
-            machiningOrder.task_id = req.body.taskNumber
             break
           case 'Completed':
             if (machiningOrder.status !== 'Started') {

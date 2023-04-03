@@ -1042,11 +1042,6 @@ const apiDoc = {
             type: 'string',
             format: 'date-time',
           },
-          taskNumber: {
-            description: 'task number of the machining order in an external ERP',
-            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
-            example: 'some-task-number',
-          },
         },
       },
       MachiningOrderStart: {
