@@ -12,7 +12,6 @@ exports.getResponse = async (type, transaction, req) => {
     status: transaction.status,
     ...(type == 'Start' && { startedAt: req.body.startedAt }),
     ...(type == 'Completed' && { completedAt: req.body.completedAt }),
-    ...(type == 'Start' && { taskNumber: req.body.taskNumber }),
   }
 }
 
@@ -51,7 +50,6 @@ exports.getResultForMachiningOrderTransactionGet = async (machiningOrderTransact
   }
   const modifiedMachiningOrderTransactions = await Promise.all(
     machiningOrderTransactions.map(async (item) => {
-      let taskNumber
       let startedAt
       let completedAt
       let newItem = {}
@@ -64,9 +62,6 @@ exports.getResultForMachiningOrderTransactionGet = async (machiningOrderTransact
           startedAt = await getMetadata(item.token_id, 'startedAt')
           startedAt = startedAt.data
           newItem['startedAt'] = startedAt
-          taskNumber = await getMetadata(item.token_id, 'taskNumber')
-          taskNumber = taskNumber.data
-          newItem['taskNumber'] = taskNumber
           break
         case 'Completed':
           completedAt = await getMetadata(item.token_id, 'completedAt')
@@ -113,7 +108,6 @@ const buildMachiningOrderOutputs = (data, type) => {
       partId: { type: 'FILE', value: 'partId.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
-      ...(type === 'Start' && { taskNumber: { type: 'LITERAL', value: data.task_id } }),
     },
     ...(type != 'Submitted' && { parent_index: 0 }),
   }
