@@ -23,7 +23,7 @@ const buildPartOutputs = (data, type, parent_index_required) => {
         certificationIndex: { type: 'LITERAL', value: JSON.stringify(data.certificationIndex) },
       }),
       ...(type == 'certification' && {
-        certificationType: { type: 'LITERAL', value: JSON.stringify(data.certificationType) },
+        certificationType: { type: 'FILE', value: 'certification_type.json' },
       }),
       actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
@@ -303,6 +303,7 @@ exports.mapPartData = async (data, type) => {
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
+    ...(type === 'certification' && { certificationType: Buffer.from(JSON.stringify(data.certificationType)) }),
     recipeId: Buffer.from(JSON.stringify(data.recipe_id)),
     ...(type == 'order-assignment' && { orderId: Buffer.from(JSON.stringify(data.order_id)) }),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),

@@ -18,6 +18,7 @@ module.exports = {
       deliveryAddress,
       partId,
       idPart,
+      certificationType,
       ...payload
     },
     authToken
@@ -38,6 +39,7 @@ module.exports = {
     if (deliveryAddress) formData.append('file', deliveryAddress, 'delivery_address.json')
     if (partId) formData.append('file', partId, 'partId.json')
     if (idPart) formData.append('file', idPart, 'idPart.json')
+    if (certificationType) formData.append('file', certificationType, 'certification_type.json')
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
