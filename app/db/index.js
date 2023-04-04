@@ -311,7 +311,9 @@ async function getMachiningOrdersBySearchQuery(searchQuery) {
   if (result.length !== 0) {
     return result
   }
-  result = await client('machiningorders').select().whereILike('task_id', `%${searchQuery}%`)
+  const [buildResult] = await client('build').select().whereILike('external_id', `%${searchQuery}%`)
+  const [partResult] = await client('parts').whereRaw('LOWER(build_id::text) LIKE LOWER(?)', [`%${buildResult.id}%`])
+  result = await client('machiningorders').whereRaw('LOWER(part_id::text) LIKE LOWER(?)', [`%${partResult.id}%`])
   if (result.length !== 0) {
     return result
   }
