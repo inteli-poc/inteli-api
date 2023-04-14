@@ -328,6 +328,10 @@ async function getRecipesByExternalId(externalId) {
   return client('recipes').select().where({ external_id: externalId })
 }
 
+async function insertNotification(notification) {
+  return client('notifications').insert(notification).returning('*')
+}
+
 async function insertRecipeTransaction(id, status, type, token_id) {
   return client('recipe_transactions')
     .insert({
@@ -338,6 +342,10 @@ async function insertRecipeTransaction(id, status, type, token_id) {
     })
     .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
+}
+
+async function getNotifications() {
+  return client('notifications').select()
 }
 
 async function insertOrderTransaction(id, type, status, token_id) {
@@ -563,4 +571,6 @@ module.exports = {
   checkDuplicateTaskNumber,
   getMachiningOrdersByExternalId,
   getMachiningOrderCount,
+  insertNotification,
+  getNotifications,
 }
