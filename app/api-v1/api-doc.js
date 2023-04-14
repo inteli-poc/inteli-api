@@ -1203,6 +1203,41 @@ const apiDoc = {
           { $ref: '#/components/schemas/NewPartDeliveryDateUpdate' },
         ],
       },
+      Notification: {
+        description: 'notification',
+        type: 'object',
+        properties: {
+          description: {
+            type: 'string',
+          },
+          orderId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          buildId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          partId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          read: {
+            type: 'boolean',
+          },
+          delete: {
+            type: 'boolean',
+          },
+          externalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          id: {
+            description: 'id of order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+        },
+      },
     },
     ...securitySchemes,
   },
