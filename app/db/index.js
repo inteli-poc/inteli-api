@@ -129,18 +129,18 @@ async function getRecipes(limit, page) {
   if (limit && page) {
     return client('recipes')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit) {
-    return client('recipes').select().orderBy('id').limit(parseInt(limit))
+    return client('recipes').select().orderBy('created_at', 'desc').limit(parseInt(limit))
   } else if (page) {
     return client('recipes')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .offset(parseInt(page) - 1)
   } else {
-    return client('recipes').select()
+    return client('recipes').select().orderBy('created_at', 'desc')
   }
 }
 
@@ -223,18 +223,18 @@ async function getOrders(limit, page) {
   if (limit && page) {
     return client('orders')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit) {
-    return client('orders').select().orderBy('id').limit(parseInt(limit))
+    return client('orders').select().orderBy('created_at', 'desc').limit(parseInt(limit))
   } else if (page) {
     return client('orders')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .offset(parseInt(page) - 1)
   } else {
-    return client('orders').select()
+    return client('orders').select().orderBy('created_at', 'desc')
   }
 }
 
@@ -344,8 +344,42 @@ async function insertRecipeTransaction(id, status, type, token_id) {
     .then((t) => t[0])
 }
 
-async function getNotifications() {
-  return client('notifications').select()
+async function getNotificationsCount(read) {
+  if (read) {
+    return client('notifications').select().where({ read }).count('*')
+  } else {
+    return client('notifications').select().count('*')
+  }
+}
+
+async function getNotifications(limit, page, read) {
+  if (limit && page && read) {
+    return client('notifications')
+      .select()
+      .where({ read })
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit && read) {
+    return client('notifications').select().where({ read }).orderBy('created_at', 'desc').limit(parseInt(limit))
+  } else if (page && read) {
+    return client('notifications')
+      .select()
+      .where({ read })
+      .orderBy('created_at', 'desc')
+      .offset(parseInt(page) - 1)
+  } else if (limit) {
+    return client('notifications').select().orderBy('created_at', 'desc').limit(parseInt(limit))
+  } else if (page) {
+    return client('notifications')
+      .select()
+      .orderBy('created_at', 'desc')
+      .offset(parseInt(page) - 1)
+  } else if (read) {
+    return client('notifications').select().where({ read }).orderBy('created_at', 'desc')
+  } else {
+    return client('notifications').select().orderBy('created_at', 'desc')
+  }
 }
 
 async function insertOrderTransaction(id, type, status, token_id) {
@@ -457,18 +491,18 @@ async function getMachiningOrder(limit, page) {
   if (limit && page) {
     return client('machiningorders')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit) {
-    return client('machiningorders').select().orderBy('id').limit(parseInt(limit))
+    return client('machiningorders').select().orderBy('created_at', 'desc').limit(parseInt(limit))
   } else if (page) {
     return client('machiningorders')
       .select()
-      .orderBy('id')
+      .orderBy('created_at', 'desc')
       .offset(parseInt(page) - 1)
   } else {
-    return client('machiningorders').select()
+    return client('machiningorders').select().orderBy('created_at', 'desc')
   }
 }
 
@@ -573,4 +607,5 @@ module.exports = {
   getMachiningOrderCount,
   insertNotification,
   getNotifications,
+  getNotificationsCount,
 }

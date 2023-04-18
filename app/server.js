@@ -40,6 +40,10 @@ async function createHttpServer() {
     res.status(200).send({ version: API_VERSION, status: 'ok' })
   })
 
+  app.get('/v1/health', async (req, res) => {
+    res.status(200).send('ok')
+  })
+
   const multerOptions = {
     limits: { fileSize: 8000000 },
     storage: multer.diskStorage({
