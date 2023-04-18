@@ -41,6 +41,7 @@ async function createHttpServer() {
   })
 
   app.get('/v1/health', async (req, res) => {
+    await verifyJwks(req)
     res.status(200).send('ok')
   })
 

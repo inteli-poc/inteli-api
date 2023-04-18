@@ -360,6 +360,12 @@ async function getNotifications(limit, page, read) {
       .orderBy('created_at', 'desc')
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
+  } else if (limit && page) {
+    return client('notifications')
+      .select()
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
   } else if (limit && read) {
     return client('notifications').select().where({ read }).orderBy('created_at', 'desc').limit(parseInt(limit))
   } else if (page && read) {
