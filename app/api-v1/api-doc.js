@@ -894,6 +894,15 @@ const apiDoc = {
           },
         },
       },
+      NotificationsCount: {
+        description: 'Total number of notifications',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
       orderCount: {
         description: 'Total number of orders',
         type: 'object',
