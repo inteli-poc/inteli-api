@@ -348,22 +348,28 @@ async function getNotificationsCount(read) {
   if (read) {
     return client('notifications').select().where({ read }).count('*')
   } else {
-    return client('notifications').select().count('*')
+    return client('notifications').select().groupBy('order_id').count('*')
   }
+}
+
+async function getNotificationsByOrderId(order_id, read, id) {
+  return client('notifications').select().where({ order_id, read }).whereNot({ id }).orderBy('created_at', 'desc')
 }
 
 async function getNotifications(limit, page, read) {
   if (limit && page && read) {
     return client('notifications')
       .select()
+      .distinctOn('order_id')
       .where({ read })
-      .orderBy('created_at', 'desc')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit && page) {
     return client('notifications')
       .select()
-      .orderBy('created_at', 'desc')
+      .distinctOn('order_id')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit && read) {
@@ -371,20 +377,29 @@ async function getNotifications(limit, page, read) {
   } else if (page && read) {
     return client('notifications')
       .select()
+      .distinctOn('order_id')
       .where({ read })
-      .orderBy('created_at', 'desc')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .offset(parseInt(page) - 1)
   } else if (limit) {
     return client('notifications').select().orderBy('created_at', 'desc').limit(parseInt(limit))
   } else if (page) {
     return client('notifications')
       .select()
-      .orderBy('created_at', 'desc')
+      .distinctOn('order_id')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .offset(parseInt(page) - 1)
   } else if (read) {
-    return client('notifications').select().where({ read }).orderBy('created_at', 'desc')
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .where({ read })
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
   } else {
-    return client('notifications').select().orderBy('created_at', 'desc')
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
   }
 }
 
@@ -614,4 +629,5 @@ module.exports = {
   insertNotification,
   getNotifications,
   getNotificationsCount,
+  getNotificationsByOrderId,
 }
