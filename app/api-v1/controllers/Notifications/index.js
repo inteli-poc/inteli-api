@@ -33,7 +33,7 @@ module.exports = {
     return {
       status: 200,
       response: {
-        count: parseInt(notificationsCount.length > 1 ? notificationsCount.length : notificationsCount[0].count),
+        count: parseInt(!req.query.read ? notificationsCount.length : notificationsCount[0].count),
       },
     }
   },
