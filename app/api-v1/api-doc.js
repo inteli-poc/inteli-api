@@ -903,6 +903,30 @@ const apiDoc = {
           },
         },
       },
+      UpdateNotification: {
+        description: 'update notification',
+        type: 'object',
+        properties: {
+          notifications: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: {
+                  description: 'id of the notification',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                read: {
+                  type: 'boolean',
+                },
+                delete: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        },
+      },
       orderCount: {
         description: 'Total number of orders',
         type: 'object',
