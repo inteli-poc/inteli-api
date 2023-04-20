@@ -344,16 +344,24 @@ async function insertRecipeTransaction(id, status, type, token_id) {
     .then((t) => t[0])
 }
 
+async function updateNotification(read, del, id) {
+  return client('notifications').update({ read, delete: del }).where({ id })
+}
+
 async function getNotificationsCount(read) {
   if (read) {
-    return client('notifications').select().where({ read }).count('*')
+    return client('notifications').select().where({ read, delete: false }).count('*')
   } else {
-    return client('notifications').select().groupBy('order_id').count('*')
+    return client('notifications').select().where({ delete: false }).groupBy('order_id').count('*')
   }
 }
 
-async function getNotificationsByOrderId(order_id, read, id) {
-  return client('notifications').select().where({ order_id, read }).whereNot({ id }).orderBy('created_at', 'desc')
+async function getNotificationsByOrderId(order_id, read, id, del) {
+  return client('notifications')
+    .select()
+    .where({ order_id, read, delete: del })
+    .whereNot({ id })
+    .orderBy('created_at', 'desc')
 }
 
 async function getNotifications(limit, page, read) {
@@ -361,7 +369,7 @@ async function getNotifications(limit, page, read) {
     return client('notifications')
       .select()
       .distinctOn('order_id')
-      .where({ read })
+      .where({ read, delete: false })
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
@@ -369,23 +377,33 @@ async function getNotifications(limit, page, read) {
     return client('notifications')
       .select()
       .distinctOn('order_id')
+      .where({ delete: false })
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .limit(parseInt(limit))
       .offset((parseInt(page) - 1) * limit)
   } else if (limit && read) {
-    return client('notifications').select().where({ read }).orderBy('created_at', 'desc').limit(parseInt(limit))
+    return client('notifications')
+      .select()
+      .where({ read, delete: false })
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
   } else if (page && read) {
     return client('notifications')
       .select()
       .distinctOn('order_id')
-      .where({ read })
+      .where({ read, delete: false })
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .offset(parseInt(page) - 1)
   } else if (limit) {
-    return client('notifications').select().orderBy('created_at', 'desc').limit(parseInt(limit))
+    return client('notifications')
+      .select()
+      .where({ delete: false })
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
   } else if (page) {
     return client('notifications')
       .select()
+      .where({ delete: false })
       .distinctOn('order_id')
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
       .offset(parseInt(page) - 1)
@@ -393,11 +411,12 @@ async function getNotifications(limit, page, read) {
     return client('notifications')
       .select()
       .distinctOn('order_id')
-      .where({ read })
+      .where({ read, delete: false })
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
   } else {
     return client('notifications')
       .select()
+      .where({ delete: false })
       .distinctOn('order_id')
       .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
   }
@@ -630,4 +649,5 @@ module.exports = {
   getNotifications,
   getNotificationsCount,
   getNotificationsByOrderId,
+  updateNotification,
 }

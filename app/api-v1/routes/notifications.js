@@ -26,6 +26,34 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['notifications'],
     }),
+    POST: buildValidatedJsonHandler(notifications.updateNotification, {
+      summary: 'updates notification',
+      description: 'updates notification',
+      parameters: [],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/UpdateNotification',
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: 'Return Notification',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateNotification',
+              },
+            },
+          },
+        },
+      },
+      security: getDefaultSecurity(),
+      tags: ['notifications'],
+    }),
   }
 
   return doc
