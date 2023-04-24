@@ -48,11 +48,22 @@ module.exports = {
     }
   },
   getCount: async function (req) {
-    let notificationsCount = await db.getNotificationsCount(req.query.read)
+    let result
+    let notificationsCount
+    if (req.query.read && req.query.read === 'trueOnly') {
+      let count1 = await db.getNotificationsCount(null, req.query.groupByOrder)
+      let count2 = await db.getNotificationsCount('false', req.query.groupByOrder)
+      result = count1.length - count2.length
+    } else {
+      notificationsCount = await db.getNotificationsCount(req.query.read, req.query.groupByOrder)
+    }
     return {
       status: 200,
       response: {
-        count: parseInt(!req.query.read ? notificationsCount.length : notificationsCount[0].count),
+        count:
+          req.query.read && req.query.read === 'trueOnly'
+            ? result
+            : parseInt(req.query.groupByOrder ? notificationsCount.length : notificationsCount[0].count),
       },
     }
   },

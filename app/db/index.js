@@ -348,11 +348,15 @@ async function updateNotification(read, del, id) {
   return client('notifications').update({ read, delete: del }).where({ id })
 }
 
-async function getNotificationsCount(read) {
-  if (read) {
+async function getNotificationsCount(read, groupyByOrder) {
+  if (read && groupyByOrder) {
+    return client('notifications').select().where({ read, delete: false }).groupBy('order_id').count('*')
+  } else if (read) {
     return client('notifications').select().where({ read, delete: false }).count('*')
-  } else {
+  } else if (groupyByOrder) {
     return client('notifications').select().where({ delete: false }).groupBy('order_id').count('*')
+  } else {
+    return client('notifications').select().where({ delete: false }).count('*')
   }
 }
 
