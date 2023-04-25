@@ -1252,6 +1252,12 @@ const apiDoc = {
           partId: {
             oneOf: [{ type: 'string' }, { type: 'null' }],
           },
+          orderExternalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          buildExternalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
           read: {
             type: 'boolean',
           },
