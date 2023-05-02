@@ -299,7 +299,11 @@ async function getRecipesBySearchQuery(searchQuery) {
 }
 
 async function getNotificationsBySearchQuery(searchQuery) {
-  return client('notifications').select().whereILike('order_external_id', `%${searchQuery}%`)
+  return client('notifications')
+    .select()
+    .distinctOn('order_id')
+    .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+    .whereILike('order_external_id', `%${searchQuery}%`)
 }
 
 async function getBuildsBySearchQuery(searchQuery) {
