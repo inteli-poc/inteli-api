@@ -3,7 +3,12 @@ const jsConvert = require('js-convert-case')
 
 module.exports = {
   getAll: async function (req) {
-    let notifications = await db.getNotifications(req.query.limit, req.query.page, req.query.read)
+    let notifications
+    if (req.query.searchQuery) {
+      notifications = await db.getNotificationsBySearchQuery(req.query.searchQuery)
+    } else {
+      notifications = await db.getNotifications(req.query.limit, req.query.page, req.query.read)
+    }
     notifications = await Promise.all(
       notifications.map(async (item) => {
         let read = true

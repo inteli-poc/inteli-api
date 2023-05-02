@@ -298,6 +298,10 @@ async function getRecipesBySearchQuery(searchQuery) {
   return client('recipes').select().whereILike('name', `%${searchQuery}%`)
 }
 
+async function getNotificationsBySearchQuery(searchQuery) {
+  return client('notifications').select().whereILike('order_external_id', `%${searchQuery}%`)
+}
+
 async function getBuildsBySearchQuery(searchQuery) {
   let result = await client('build').select().whereILike('external_id', `%${searchQuery}%`)
   if (result.length !== 0) {
@@ -654,4 +658,5 @@ module.exports = {
   getNotificationsCount,
   getNotificationsByOrderId,
   updateNotification,
+  getNotificationsBySearchQuery,
 }
