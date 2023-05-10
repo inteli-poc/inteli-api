@@ -29,7 +29,7 @@ const buildPartOutputs = (data, type, parent_index_required) => {
       id: { type: 'FILE', value: 'id.json' },
       price: { type: 'LITERAL', value: data.price.toString() },
       quantity: { type: 'LITERAL', value: data.quantity.toString() },
-      description: { type: 'LITERAL', value: data.description },
+      description: { type: 'FILE', value: 'description.json' },
       deliveryTerms: { type: 'LITERAL', value: data.delivery_terms },
       deliveryAddress: { type: 'FILE', value: 'delivery_address.json' },
       priceType: { type: 'LITERAL', value: data.price_type },
@@ -300,6 +300,7 @@ exports.mapPartData = async (data, type) => {
     id: Buffer.from(JSON.stringify(data.id)),
     lineText: Buffer.from(JSON.stringify(data.line_text)),
     deliveryAddress: Buffer.from(JSON.stringify(data.delivery_address)),
+    description: Buffer.from(JSON.stringify(data.description)),
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
