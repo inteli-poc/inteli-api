@@ -162,6 +162,7 @@ module.exports = {
         requiredCerts: Buffer.from(JSON.stringify(recipe.required_certs)),
         id: Buffer.from(JSON.stringify(id)),
         imageAttachmentId: Buffer.from(JSON.stringify(recipe.image_attachment_id)),
+        name: recipe.name,
         inputs: [],
         outputs: [
           {
