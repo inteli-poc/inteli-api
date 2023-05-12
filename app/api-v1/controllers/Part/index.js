@@ -233,15 +233,21 @@ module.exports = {
             }
           } else {
             await db.removeTransactionPart(transaction.id)
+            if (type === 'Creation') {
+              await db.removePart(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionPart(transaction.id)
+          if (type === 'Creation') {
+            await db.removePart(id)
+          }
           throw err
         }
         return {

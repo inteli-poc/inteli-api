@@ -70,7 +70,7 @@ const apiDoc = {
           },
           name: {
             description: 'Name of the recipe',
-            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            type: 'string',
             example: 'Low-pressure compressor',
           },
           imageAttachmentId: {

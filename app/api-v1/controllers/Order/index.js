@@ -40,7 +40,12 @@ module.exports = {
       req.params = {}
       req.params.id = partResponse.id
       try {
-        await partController.transaction.create('Creation')(req)
+        let partTransactionResponse = await partController.transaction.create('Creation')(req)
+        if (partTransactionResponse.status !== 201) {
+          throw {
+            message: partTransactionResponse.response.message,
+          }
+        }
       } catch (err) {
         throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
       }
@@ -70,6 +75,11 @@ module.exports = {
       req.params = {}
       req.params.id = result.id
       transactionResponse = await module.exports.transaction.create('Submission')(req)
+      if (transactionResponse.status !== 201) {
+        throw {
+          message: transactionResponse.response.message,
+        }
+      }
       result.status = 'Submitted'
     } catch (err) {
       throw new InternalError({ message: 'failed to save order to chain : ' + err.message })
@@ -262,7 +272,16 @@ module.exports = {
               req.params = {}
               req.params.id = part.id
               req.body = part
-              await partController.transaction.create('acknowledgement')(req)
+              try {
+                let partTransactionResponse = await partController.transaction.create('acknowledgement')(req)
+                if (partTransactionResponse.status !== 201) {
+                  throw {
+                    message: partTransactionResponse.response.message,
+                  }
+                }
+              } catch (err) {
+                throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
+              }
             }
             order.image_attachment_id = req.body.imageAttachmentId
             order.comments = req.body.comments
@@ -287,7 +306,16 @@ module.exports = {
               req.params = {}
               req.params.id = part.id
               req.body = part
-              await partController.transaction.create('amendment')(req)
+              try {
+                let partTransactionResponse = await partController.transaction.create('amendment')(req)
+                if (partTransactionResponse.status !== 201) {
+                  throw {
+                    message: partTransactionResponse.response.message,
+                  }
+                }
+              } catch (err) {
+                throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
+              }
             }
             order.image_attachment_id = null
             order.comments = null
@@ -332,15 +360,21 @@ module.exports = {
             }
           } else {
             await db.removeTransactionOrder(transaction.id)
+            if (type === 'Submission') {
+              await db.removeOrder(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
+          if (type === 'Submission') {
+            await db.removeOrder(id)
+          }
           throw err
         }
         return {

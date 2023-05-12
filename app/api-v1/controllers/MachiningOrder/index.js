@@ -183,15 +183,21 @@ module.exports = {
             }
           } else {
             await db.removeTransactionMachiningOrder(transaction.id)
+            if (type === 'Submitted') {
+              await db.removeMachiningOrder(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionMachiningOrder(transaction.id)
+          if (type === 'Submitted') {
+            await db.removeMachiningOrder(id)
+          }
           throw err
         }
         return {
