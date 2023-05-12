@@ -131,7 +131,7 @@ describe('order.create', () => {
         id: 'd3607fc8-442a-4394-a96e-042bd97f0624',
       },
     })
-    stubs.partCreateInnerFn = stub().resolves([])
+    stubs.partCreateInnerFn = stub().resolves({ status: 201 })
     stubs.partCreate = stub(partController.transaction, 'create').returns(stubs.partCreateInnerFn)
     stubs.postOrderDb = stub(db, 'postOrderDb').resolves([
       {
@@ -146,6 +146,7 @@ describe('order.create', () => {
     ])
     stubs.updatePart = stub(db, 'updatePart').resolves([])
     stubs.orderCreationInnerFn = stub().resolves({
+      status: 201,
       response: {
         updatedAt: new Date(),
       },

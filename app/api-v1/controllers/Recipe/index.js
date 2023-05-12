@@ -98,7 +98,12 @@ module.exports = {
       let req = {}
       req.params = {}
       req.params.id = recipe.id
-      await module.exports.transaction.create(req)
+      let recipeTransactionResponse = await module.exports.transaction.create(req)
+      if (recipeTransactionResponse.status !== 201) {
+        throw {
+          message: recipeTransactionResponse.response.message,
+        }
+      }
     } catch (err) {
       throw new InternalError({ message: 'failed to save recipe on chain : ' + err.message })
     }
@@ -189,15 +194,17 @@ module.exports = {
           }
         } else {
           await db.removeTransactionRecipe(transaction.id)
+          await db.removeRecipe(id)
           return {
             status: 400,
             response: {
-              message: 'No Token Ownership',
+              message: result.message,
             },
           }
         }
       } catch (err) {
         await db.removeTransactionRecipe(transaction.id)
+        await db.removeRecipe(id)
         throw err
       }
     },

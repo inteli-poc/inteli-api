@@ -498,6 +498,26 @@ async function insertMachiningOrderTransaction(id, type, status, token_id) {
     .then((t) => t[0])
 }
 
+async function removeRecipe(id) {
+  return client('recipes').delete().where({ id })
+}
+
+async function removeOrder(id) {
+  return client('orders').delete().where({ id })
+}
+
+async function removePart(id) {
+  return client('parts').delete().where({ id })
+}
+
+async function removeMachiningOrder(id) {
+  return client('machiningorders').delete().where({ id })
+}
+
+async function removeBuild(id) {
+  return client('build').delete().where({ id })
+}
+
 async function removeTransactionOrder(id) {
   return client('order_transactions').delete().where({ id })
 }
@@ -663,4 +683,9 @@ module.exports = {
   getNotificationsByOrderId,
   updateNotification,
   getNotificationsBySearchQuery,
+  removeRecipe,
+  removeOrder,
+  removePart,
+  removeBuild,
+  removeMachiningOrder,
 }

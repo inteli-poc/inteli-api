@@ -275,15 +275,21 @@ module.exports = {
             }
           } else {
             await db.removeTransactionBuild(transaction.id)
+            if (type === 'Schedule' || type === 'Start') {
+              await db.removeBuild(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
+          if (type === 'Schedule' || type === 'Start') {
+            await db.removeBuild(id)
+          }
           throw err
         }
         return {
