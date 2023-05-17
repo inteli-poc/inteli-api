@@ -25,6 +25,7 @@ module.exports = {
     const newNotification = jsConvert.snakeKeys(request.body)
     let [insertedNotification] = await db.insertNotification(newNotification)
     insertedNotification.created_at = new Date(insertedNotification.created_at).toISOString()
+    response.status(201)
     response.json(insertedNotification)
     return clients.forEach((client) => {
       client.response.write(`data: ${JSON.stringify(insertedNotification)}\n\n`)
