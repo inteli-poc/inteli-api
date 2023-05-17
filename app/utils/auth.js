@@ -20,9 +20,13 @@ async function getKey(header, cb) {
 }
 
 const verifyJwks = async (req) => {
-  const authHeader = req.headers['authorization']
-  const authToken = authHeader ? authHeader.replace('Bearer ', '') : ''
-
+  let authToken
+  if (!req.query.authToken) {
+    let authHeader = req.headers['authorization']
+    authToken = authHeader ? authHeader.replace('Bearer ', '') : ''
+  } else {
+    authToken = req.query.authToken
+  }
   const verifyOptions = {
     audience: AUTH_AUDIENCE,
     issuer: [AUTH_ISSUER],
