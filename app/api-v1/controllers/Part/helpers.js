@@ -23,24 +23,26 @@ const buildPartOutputs = (data, type, parent_index_required) => {
         certificationIndex: { type: 'LITERAL', value: JSON.stringify(data.certificationIndex) },
       }),
       ...(type == 'certification' && {
-        certificationType: { type: 'LITERAL', value: JSON.stringify(data.certificationType) },
+        certificationType: { type: 'FILE', value: 'certification_type.json' },
       }),
       actionType: { type: 'LITERAL', value: type },
       id: { type: 'FILE', value: 'id.json' },
       price: { type: 'LITERAL', value: data.price.toString() },
       quantity: { type: 'LITERAL', value: data.quantity.toString() },
-      description: { type: 'LITERAL', value: data.description },
+      description: { type: 'FILE', value: 'description.json' },
       deliveryTerms: { type: 'LITERAL', value: data.delivery_terms },
-      deliveryAddress: { type: 'LITERAL', value: data.delivery_address },
+      deliveryAddress: { type: 'FILE', value: 'delivery_address.json' },
       priceType: { type: 'LITERAL', value: data.price_type },
       confirmedReceiptDate: { type: 'LITERAL', value: data.confirmed_receipt_date },
       unitOfMeasure: { type: 'LITERAL', value: data.unit_of_measure },
       currency: { type: 'LITERAL', value: data.currency },
       exportClassification: { type: 'LITERAL', value: data.export_classification },
-      lineText: { type: 'LITERAL', value: data.line_text },
+      lineText: { type: 'FILE', value: 'line_text.json' },
       requiredBy: { type: 'LITERAL', value: data.required_by },
       recipeId: { type: 'FILE', value: 'recipe_id.json' },
       forecastedDeliveryDate: { type: 'LITERAL', value: data.forecast_delivery_date },
+      ...((type == 'acknowledgement' || type == 'amendment') &&
+        data.comments && { comments: { type: 'FILE', value: 'comments.json' } }),
     },
     ...(parent_index_required && { parent_index: 0 }),
   }
@@ -60,66 +62,91 @@ exports.getResponse = async (type, transaction, req) => {
   }
 }
 
-exports.getResultForPartGet = async (parts, req) => {
+exports.getResultForPartGet = async (parts, req, metadataType) => {
   if (parts.length == 0) {
     throw new NotFoundError('parts')
   }
   const result = await Promise.all(
-    parts.map(async (item) => {
-      const newItem = {}
-      const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
-      newItem['supplier'] = supplierAlias
-      newItem['buildId'] = item.build_id
-      newItem['recipeId'] = item.recipe_id
-      let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
-      newItem['recipeAttachmentId'] = recipe.image_attachment_id
-      newItem['id'] = item.id
-      newItem['certifications'] = item.certifications
-      newItem['metadata'] = item.metadata
-      newItem['price'] = item.price
-      newItem['quantity'] = item.quantity
-      newItem['deliveryTerms'] = item.delivery_terms
-      newItem['description'] = item.description
-      newItem['deliveryAddress'] = item.delivery_address
-      newItem['priceType'] = item.price_type
-      newItem['unitOfMeasure'] = item.unit_of_measure
-      newItem['exportClassification'] = item.export_classification
-      newItem['lineText'] = item.line_text
-      newItem['currency'] = item.currency
-      newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
-      newItem['requiredBy'] = item.required_by.toISOString()
-      newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
-      newItem['attachments'] = []
-      let attachment = {}
-      attachment['description'] = 'Design'
-      attachment['attachmentId'] = newItem['recipeAttachmentId']
-      newItem['attachments'].push(attachment)
-      if (item.build_id) {
-        let req = {}
-        req.params = { id: item.build_id }
-        let result = await getById(req)
-        newItem['build'] = result.response
-        if (newItem['build'].asnAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'ASN'
-          attachment['attachmentId'] = newItem['build'].asnAttachmentId
-          newItem['attachments'].push(attachment)
+    parts
+      .filter((item) => {
+        if (metadataType) {
+          if (item.metadata) {
+            return item.metadata.some((item) => {
+              return item.metadataType == metadataType
+            })
+          } else {
+            return false
+          }
+        } else {
+          return true
         }
-        if (newItem['build'].invoiceAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'Invoice'
-          attachment['attachmentId'] = newItem['build'].invoiceAttachmentId
-          newItem['attachments'].push(attachment)
+      })
+      .map(async (item) => {
+        const newItem = {}
+        const { alias: supplierAlias } = await identity.getMemberByAddress(req, item.supplier)
+        newItem['supplier'] = supplierAlias
+        newItem['buildId'] = item.build_id
+        newItem['buildExternalId'] = null
+        if (item.build_id) {
+          let [build] = await db.getBuildById(item.build_id)
+          newItem['buildExternalId'] = build.external_id
         }
-        if (newItem['build'].grnAttachmentId) {
-          let attachment = {}
-          attachment['description'] = 'GRN'
-          attachment['attachmentId'] = newItem['build'].grnAttachmentId
-          newItem['attachments'].push(attachment)
+        newItem['orderId'] = item.order_id
+        let [order] = await db.getOrder(item.order_id)
+        newItem['orderExternalId'] = order.external_id
+        newItem['recipeId'] = item.recipe_id
+        let [recipe] = await db.getRecipeByIDdb(item.recipe_id)
+        newItem['recipeAttachmentId'] = recipe.image_attachment_id
+        const { alias: buyerAlias } = await identity.getMemberByAddress(req, recipe.owner)
+        newItem['buyer'] = buyerAlias
+        newItem['id'] = item.id
+        newItem['certifications'] = item.certifications
+        newItem['metadata'] = item.metadata
+        newItem['price'] = item.price
+        newItem['quantity'] = item.quantity
+        newItem['deliveryTerms'] = item.delivery_terms
+        newItem['description'] = item.description
+        newItem['deliveryAddress'] = item.delivery_address
+        newItem['priceType'] = item.price_type
+        newItem['unitOfMeasure'] = item.unit_of_measure
+        newItem['exportClassification'] = item.export_classification
+        newItem['lineText'] = item.line_text
+        newItem['currency'] = item.currency
+        newItem['confirmedReceiptDate'] = item.confirmed_receipt_date.toISOString()
+        newItem['requiredBy'] = item.required_by.toISOString()
+        newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
+        newItem['comments'] = item.comments
+        newItem['attachments'] = []
+        let attachment = {}
+        attachment['description'] = 'Design'
+        attachment['attachmentId'] = newItem['recipeAttachmentId']
+        newItem['attachments'].push(attachment)
+        if (item.build_id) {
+          let req = {}
+          req.params = { id: item.build_id }
+          let result = await getById(req)
+          newItem['build'] = result.response
+          if (newItem['build'].asnAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'ASN'
+            attachment['attachmentId'] = newItem['build'].asnAttachmentId
+            newItem['attachments'].push(attachment)
+          }
+          if (newItem['build'].invoiceAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'Invoice'
+            attachment['attachmentId'] = newItem['build'].invoiceAttachmentId
+            newItem['attachments'].push(attachment)
+          }
+          if (newItem['build'].grnAttachmentId) {
+            let attachment = {}
+            attachment['description'] = 'GRN'
+            attachment['attachmentId'] = newItem['build'].grnAttachmentId
+            newItem['attachments'].push(attachment)
+          }
         }
-      }
-      return newItem
-    })
+        return newItem
+      })
   )
   return result
 }
@@ -204,6 +231,7 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
       let certificationIndex
       let certificationType
       let forecastedDeliveryDate
+      let comments
       const newItem = {}
       newItem['transactionId'] = item['id']
       newItem['id'] = item['part_id']
@@ -230,9 +258,16 @@ exports.getResultForPartTransactionGet = async (partTransanctions, type, id) => 
           newItem['certificationType'] = certificationType
           break
         case 'acknowledgement':
+          comments = await getMetadata(item.token_id, 'comments')
+          newItem['comments'] = comments.data
           await gatherPartDetails(item.token_id, newItem)
           break
         case 'amendment':
+          comments = await getMetadata(item.token_id, 'comments')
+          newItem['comments'] = comments.data
+          await gatherPartDetails(item.token_id, newItem)
+          break
+        case 'Creation':
           await gatherPartDetails(item.token_id, newItem)
           break
         case 'update-delivery-date':
@@ -263,12 +298,18 @@ exports.mapPartData = async (data, type) => {
   outputs = [buildPartOutputs(data, type, parent_index_required)]
   return {
     id: Buffer.from(JSON.stringify(data.id)),
+    lineText: Buffer.from(JSON.stringify(data.line_text)),
+    deliveryAddress: Buffer.from(JSON.stringify(data.delivery_address)),
+    description: Buffer.from(JSON.stringify(data.description)),
     ...((type == 'metadata-update' || type == 'certification') && {
       imageAttachmentId: Buffer.from(JSON.stringify(data.imageAttachmentId)),
     }),
+    ...(type === 'certification' && { certificationType: Buffer.from(JSON.stringify(data.certificationType)) }),
     recipeId: Buffer.from(JSON.stringify(data.recipe_id)),
     ...(type == 'order-assignment' && { orderId: Buffer.from(JSON.stringify(data.order_id)) }),
     ...((type == 'metadata-update' || type == 'certification') && data.binary_blob && { image: data.binary_blob }),
+    ...((type == 'acknowledgement' || type == 'amendment') &&
+      data.comments && { comments: Buffer.from(JSON.stringify(data.comments)) }),
     inputs,
     outputs,
   }

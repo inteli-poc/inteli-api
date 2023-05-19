@@ -111,7 +111,7 @@ describe('recipe.create', () => {
         id: '7afb3af3-361e-4dc9-9a32-1922fa9837a0',
       },
     ])
-    stubs.recipeTransactionCreate = stub(recipeController.transaction, 'create').resolves([])
+    stubs.recipeTransactionCreate = stub(recipeController.transaction, 'create').resolves({ status: 201 })
   })
   afterEach(async () => {
     stubs.getMemberByAlias.restore()

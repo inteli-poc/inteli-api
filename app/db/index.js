@@ -32,6 +32,10 @@ async function postBuildDb(build) {
   return client('build').insert(build).returning(['id'])
 }
 
+async function postMachiningOrderDb(machiningOrder) {
+  return client('machiningorders').insert(machiningOrder).returning(['id'])
+}
+
 async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
@@ -59,6 +63,19 @@ async function updateBuild(reqBody, latest_token_id, updateOriginalTokenId) {
       .where({ id: reqBody.id })
   } else {
     return client('build').update(reqBody).where({ id: reqBody.id })
+  }
+}
+
+async function updateMachiningOrder(reqBody, latest_token_id, updateOriginalTokenId) {
+  const updated_at = new Date().toISOString()
+  reqBody.updated_at = updated_at
+  reqBody.latest_token_id = latest_token_id
+  if (updateOriginalTokenId) {
+    return client('machiningorders')
+      .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
+      .where({ id: reqBody.id })
+  } else {
+    return client('machiningorders').update(reqBody).where({ id: reqBody.id })
   }
 }
 
@@ -108,8 +125,27 @@ async function getRecipeByIDdb(id) {
   return client('recipes').select('*').where({ id })
 }
 
-async function getRecipes() {
-  return client('recipes').select()
+async function getRecipes(limit, page) {
+  if (limit && page) {
+    return client('recipes')
+      .select()
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('recipes').select().orderBy('created_at', 'desc').limit(parseInt(limit))
+  } else if (page) {
+    return client('recipes')
+      .select()
+      .orderBy('created_at', 'desc')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('recipes').select().orderBy('created_at', 'desc')
+  }
+}
+
+async function getRecipeCount() {
+  return client('recipes').count('*')
 }
 
 async function getParts() {
@@ -163,8 +199,16 @@ async function getBuildTransactions(build_id, type) {
   return client('build_transactions').select().where({ build_id, type })
 }
 
+async function getMachiningOrderTransactions(machining_order_id, type) {
+  return client('machining_order_transactions').select().where({ machining_order_id, type })
+}
+
 async function getBuildTransactionsById(transaction_id, build_id, type) {
   return client('build_transactions').select().where({ build_id, type, id: transaction_id })
+}
+
+async function getMachiningOrderTransactionsById(transaction_id, machining_order_id, type) {
+  return client('machining_order_transactions').select().where({ machining_order_id, type, id: transaction_id })
 }
 
 async function getOrderTransactionsById(transaction_id, order_id, type) {
@@ -175,16 +219,125 @@ async function getPartTransactionsById(transaction_id, part_id, type) {
   return client('part_transactions').select().where({ part_id, type, id: transaction_id })
 }
 
-async function getOrders() {
-  return client('orders').select()
+async function getOrders(limit, page) {
+  if (limit && page) {
+    return client('orders')
+      .select()
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('orders').select().orderBy('created_at', 'desc').limit(parseInt(limit))
+  } else if (page) {
+    return client('orders')
+      .select()
+      .orderBy('created_at', 'desc')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('orders').select().orderBy('created_at', 'desc')
+  }
+}
+
+async function getOrderCount() {
+  return client('orders').count('*')
+}
+
+async function getMachiningOrderCount() {
+  return client('machiningorders').count('*')
 }
 
 async function getOrdersByExternalId(externalId) {
   return client('orders').select().where({ external_id: externalId })
 }
 
+async function getMachiningOrdersByExternalId(externalId) {
+  return client('machiningorders').select().where({ external_id: externalId })
+}
+
+async function getOrdersBySearchQuery(searchQuery) {
+  let result = await client('orders').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  result = await client('orders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+  if (result.length !== 0) {
+    return result
+  }
+  let build = await getBuildsBySearchQuery(searchQuery)
+  let parts = []
+  let orders = []
+  if (build.length !== 0) {
+    for (let index = 0; index < build.length; index++) {
+      let [result] = await getPartsByBuildId(build[index].id)
+      parts.push(result)
+    }
+    for (let index = 0; index < parts.length; index++) {
+      let [result] = await getOrder(parts[index].order_id)
+      orders.push(result)
+    }
+  }
+  let part = await getPartsBySearchQuery(searchQuery)
+  if (part.length !== 0) {
+    for (let index = 0; index < part.length; index++) {
+      let [result] = await getOrder(part[index].order_id)
+      orders.push(result)
+    }
+  }
+  return orders
+}
+
+async function getRecipesBySearchQuery(searchQuery) {
+  let result = await client('recipes').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  result = await client('recipes').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+  if (result.length !== 0) {
+    return result
+  }
+  return client('recipes').select().whereILike('name', `%${searchQuery}%`)
+}
+
+async function getNotificationsBySearchQuery(searchQuery) {
+  return client('notifications')
+    .select()
+    .distinctOn('order_id')
+    .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+    .whereILike('order_external_id', `%${searchQuery}%`)
+}
+
+async function getBuildsBySearchQuery(searchQuery) {
+  let result = await client('build').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  return client('build').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+}
+
+async function getMachiningOrdersBySearchQuery(searchQuery) {
+  let result = await client('machiningorders').select().whereILike('external_id', `%${searchQuery}%`)
+  if (result.length !== 0) {
+    return result
+  }
+  const [buildResult] = await client('build').select().whereILike('external_id', `%${searchQuery}%`)
+  const [partResult] = await client('parts').whereRaw('LOWER(build_id::text) LIKE LOWER(?)', [`%${buildResult.id}%`])
+  result = await client('machiningorders').whereRaw('LOWER(part_id::text) LIKE LOWER(?)', [`%${partResult.id}%`])
+  if (result.length !== 0) {
+    return result
+  }
+  return client('machiningorders').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+}
+
+async function getPartsBySearchQuery(searchQuery) {
+  return client('parts').whereRaw('LOWER(id::text) LIKE LOWER(?)', [`%${searchQuery}%`])
+}
+
 async function getRecipesByExternalId(externalId) {
   return client('recipes').select().where({ external_id: externalId })
+}
+
+async function insertNotification(notification) {
+  return client('notifications').insert(notification).returning('*')
 }
 
 async function insertRecipeTransaction(id, status, type, token_id) {
@@ -197,6 +350,88 @@ async function insertRecipeTransaction(id, status, type, token_id) {
     })
     .returning(['id', 'status', 'created_at'])
     .then((t) => t[0])
+}
+
+async function updateNotification(read, del, id) {
+  return client('notifications').update({ read, delete: del }).where({ id })
+}
+
+async function getNotificationsCount(read, groupyByOrder) {
+  if (read && groupyByOrder) {
+    return client('notifications').select().where({ read, delete: false }).groupBy('order_id').count('*')
+  } else if (read) {
+    return client('notifications').select().where({ read, delete: false }).count('*')
+  } else if (groupyByOrder) {
+    return client('notifications').select().where({ delete: false }).groupBy('order_id').count('*')
+  } else {
+    return client('notifications').select().where({ delete: false }).count('*')
+  }
+}
+
+async function getNotificationsByOrderId(order_id, read, id, del) {
+  return client('notifications')
+    .select()
+    .where({ order_id, read, delete: del })
+    .whereNot({ id })
+    .orderBy('created_at', 'desc')
+}
+
+async function getNotifications(limit, page, read) {
+  if (limit && page && read) {
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .where({ read, delete: false })
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit && page) {
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .where({ delete: false })
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit && read) {
+    return client('notifications')
+      .select()
+      .where({ read, delete: false })
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+  } else if (page && read) {
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .where({ read, delete: false })
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+      .offset(parseInt(page) - 1)
+  } else if (limit) {
+    return client('notifications')
+      .select()
+      .where({ delete: false })
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+  } else if (page) {
+    return client('notifications')
+      .select()
+      .where({ delete: false })
+      .distinctOn('order_id')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+      .offset(parseInt(page) - 1)
+  } else if (read) {
+    return client('notifications')
+      .select()
+      .distinctOn('order_id')
+      .where({ read, delete: false })
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+  } else {
+    return client('notifications')
+      .select()
+      .where({ delete: false })
+      .distinctOn('order_id')
+      .orderBy([{ column: 'order_id' }, { column: 'created_at', order: 'desc' }])
+  }
 }
 
 async function insertOrderTransaction(id, type, status, token_id) {
@@ -217,6 +452,10 @@ async function updateOrderTransaction(id, token_id) {
 
 async function updateBuildTransaction(id, token_id) {
   return client('build_transactions').update({ token_id }).where({ id })
+}
+
+async function updateMachiningOrderTransaction(id, token_id) {
+  return client('machining_order_transactions').update({ token_id }).where({ id })
 }
 
 async function updatePartTransaction(id, token_id) {
@@ -247,12 +486,48 @@ async function insertBuildTransaction(id, type, status, token_id) {
     .then((t) => t[0])
 }
 
+async function insertMachiningOrderTransaction(id, type, status, token_id) {
+  return client('machining_order_transactions')
+    .insert({
+      machining_order_id: id,
+      status,
+      type,
+      token_id,
+    })
+    .returning(['id', 'status', 'created_at'])
+    .then((t) => t[0])
+}
+
+async function removeRecipe(id) {
+  return client('recipes').delete().where({ id })
+}
+
+async function removeOrder(id) {
+  return client('orders').delete().where({ id })
+}
+
+async function removePart(id) {
+  return client('parts').delete().where({ id })
+}
+
+async function removeMachiningOrder(id) {
+  return client('machiningorders').delete().where({ id })
+}
+
+async function removeBuild(id) {
+  return client('build').delete().where({ id })
+}
+
 async function removeTransactionOrder(id) {
   return client('order_transactions').delete().where({ id })
 }
 
 async function removeTransactionBuild(id) {
   return client('build_transactions').delete().where({ id })
+}
+
+async function removeTransactionMachiningOrder(id) {
+  return client('machining_order_transactions').delete().where({ id })
 }
 
 async function removeTransactionPart(id) {
@@ -284,6 +559,25 @@ async function getBuild() {
   return client('build').select()
 }
 
+async function getMachiningOrder(limit, page) {
+  if (limit && page) {
+    return client('machiningorders')
+      .select()
+      .orderBy('created_at', 'desc')
+      .limit(parseInt(limit))
+      .offset((parseInt(page) - 1) * limit)
+  } else if (limit) {
+    return client('machiningorders').select().orderBy('created_at', 'desc').limit(parseInt(limit))
+  } else if (page) {
+    return client('machiningorders')
+      .select()
+      .orderBy('created_at', 'desc')
+      .offset(parseInt(page) - 1)
+  } else {
+    return client('machiningorders').select().orderBy('created_at', 'desc')
+  }
+}
+
 async function getPartIdsByBuildId(build_id) {
   return client('parts').select('id').where({ build_id })
 }
@@ -296,8 +590,20 @@ async function getBuildById(id) {
   return client('build').select().where({ id })
 }
 
+async function getMachiningOrderById(id) {
+  return client('machiningorders').select().where({ id })
+}
+
+async function getMachiningOrderByPartId(partId) {
+  return client('machiningorders').select().where({ part_id: partId })
+}
+
 async function checkDuplicateExternalId(external_id, tableName) {
   return client(tableName).select('external_id').where({ external_id })
+}
+
+async function checkDuplicateTaskNumber(taskNumber, tableName) {
+  return client(tableName).select('task_id').where({ task_id: taskNumber })
 }
 
 module.exports = {
@@ -351,4 +657,35 @@ module.exports = {
   getPartsByOrderId,
   getPartByIDs,
   checkDuplicateExternalId,
+  getOrderCount,
+  getRecipeCount,
+  getOrdersBySearchQuery,
+  getRecipesBySearchQuery,
+  getBuildsBySearchQuery,
+  getPartsBySearchQuery,
+  postMachiningOrderDb,
+  getMachiningOrdersBySearchQuery,
+  getMachiningOrder,
+  getMachiningOrderById,
+  insertMachiningOrderTransaction,
+  removeTransactionMachiningOrder,
+  updateMachiningOrderTransaction,
+  updateMachiningOrder,
+  getMachiningOrderTransactions,
+  getMachiningOrderTransactionsById,
+  getMachiningOrderByPartId,
+  checkDuplicateTaskNumber,
+  getMachiningOrdersByExternalId,
+  getMachiningOrderCount,
+  insertNotification,
+  getNotifications,
+  getNotificationsCount,
+  getNotificationsByOrderId,
+  updateNotification,
+  getNotificationsBySearchQuery,
+  removeRecipe,
+  removeOrder,
+  removePart,
+  removeBuild,
+  removeMachiningOrder,
 }

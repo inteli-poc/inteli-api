@@ -7,7 +7,9 @@ const { BadRequestError, NotFoundError, InternalError } = require('../../../util
 module.exports = {
   get: async function (req) {
     let recipes
-    if (req.query.externalId) {
+    if (req.query.searchQuery) {
+      recipes = await db.getRecipesBySearchQuery(req.query.searchQuery)
+    } else if (req.query.externalId) {
       recipes = await db.getRecipesByExternalId(req.query.externalId)
     } else {
       recipes = await db.getRecipes()
@@ -96,7 +98,12 @@ module.exports = {
       let req = {}
       req.params = {}
       req.params.id = recipe.id
-      await module.exports.transaction.create(req)
+      let recipeTransactionResponse = await module.exports.transaction.create(req)
+      if (recipeTransactionResponse.status !== 201) {
+        throw {
+          message: recipeTransactionResponse.response.message,
+        }
+      }
     } catch (err) {
       throw new InternalError({ message: 'failed to save recipe on chain : ' + err.message })
     }
@@ -106,6 +113,15 @@ module.exports = {
         id: recipe.id,
         owner: selfAlias,
         ...req.body,
+      },
+    }
+  },
+  getCount: async function () {
+    let totalRecipeCount = await db.getRecipeCount()
+    return {
+      status: 200,
+      response: {
+        count: parseInt(totalRecipeCount[0].count),
       },
     }
   },
@@ -151,6 +167,7 @@ module.exports = {
         requiredCerts: Buffer.from(JSON.stringify(recipe.required_certs)),
         id: Buffer.from(JSON.stringify(id)),
         imageAttachmentId: Buffer.from(JSON.stringify(recipe.image_attachment_id)),
+        name: recipe.name,
         inputs: [],
         outputs: [
           {
@@ -176,16 +193,18 @@ module.exports = {
             },
           }
         } else {
+          await db.removeTransactionRecipe(transaction.id)
+          await db.removeRecipe(id)
           return {
             status: 400,
             response: {
-              message: 'No Token Ownership',
+              message: result.message,
             },
           }
         }
       } catch (err) {
         await db.removeTransactionRecipe(transaction.id)
-        await db.insertRecipeTransaction(id, 'Failed', 'Creation', 0)
+        await db.removeRecipe(id)
         throw err
       }
     },

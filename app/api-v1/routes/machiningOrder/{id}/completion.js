@@ -1,41 +1,41 @@
 const { getDefaultSecurity } = require('../../../../utils/auth')
-const order = require('../../../controllers/Order')
+const machiningOrderController = require('../../../controllers/MachiningOrder')
 const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator')
 
+// eslint-disable-next-line no-unused-vars
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.transaction.get('Submission'), {
-      summary: 'List Purchase Orders Submission Actions',
-      description: 'Returns the details of all on-chain transactions to submit the order {id}.',
+    GET: buildValidatedJsonHandler(machiningOrderController.transaction.getAll('Completed'), {
+      summary: 'List Machining Order Completion Actions',
+      description: 'Returns the details of all on-chain transactions to complete the machining order {id}.',
       parameters: [
         {
-          description: 'Id of the purchase-order',
+          description: 'Id of the machining order',
           in: 'path',
           required: true,
           name: 'id',
           allowEmptyValue: false,
           schema: {
-            type: 'string',
-            format: 'uuid',
+            $ref: '#/components/schemas/ObjectReference',
           },
         },
       ],
       responses: {
         200: {
-          description: 'Return Purchase Order Submission Actions',
+          description: 'Return machining order Complete Actions',
           content: {
             'application/json': {
               schema: {
                 type: 'array',
                 items: {
-                  $ref: '#/components/schemas/OrderSubmissionGet',
+                  $ref: '#/components/schemas/MachiningOrderComplete',
                 },
               },
             },
           },
         },
         404: {
-          description: 'Order not found',
+          description: 'machining order not found',
           content: {
             'application/json': {
               schema: {
@@ -45,15 +45,15 @@ module.exports = function () {
           },
         },
       },
-      tags: ['order'],
+      security: getDefaultSecurity(),
+      tags: ['machining order'],
     }),
-    POST: buildValidatedJsonHandler(order.transaction.create('Submission'), {
-      summary: 'Create Purchase Order Submission Action',
-      description:
-        'A Buyer submits the order {id}. Order must be in `Created` state. Order is now viewable to other members.',
+    POST: buildValidatedJsonHandler(machiningOrderController.transaction.create('Completed'), {
+      summary: 'Create machining order Complete Action',
+      description: 'A Supplier starts the machining order {id}. machining order must be in `Started` state.',
       parameters: [
         {
-          description: 'Id of the purchase-order. Must be in "Created" state',
+          description: 'Id of the machining order. Must be in Started state',
           in: 'path',
           required: true,
           name: 'id',
@@ -67,18 +67,18 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/NewOrderSubmission',
+              $ref: '#/components/schemas/NewMachiningOrderComplete',
             },
           },
         },
       },
       responses: {
         201: {
-          description: 'Purchase Order Submission Created',
+          description: 'Machining Order Completion Action Created',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/OrderSubmission',
+                $ref: '#/components/schemas/MachiningOrderComplete',
               },
             },
           },
@@ -95,7 +95,7 @@ module.exports = function () {
         },
       },
       security: getDefaultSecurity(),
-      tags: ['order'],
+      tags: ['machining order'],
     }),
   }
 

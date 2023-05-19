@@ -40,7 +40,12 @@ module.exports = {
       req.params = {}
       req.params.id = partResponse.id
       try {
-        await partController.transaction.create('Creation')(req)
+        let partTransactionResponse = await partController.transaction.create('Creation')(req)
+        if (partTransactionResponse.status !== 201) {
+          throw {
+            message: partTransactionResponse.response.message,
+          }
+        }
       } catch (err) {
         throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
       }
@@ -70,9 +75,14 @@ module.exports = {
       req.params = {}
       req.params.id = result.id
       transactionResponse = await module.exports.transaction.create('Submission')(req)
+      if (transactionResponse.status !== 201) {
+        throw {
+          message: transactionResponse.response.message,
+        }
+      }
       result.status = 'Submitted'
     } catch (err) {
-      throw new InternalError({ message: 'failed to save order ro chain : ' + err.message })
+      throw new InternalError({ message: 'failed to save order to chain : ' + err.message })
     }
     let partsArr = []
     for (let partId of order.items) {
@@ -112,10 +122,12 @@ module.exports = {
   },
   get: async function (req) {
     let result
-    if (req.query.externalId) {
+    if (req.query.searchQuery) {
+      result = await db.getOrdersBySearchQuery(req.query.searchQuery)
+    } else if (req.query.externalId) {
       result = await db.getOrdersByExternalId(req.query.externalId)
     } else {
-      result = await db.getOrders()
+      result = await db.getOrders(req.query.limit, req.query.page)
     }
     let response = await getResultForOrderGet(result, req)
     if (req.query.externalId) {
@@ -135,6 +147,7 @@ module.exports = {
     let recipeCount = recipes.length
     let totalParts = []
     let totalPartsCount
+    let totalJobsCount = 0
     let manufactureCount = 0
     let shipCount = 0
     let orderCount = 0
@@ -144,10 +157,11 @@ module.exports = {
       for (let item of items) {
         let [part] = await db.getPartById(item)
         if (part && part.build_id) {
+          totalJobsCount = totalJobsCount + 1
           let [build] = await db.getBuildById(part.build_id)
-          if (build.update_type) {
+          if (build.status == 'Started') {
             manufactureCount = manufactureCount + 1
-          } else if (build.status == 'Completed') {
+          } else if (build.status == 'Completed' || build.status == 'Part Received') {
             shipCount = shipCount + 1
           } else {
             orderCount = orderCount + 1
@@ -157,17 +171,27 @@ module.exports = {
         }
       }
     }
-    totalPartsCount = totalParts.length
+    totalPartsCount = totalParts.flat().length
     let orderSummary = {
       parts: totalPartsCount,
       design: recipeCount,
       manufacturing: manufactureCount,
       ship: shipCount,
       order: orderCount,
+      jobs: totalJobsCount,
     }
     return {
       status: 200,
       response: orderSummary,
+    }
+  },
+  getCount: async function () {
+    let totalOrderCount = await db.getOrderCount()
+    return {
+      status: 200,
+      response: {
+        count: parseInt(totalOrderCount[0].count),
+      },
     }
   },
   transaction: {
@@ -248,7 +272,16 @@ module.exports = {
               req.params = {}
               req.params.id = part.id
               req.body = part
-              await partController.transaction.create('acknowledgement')(req)
+              try {
+                let partTransactionResponse = await partController.transaction.create('acknowledgement')(req)
+                if (partTransactionResponse.status !== 201) {
+                  throw {
+                    message: partTransactionResponse.response.message,
+                  }
+                }
+              } catch (err) {
+                throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
+              }
             }
             order.image_attachment_id = req.body.imageAttachmentId
             order.comments = req.body.comments
@@ -273,7 +306,16 @@ module.exports = {
               req.params = {}
               req.params.id = part.id
               req.body = part
-              await partController.transaction.create('amendment')(req)
+              try {
+                let partTransactionResponse = await partController.transaction.create('amendment')(req)
+                if (partTransactionResponse.status !== 201) {
+                  throw {
+                    message: partTransactionResponse.response.message,
+                  }
+                }
+              } catch (err) {
+                throw new InternalError({ message: 'failed to save part to chain : ' + err.message })
+              }
             }
             order.image_attachment_id = null
             order.comments = null
@@ -317,16 +359,22 @@ module.exports = {
               await db.updateOrder(order, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
+            await db.removeTransactionOrder(transaction.id)
+            if (type === 'Submission') {
+              await db.removeOrder(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionOrder(transaction.id)
-          await db.insertOrderTransaction(id, type, 'Failed', 0)
+          if (type === 'Submission') {
+            await db.removeOrder(id)
+          }
           throw err
         }
         return {
@@ -385,6 +433,7 @@ module.exports = {
         partObj['id'] = part.id
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
         partObj['requiredBy'] = part.required_by.toISOString()
+        partObj['confirmedReceiptDate'] = part.confirmed_receipt_date.toISOString()
         if (part.build_id) {
           partObj['buildId'] = part.build_id
           let [build] = await db.getBuildById(part.build_id)

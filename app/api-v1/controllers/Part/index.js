@@ -54,8 +54,13 @@ module.exports = {
   },
   getAll: async function (req) {
     let parts
-    parts = await db.getParts()
-    let result = await getResultForPartGet(parts, req)
+    let metadataType = req.query.metadataType
+    if (req.query.searchQuery) {
+      parts = await db.getPartsBySearchQuery(req.query.searchQuery)
+    } else {
+      parts = await db.getParts()
+    }
+    let result = await getResultForPartGet(parts, req, metadataType)
     return {
       status: 200,
       response: result,
@@ -186,8 +191,13 @@ module.exports = {
         if (!recipe) {
           throw new BadRequestError('recipe not found')
         }
+        let machiningOrder = await db.getMachiningOrderByPartId(part.id)
+        let partSupplier
+        if (machiningOrder.length !== 0 && machiningOrder[0].status === 'Started') {
+          partSupplier = machiningOrder[0].supplier
+        }
         const buyer = recipe.owner
-        const supplier = recipe.supplier
+        const supplier = partSupplier || recipe.supplier
         const transaction = await db.insertPartTransaction(id, type, 'Submitted')
         let payload
         try {
@@ -222,16 +232,22 @@ module.exports = {
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
             }
           } else {
+            await db.removeTransactionPart(transaction.id)
+            if (type === 'Creation') {
+              await db.removePart(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionPart(transaction.id)
-          await db.insertPartTransaction(id, type, 'Failed', 0)
+          if (type === 'Creation') {
+            await db.removePart(id)
+          }
           throw err
         }
         return {

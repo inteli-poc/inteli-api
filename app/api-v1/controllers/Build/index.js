@@ -13,7 +13,12 @@ const {
 
 module.exports = {
   getAll: async function (req) {
-    const build = await db.getBuild()
+    let build
+    if (req.query.searchQuery) {
+      build = await db.getBuildsBySearchQuery(req.query.searchQuery)
+    } else {
+      build = await db.getBuild()
+    }
     let result = await getResultForBuildGet(build, req)
     await module.exports.getBuildAttachments(result)
     return {
@@ -191,10 +196,10 @@ module.exports = {
             build.started_at = req.body.startedAt
             break
           case 'progress-update':
-            if (build.status != 'Started' && build.status != 'Completed') {
+            if (build.status != 'Started' && build.status != 'Completed' && build.status != 'Part Received') {
               throw new InternalError({ message: 'Build not in Started or Completed state' })
             }
-            if (req.body.updateType == 'GRN Uploaded') {
+            if (req.body.updateType == 'GRN Uploaded' || req.body.updateType == '3-Way Match Completed') {
               build.status = 'Part Received'
             } else {
               build.status = 'Started'
@@ -255,9 +260,11 @@ module.exports = {
               let orderComplete = true
               for (let part of part_order) {
                 let [build] = await db.getBuildById(part.build_id)
-                if (build.status != 'Part Received') {
-                  orderComplete = false
-                  break
+                if (typeof build?.status !== 'undefined') {
+                  if (build.status != 'Part Received') {
+                    orderComplete = false
+                    break
+                  }
                 }
               }
               if (orderComplete) {
@@ -267,16 +274,22 @@ module.exports = {
               }
             }
           } else {
+            await db.removeTransactionBuild(transaction.id)
+            if (type === 'Schedule' || type === 'Start') {
+              await db.removeBuild(id)
+            }
             return {
               status: 400,
               response: {
-                message: 'No Token Ownership',
+                message: result.message,
               },
             }
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
-          await db.insertBuildTransaction(id, type, 'Failed', 0)
+          if (type === 'Schedule' || type === 'Start') {
+            await db.removeBuild(id)
+          }
           throw err
         }
         return {

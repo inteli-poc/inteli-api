@@ -70,7 +70,7 @@ const apiDoc = {
           },
           name: {
             description: 'Name of the recipe',
-            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            type: 'string',
             example: 'Low-pressure compressor',
           },
           imageAttachmentId: {
@@ -167,6 +167,69 @@ const apiDoc = {
             description: 'size of the uploaded attachment',
             type: 'integer',
             minimum: 1,
+          },
+        },
+      },
+      NewMachiningOrder: {
+        type: 'object',
+        description: 'A manufacture run that produces machining order',
+        properties: {
+          externalId: {
+            description: 'machining id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
+          partId: {
+            $ref: '#/components/schemas/ObjectReference',
+          },
+          supplier: {
+            description:
+              'Name of the supplier who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+        },
+      },
+      MachiningOrder: {
+        type: 'object',
+        description: 'A manufacture run that produces machining order',
+        properties: {
+          id: {
+            description: 'local id of the build',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          externalId: {
+            description: 'machining id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
+          },
+          partId: {
+            $ref: '#/components/schemas/ObjectReference',
+          },
+          supplier: {
+            description:
+              'Name of the supplier who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+          taskNumber: {
+            description: 'task number of the machining order in an external ERP',
+            oneOf: [{ $ref: '#/components/schemas/OnChainLiteral' }, { type: 'null' }],
+            example: 'some-task-number',
+          },
+          buyer: {
+            description:
+              'Name of the buyer who ran the machining order. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'BuyerAlias',
+          },
+          buildExternalId: {
+            description: 'build id of the machining order in an external system',
+            allOf: [{ $ref: '#/components/schemas/OnChainLiteral' }],
+            example: 'some-external-system-id',
           },
         },
       },
@@ -327,8 +390,30 @@ const apiDoc = {
             description: 'local id of the part',
             allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
           },
+          buildId: {
+            description: 'local id of the build',
+            oneOf: [{ $ref: '#/components/schemas/ObjectReference' }, { type: 'null' }],
+          },
+          buildExternalId: {
+            description: 'external id of the build',
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          orderId: {
+            description: 'local id of the order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          orderExternalId: {
+            description: 'external id of the order',
+            type: 'string',
+          },
           supplier: {
-            description: 'Name of the suppler who created the part. This information is not stored directly on-chain',
+            description: 'Name of the supplier who created the part. This information is not stored directly on-chain',
+            type: 'string',
+            maxLength: 255,
+            example: 'SupplierAlias',
+          },
+          buyer: {
+            description: 'Name of the buyer who created the part. This information is not stored directly on-chain',
             type: 'string',
             maxLength: 255,
             example: 'SupplierAlias',
@@ -377,6 +462,10 @@ const apiDoc = {
                 },
               },
             },
+          },
+          comments: {
+            description: 'comments on part',
+            oneOf: [{ type: 'string' }, { type: 'null' }],
           },
         },
       },
@@ -499,6 +588,9 @@ const apiDoc = {
                 buildExternalId: {
                   type: 'string',
                 },
+                machiningOrderExternalId: {
+                  type: 'string',
+                },
                 recipe: {
                   type: 'object',
                   properties: {
@@ -564,6 +656,10 @@ const apiDoc = {
                   description: 'line text for the order',
                   type: 'string',
                 },
+                comments: {
+                  description: 'comments on line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
+                },
               },
             },
           },
@@ -593,6 +689,36 @@ const apiDoc = {
           },
         },
       },
+      NewMachiningOrderSubmission: {
+        description: 'A new action on an order that causes it to be submitted',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderSubmission: {
+        description: 'An action on an order that causes it to be submitted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      NewMachiningOrderAcceptance: {
+        description: 'A new action on an order that causes it to be accepted',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderAcceptance: {
+        description: 'An action on an order that causes it to be accepted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      NewMachiningOrderPartShipped: {
+        description: 'A new action on an order that causes it to be part shipped',
+        type: 'object',
+        properties: {},
+      },
+      MachiningOrderPartShipped: {
+        description: 'An action on an order that causes it to be part shipped',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
       NewOrderSubmission: {
         description: 'A new action on an order that causes it to be submitted',
         type: 'object',
@@ -602,6 +728,27 @@ const apiDoc = {
         description: 'An action on an order that causes it to be submitted',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+      },
+      OrderSubmissionGet: {
+        description: 'An action on an order that causes it to be submitted',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }],
+        properties: {
+          items: {
+            description: 'part details',
+            type: 'array',
+            items: {
+              description: 'part details',
+              allOf: [{ $ref: '#/components/schemas/NewPart' }],
+              properties: {
+                id: {
+                  description: 'id of the part',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+              },
+            },
+          },
+        },
       },
       NewOrderAcceptance: {
         description: 'A new action on an order that causes it to be accepted',
@@ -623,6 +770,40 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }],
       },
+      machiningOrderHistory: {
+        description: 'History of the order',
+        type: 'object',
+        properties: {
+          id: {
+            description: 'id of machining order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          externalId: {
+            description: 'external of machining order',
+            type: 'string',
+          },
+          partId: {
+            description: 'id of part',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+          history: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                },
+                submittedAt: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
+            },
+          },
+        },
+      },
+
       orderHistory: {
         description: 'History of the order',
         type: 'object',
@@ -650,6 +831,10 @@ const apiDoc = {
                   format: 'date-time',
                 },
                 requiredBy: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+                confirmedReceiptDate: {
                   type: 'string',
                   format: 'date-time',
                 },
@@ -703,6 +888,70 @@ const apiDoc = {
             description: 'number of parts',
             type: 'integer',
           },
+          jobs: {
+            description: 'number of jobs',
+            type: 'integer',
+          },
+        },
+      },
+      NotificationsCount: {
+        description: 'Total number of notifications',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
+      UpdateNotification: {
+        description: 'update notification',
+        type: 'object',
+        properties: {
+          notifications: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: {
+                  description: 'id of the notification',
+                  allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                read: {
+                  type: 'boolean',
+                },
+                delete: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        },
+      },
+      orderCount: {
+        description: 'Total number of orders',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
+      machiningOrderCount: {
+        description: 'Total number of machining orders',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
+        },
+      },
+      recipeCount: {
+        description: 'Total number of recipes',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+          },
         },
       },
       NewOrderAmendment: {
@@ -719,6 +968,10 @@ const apiDoc = {
                 id: {
                   description: 'id of the part',
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                comments: {
+                  description: 'comments for line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
                 },
               },
             },
@@ -744,6 +997,10 @@ const apiDoc = {
                 id: {
                   description: 'id of the part',
                   allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                },
+                comments: {
+                  description: 'comments for line item',
+                  oneOf: [{ type: 'string' }, { type: 'null' }],
                 },
               },
             },
@@ -808,6 +1065,41 @@ const apiDoc = {
           'An action on a build that causes it to be registered on-chain. Build schedule actions also result in the creation of the Part entities that are being constructed in the build',
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
+      },
+      NewMachiningOrderStart: {
+        description: 'A new action on a Machining that causes it to be registered on-chain as started',
+        type: 'object',
+        properties: {
+          startedAt: {
+            description: 'Date and time at which the Machining order actually started',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      MachiningOrderStart: {
+        description: 'An action on a Machining Order that causes it to be registered on-chain as started',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewMachiningOrderStart' }],
+      },
+      NewMachiningOrderComplete: {
+        description: 'A new action on a Machining that causes it to be registered on-chain as started',
+        type: 'object',
+        properties: {
+          completedAt: {
+            description: 'Date and time at which the Machining order actually completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      MachiningOrderComplete: {
+        description: 'An action on a Machining Order that causes it to be registered on-chain as started',
+        type: 'object',
+        allOf: [
+          { $ref: '#/components/schemas/ChainAction' },
+          { $ref: '#/components/schemas/NewMachiningOrderComplete' },
+        ],
       },
       NewBuildStart: {
         description: 'A new action on a build that causes it to be registered on-chain as started',
@@ -943,6 +1235,47 @@ const apiDoc = {
           { $ref: '#/components/schemas/ChainAction' },
           { $ref: '#/components/schemas/NewPartDeliveryDateUpdate' },
         ],
+      },
+      Notification: {
+        description: 'notification',
+        type: 'object',
+        properties: {
+          description: {
+            type: 'string',
+          },
+          orderId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          buildId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          partId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          orderExternalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          buildExternalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          read: {
+            type: 'boolean',
+          },
+          delete: {
+            type: 'boolean',
+          },
+          externalId: {
+            oneOf: [{ type: 'string' }, { type: 'null' }],
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          id: {
+            description: 'id of order',
+            allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+          },
+        },
       },
     },
     ...securitySchemes,

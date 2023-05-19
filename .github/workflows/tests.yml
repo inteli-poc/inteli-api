@@ -44,7 +44,7 @@ jobs:
         run: ct lint --validate-maintainers false --charts helm/${{ needs.repo_ids.outputs.repo_name }}/ --chart-repos bitnami=https://charts.bitnami.com/bitnami,k8s-at-home=https://k8s-at-home.com/charts
 
   helm-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [repo_ids]
     steps:
       - name: Checkout

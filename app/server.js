@@ -27,12 +27,22 @@ async function createHttpServer() {
   app.use(bodyParser.json())
 
   app.use((req, res, next) => {
+    req.setTimeout(0)
+    next()
+  })
+
+  app.use((req, res, next) => {
     if (req.path !== '/health') requestLogger(req, res)
     next()
   })
 
   app.get('/health', async (req, res) => {
     res.status(200).send({ version: API_VERSION, status: 'ok' })
+  })
+
+  app.get('/v1/health', async (req, res) => {
+    await verifyJwks(req)
+    res.status(200).send('ok')
   })
 
   const multerOptions = {

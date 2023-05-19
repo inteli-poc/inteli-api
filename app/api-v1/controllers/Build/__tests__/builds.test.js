@@ -9,6 +9,7 @@ const dscpApiUrl = `http://${DSCP_API_HOST}:${DSCP_API_PORT}`
 
 describe('build.getAll', () => {
   let stubs = {}
+  let req = { query: {} }
   beforeEach(async () => {
     stubs.getBuild = stub(db, 'getBuild').resolves([
       {
@@ -32,7 +33,7 @@ describe('build.getAll', () => {
     stubs.getPartIdsByBuildId.restore()
   })
   it('should resolve to 200', async () => {
-    const result = await buildController.getAll()
+    const result = await buildController.getAll(req)
     expect(result.status).to.equal(200)
   })
 })

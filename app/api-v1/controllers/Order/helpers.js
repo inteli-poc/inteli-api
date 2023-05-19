@@ -136,6 +136,7 @@ exports.getResultForOrderGet = async (result, req) => {
         partObj['confirmedReceiptDate'] = part.confirmed_receipt_date.toISOString()
         partObj['description'] = part.description
         partObj['forecastedDeliveryDate'] = part.forecast_delivery_date.toISOString()
+        partObj['comments'] = part.comments
         let [build] = await db.getBuildById(part.build_id)
         if (build) {
           partObj['buildStatus'] = build.status
@@ -144,6 +145,10 @@ exports.getResultForOrderGet = async (result, req) => {
           }
           partObj['updatedAt'] = build.updated_at.toISOString()
           partObj['buildExternalId'] = build.external_id
+        }
+        let [machiningOrder] = await db.getMachiningOrderByPartId(partId)
+        if (machiningOrder) {
+          partObj['machiningOrderExternalId'] = machiningOrder.external_id
         }
       }
       parts.push(partObj)
@@ -184,6 +189,7 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
       let comments
       let imageAttachmentId
       let updatedParts
+      let parts
       switch (type) {
         case 'Acknowledgement':
           try {
@@ -220,6 +226,16 @@ exports.getResultForOrderTransactionGet = async (orderTransactions, type, id) =>
           for (let partId of updatedParts) {
             let req = { params: { id: partId } }
             let partResponse = await partController.transaction.getAll('amendment')(req)
+            newItem['items'].push(partResponse.response[index])
+          }
+          break
+        case 'Submission':
+          parts = await getMetadata(item.token_id, 'parts')
+          parts = parts.data
+          newItem['items'] = []
+          for (let partId of parts) {
+            let req = { params: { id: partId } }
+            let partResponse = await partController.transaction.getAll('Creation')(req)
             newItem['items'].push(partResponse.response[index])
           }
           break

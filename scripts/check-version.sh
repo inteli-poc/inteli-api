@@ -4,8 +4,8 @@
 set -e
 
 function check_versions_consistent () {
-  local PACKAGE_VERSION=$(yq eval '.version' ./package.json)
-  local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./package-lock.json)
+  local PACKAGE_VERSION=$(yq eval '.version' ./package.json -oy)
+  local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./package-lock.json -oy)
   local HELM_VALUES_TAG_VERSION=$(yq eval '.image.tag' ./helm/inteli-api/values.yaml)
   local HELM_CHART_VERSION=$(yq eval '.version' ./helm/inteli-api/Chart.yaml)
   local HELM_CHART_APP_VERSION=$(yq eval '.appVersion' ./helm/inteli-api/Chart.yaml)
@@ -55,7 +55,7 @@ function check_version_greater () {
 # Get published git tags that match semver regex with a "v" prefix then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from package.json
-CURRENT_VERSION=$(yq eval '.version' ./package.json)
+CURRENT_VERSION=$(yq eval '.version' ./package.json -oy)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
