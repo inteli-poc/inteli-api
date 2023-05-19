@@ -5,6 +5,7 @@ const { mapRecipeData } = require('./helpers')
 const { BadRequestError, NotFoundError, InternalError } = require('../../../utils/errors')
 
 module.exports = {
+  // this function returns all recipes in the db
   get: async function (req) {
     let recipes
     if (req.query.searchQuery) {
@@ -39,6 +40,7 @@ module.exports = {
     )
     return { status: 200, response: result }
   },
+  // this function returns a particular recipe in the db
   getById: async function (req) {
     const { id } = req.params
     if (!id) throw new BadRequestError('missing params')
@@ -64,6 +66,7 @@ module.exports = {
       },
     }
   },
+  // this function creates a recipe in db
   create: async (req) => {
     if (!req.body) {
       throw new BadRequestError('no body provided')
@@ -116,6 +119,7 @@ module.exports = {
       },
     }
   },
+  // this function returns total count of recipes in db
   getCount: async function () {
     let totalRecipeCount = await db.getRecipeCount()
     return {
@@ -126,6 +130,7 @@ module.exports = {
     }
   },
   transaction: {
+    // this function returns all transactions of a particular type associated with a recipe
     get: async (req) => {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')
@@ -142,6 +147,7 @@ module.exports = {
         })),
       }
     },
+    // this function returns a particular transaction associated with a recipe
     getById: async (req) => {
       const { creationId, id } = req.params
       if (!id || !creationId) throw new BadRequestError('missing params')
@@ -154,6 +160,7 @@ module.exports = {
         creation: transaction,
       }
     },
+    // this function creates recipe transactions on chain
     create: async (req) => {
       const { id } = req.params
       if (!id) throw new BadRequestError('missing params')

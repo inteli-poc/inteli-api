@@ -7,6 +7,7 @@ const { createAttachmentFromFile, createAttachment, checkMimeType } = require('.
 const { NotFoundError, BadRequestError } = require('../../../utils/errors')
 
 module.exports = {
+  // this function returns all attachment in db
   get: async function () {
     const attachments = await db.getAttachments()
     if (attachments.length == 0) {
@@ -24,6 +25,7 @@ module.exports = {
       response: res,
     }
   },
+  // this function return a attachment by id
   getById: async function (req) {
     const { id } = req.params
     if (!id) throw new BadRequestError('missing params')
@@ -41,6 +43,7 @@ module.exports = {
     const result = await checkMimeType(orderedAccept, attachment, type)
     return result
   },
+  // this function creates a attachment in db
   create: async (req) => {
     if (req.headers['content-type'] === 'application/json') {
       logger.info('JSON attachment upload: %j', req.body)

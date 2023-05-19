@@ -12,6 +12,7 @@ const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 const partController = require('../Part/index')
 module.exports = {
+  // this function creates part, order in db and on chain
   post: async function (req) {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
@@ -110,6 +111,7 @@ module.exports = {
       },
     }
   },
+  // this function returns a particular order in db
   getById: async function (req) {
     let { id } = req.params
     if (!id) throw new BadRequestError('missing params')
@@ -120,6 +122,7 @@ module.exports = {
       response: response[0],
     }
   },
+  // this function returns all order in db
   get: async function (req) {
     let result
     if (req.query.searchQuery) {
@@ -141,6 +144,7 @@ module.exports = {
       response: response,
     }
   },
+  // this function returns total number of parts, jobs, design, order, manufacture, ship
   getSummary: async function () {
     let orders = await db.getOrders()
     let recipes = await db.getRecipes()
@@ -185,6 +189,7 @@ module.exports = {
       response: orderSummary,
     }
   },
+  // this function returns total number of orders in db
   getCount: async function () {
     let totalOrderCount = await db.getOrderCount()
     return {
@@ -195,6 +200,7 @@ module.exports = {
     }
   },
   transaction: {
+    // this functions return a particular transaction associated with the order
     getById: (type) => {
       return async (req) => {
         let id
@@ -221,6 +227,7 @@ module.exports = {
         }
       }
     },
+    // this function returns all transactions of a particular type associated with an order
     get: (type) => {
       return async (req) => {
         const { id } = req.params
@@ -233,6 +240,7 @@ module.exports = {
         }
       }
     },
+    // this function creates order transactions on chain
     create: (type) => {
       return async (req) => {
         let binary_blob = null
@@ -383,6 +391,7 @@ module.exports = {
         }
       }
     },
+    // this function returns all chain transactions associated with an order
     getHistory: async (req) => {
       let { id } = req.params
       if (!id) throw new BadRequestError('missing params')
