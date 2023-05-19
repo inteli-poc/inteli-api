@@ -2,6 +2,7 @@ const db = require('../../../db')
 const jsConvert = require('js-convert-case')
 
 module.exports = {
+  // this function returns all notifications in the db
   getAll: async function (req) {
     let notifications
     if (req.query.searchQuery) {
@@ -42,6 +43,7 @@ module.exports = {
       response: notifications,
     }
   },
+  // this function updates the existing notification in the db
   updateNotification: async function (req) {
     let notifications = req.body.notifications
     for (let index = 0; index < notifications.length; index++) {
@@ -52,6 +54,7 @@ module.exports = {
       response: req.body,
     }
   },
+  // this function returns the count of notifications
   getCount: async function (req) {
     let result
     let notificationsCount

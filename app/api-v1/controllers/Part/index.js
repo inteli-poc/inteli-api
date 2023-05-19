@@ -13,6 +13,7 @@ const {
 const { BadRequestError, NotFoundError } = require('../../../utils/errors')
 
 module.exports = {
+  // this function creates a part in db
   post: async function (req) {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
@@ -52,6 +53,7 @@ module.exports = {
       },
     }
   },
+  // this function returns all part in db
   getAll: async function (req) {
     let parts
     let metadataType = req.query.metadataType
@@ -66,6 +68,7 @@ module.exports = {
       response: result,
     }
   },
+  // this function returns a particular part in db
   get: async function (req) {
     let { id } = req.params
     if (!id) {
@@ -80,6 +83,7 @@ module.exports = {
     }
   },
   transaction: {
+    // this function returns all transactions of a particular type associated with a part
     getAll: (type) => {
       return async (req) => {
         let { id } = req.params
@@ -94,6 +98,7 @@ module.exports = {
         }
       }
     },
+    // this function returns a particular transaction associated with a part
     get: (type) => {
       return async (req) => {
         let { id } = req.params
@@ -126,6 +131,7 @@ module.exports = {
         }
       }
     },
+    // this function creates part transactions on chain
     create: (type) => {
       return async (req) => {
         let binary_blob

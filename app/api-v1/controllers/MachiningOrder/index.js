@@ -11,6 +11,7 @@ const {
 } = require('./helpers')
 
 module.exports = {
+  // this function returns all machining order in db
   get: async function (req) {
     let machiningOrder
     if (req.query.searchQuery) {
@@ -32,6 +33,7 @@ module.exports = {
       response: result,
     }
   },
+  // this function returns a machining order by id
   getById: async function (req) {
     const { id } = req.params
     if (!id) {
@@ -44,6 +46,7 @@ module.exports = {
       response: result[0],
     }
   },
+  // this function returns the total number of machining orders
   getCount: async function () {
     let totalOrderCount = await db.getMachiningOrderCount()
     return {
@@ -53,6 +56,7 @@ module.exports = {
       },
     }
   },
+  // this function creates a machining order in db
   post: async function (req) {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
@@ -84,6 +88,7 @@ module.exports = {
     return { status: 201, response: camelcaseObjectDeep(machiningOrder) }
   },
   transaction: {
+    // this function returns all transactions of a particular type associated with a machining order
     getAll: (type) => {
       return async (req) => {
         const { id } = req.params
@@ -101,6 +106,7 @@ module.exports = {
         }
       }
     },
+    // this function creates machining order transactions on chain
     create: (type) => {
       return async (req) => {
         const { id } = req.params
@@ -206,6 +212,7 @@ module.exports = {
         }
       }
     },
+    // this function returns  all transactions associated with a machining order
     getHistory: async (req) => {
       let { id } = req.params
       if (!id) throw new BadRequestError('missing params')
@@ -290,6 +297,7 @@ module.exports = {
         response: machiningOrderHistory,
       }
     },
+    // this function returns a particular transaction associated with a machining order
     get: (type) => {
       return async (req) => {
         const { id } = req.params

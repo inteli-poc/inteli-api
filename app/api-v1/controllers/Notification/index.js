@@ -3,6 +3,7 @@ const jsConvert = require('js-convert-case')
 let clients = []
 
 module.exports = {
+  // this function establishes an open connection with the client
   get: function (request, response) {
     const headers = {
       'Content-Type': 'text/event-stream',
@@ -21,6 +22,7 @@ module.exports = {
       clients = clients.filter((client) => client.id !== clientId)
     })
   },
+  //this function sends notification to the client and writes notification to db
   post: async function (request, response) {
     const newNotification = jsConvert.snakeKeys(request.body)
     let [insertedNotification] = await db.insertNotification(newNotification)

@@ -12,6 +12,9 @@ const {
 } = require('./helpers')
 
 module.exports = {
+  /*this function returns all builds in the db
+    also returns build with particular external id
+  */
   getAll: async function (req) {
     let build
     if (req.query.searchQuery) {
@@ -26,6 +29,7 @@ module.exports = {
       response: result,
     }
   },
+  // this function returns a build with a particular id
   getById: async function (req) {
     const { id } = req.params
     if (!id) {
@@ -39,6 +43,7 @@ module.exports = {
       response: result[0],
     }
   },
+  // this function returns attachments associated with build (ASN, Invoice, GRN)
   getBuildAttachments: async function (result) {
     for (let buildResponse of result) {
       let req = {}
@@ -78,6 +83,7 @@ module.exports = {
       }
     }
   },
+  // this function creates a new build in db
   create: async function (req) {
     if (!req.body) {
       throw new BadRequestError('missing req.body')
@@ -117,6 +123,7 @@ module.exports = {
     return { status: 201, response: camelcaseObjectDeep(build) }
   },
   transaction: {
+    // this function returns all chain transactios of a particular type associated with a build
     getAll: (type) => {
       return async (req) => {
         const { id } = req.params
@@ -130,6 +137,7 @@ module.exports = {
         }
       }
     },
+    // this function returns a particular transaction associated with a build
     get: (type) => {
       return async (req) => {
         const { id } = req.params
@@ -159,6 +167,7 @@ module.exports = {
         }
       }
     },
+    // this function creates build  transactions on the chain
     create: (type) => {
       return async (req) => {
         let binary_blob
