@@ -238,6 +238,20 @@ async function getOrders(limit, page) {
   }
 }
 
+async function getOrdersByDateRange(months = 6) {
+  // Default to 6 months if no value is passed
+  const targetDate = new Date();
+  targetDate.setMonth(targetDate.getMonth() - months); 
+  
+  const formattedDate = targetDate.toISOString();
+
+  return client('orders')
+    .select()
+    .where('created_at', '>=', formattedDate)  
+    .orderBy('created_at', 'desc');
+}
+
+
 async function getOrderCount() {
   return client('orders').count('*')
 }

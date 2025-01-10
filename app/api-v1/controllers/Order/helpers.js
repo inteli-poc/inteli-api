@@ -300,3 +300,49 @@ exports.mapOrderData = async (data, type) => {
     outputs: outputs,
   }
 }
+
+const getDeliveryStatus = (forecastedDeliveryDate, confirmedReceiptDate) => {
+  if (!forecastedDeliveryDate || !confirmedReceiptDate) {
+    return 'failed';
+  }
+
+  const forecastDate = new Date(forecastedDeliveryDate);
+  const receiptDate = new Date(confirmedReceiptDate);
+
+  const timeDifference = (receiptDate - forecastDate) / (1000 * 3600 * 24); // Difference in days
+
+  if (timeDifference < -7) {
+    return 'early';
+  } else if (timeDifference <= 7) {
+    return 'onTime';
+  } else if (timeDifference <= 30) {
+    return 'late';
+  } else {
+    return 'failed';
+  }
+};
+
+//function to filter orders from the past 6 months
+exports.filterOrdersByDate = (orders) => {
+  const statusByMonth = {};
+
+  orders.forEach(order => {
+      order.parts.forEach(part => {
+          const forecastedDeliveryDate = part.forecastedDeliveryDate;
+          const confirmedReceiptDate = part.confirmedReceiptDate;
+          const status = getDeliveryStatus(forecastedDeliveryDate, confirmedReceiptDate);
+          
+          const monthYear = new Date(forecastedDeliveryDate).toLocaleString('default', { month: 'short', year: 'numeric' });
+
+          if (!statusByMonth[monthYear]) {
+              statusByMonth[monthYear] = { early: 0, onTime: 0, late: 0, failed: 0 };
+          }
+          statusByMonth[monthYear][status] += 1;
+      });
+  });
+
+  return statusByMonth;
+};
+
+
+
