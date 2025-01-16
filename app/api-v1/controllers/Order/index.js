@@ -8,6 +8,7 @@ const {
   getPartHistory,
   getBuildHistory,
   filterOrdersByDate,
+  filterOrdersByPO,
 } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
@@ -210,6 +211,18 @@ module.exports = {
       return ({
         status: 200,
         response: filteredOrders,
+      });
+  },
+  getPOThroughputStatusByMonth: async (req, res) => {
+      const orders = await db.getOrdersByDateRange();
+      
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: 'No orders found for the last 6 months' });
+      }
+      const statusByMonth = filterOrdersByPO(orders);
+      return ({
+        status: 200,
+        response: statusByMonth,
       });
   },
   transaction: {

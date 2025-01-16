@@ -344,5 +344,43 @@ exports.filterOrdersByDate = (orders) => {
   return statusByMonth;
 };
 
+const getOrderStatusByPO = (order) => {
+  const status = {
+    acknowledged: 0,
+    invoiced: 0
+  };
+
+  if (order.status === 'AcknowledgedWithExceptions' || order.status === 'Accepted') {
+    status.acknowledged += 1;
+  }
+
+  order.parts.forEach(part => {
+    if (part.build && part.build.status === 'Completed' && part.build.update_type === 'Invoice Uploaded') {
+      status.invoiced += 1;
+    }
+  });
+
+  return status;
+};
+
+exports.filterOrdersByPO = (orders) => {
+  const statusByMonth = {};
+
+  for (let order of orders) {
+    const orderStatus = getOrderStatusByPO(order);
+    const orderDate = new Date(order.created_at);
+    const monthYear = orderDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+
+    if (!statusByMonth[monthYear]) {
+      statusByMonth[monthYear] = { acknowledged: 0, invoiced: 0 };
+    }
+
+    statusByMonth[monthYear].acknowledged += orderStatus.acknowledged;
+    statusByMonth[monthYear].invoiced += orderStatus.invoiced;
+  }
+
+  return statusByMonth;
+};
+
 
 

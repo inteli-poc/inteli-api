@@ -238,8 +238,9 @@ async function getOrders(limit, page) {
   }
 }
 
-async function getOrdersByDateRange(months = 6) {
+async function getOrdersByDateRange() {
   // Default to 6 months if no value is passed
+  const months = 6;
   const targetDate = new Date();
   targetDate.setMonth(targetDate.getMonth() - months); 
   
