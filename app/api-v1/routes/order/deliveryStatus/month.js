@@ -1,10 +1,10 @@
-const { getDefaultSecurity } = require('../../../utils/auth');
-const order = require('../../controllers/Order');
-const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator');
+const { getDefaultSecurity } = require('../../../../utils/auth');
+const order = require('../../../controllers/Order');
+const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator');
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.getDeliveryStatusByMonth, {
+    GET: buildValidatedJsonHandler(order.getDeliveryStatus('month'), {
       summary: 'List Purchase Order Status for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
       parameters: [],  
@@ -37,6 +37,3 @@ module.exports = function () {
 
   return doc;
 };
-
-
-
