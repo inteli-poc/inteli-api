@@ -13,7 +13,7 @@ const {
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 const partController = require('../Part/index')
-const mockOrders = require('../../../../mock-api/mockOrders.json'); // Import mock data
+
 module.exports = {
   post: async function (req) {
     if (!req.body) {
@@ -197,16 +197,15 @@ module.exports = {
       },
     }
   },
-  getDeliveryStatusByMonth: async function (req, res) {
+  getDeliveryStatus: async function (type, req, res) {
       const currentDate = new Date();
       const orders = await db.getOrdersByDateRange();
-      
       
       const endDate = new Date(currentDate); 
       const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 6, 1);
 
       // Filter orders based on the past 6 months
-      const filteredOrders = filterOrdersByDate(orders);
+      const filteredOrders = filterOrdersByDate(orders, type);
 
       return ({
         status: 200,

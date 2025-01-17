@@ -323,25 +323,35 @@ const getDeliveryStatus = (forecastedDeliveryDate, confirmedReceiptDate) => {
 };
 
 //function to filter orders from the past 6 months
-exports.filterOrdersByDate = (orders) => {
-  const statusByMonth = {};
+exports.filterOrdersByDate = (orders, type) => {
+  const statusCount = type === 'total' ? {
+    'early': 0,
+    'onTime': 0,
+    'late': 0,
+    'failed': 0,
+  } : {};
 
   orders.forEach(order => {
       order.parts.forEach(part => {
           const forecastedDeliveryDate = part.forecastedDeliveryDate;
           const confirmedReceiptDate = part.confirmedReceiptDate;
           const status = getDeliveryStatus(forecastedDeliveryDate, confirmedReceiptDate);
-          
-          const monthYear = new Date(forecastedDeliveryDate).toLocaleString('default', { month: 'short', year: 'numeric' });
 
-          if (!statusByMonth[monthYear]) {
-              statusByMonth[monthYear] = { early: 0, onTime: 0, late: 0, failed: 0 };
+          if(type === 'total') {
+            statusCount[status] += 1;
           }
-          statusByMonth[monthYear][status] += 1;
+          else if(type === 'month') {
+            const monthYear = new Date(forecastedDeliveryDate).toLocaleString('default', { month: 'short', year: 'numeric' });
+
+            if (!statusCount[monthYear]) {
+              statusCount[monthYear] = { early: 0, onTime: 0, late: 0, failed: 0 };
+            }
+            statusCount[monthYear][status] += 1;
+          }
       });
   });
 
-  return statusByMonth;
+  return statusCount;
 };
 
 const getOrderStatusByPO = (order) => {
