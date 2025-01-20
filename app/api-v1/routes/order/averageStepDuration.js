@@ -1,11 +1,11 @@
-const { getDefaultSecurity } = require('../../../../utils/auth');
-const order = require('../../../controllers/Order');
-const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseValidator');
+const { getDefaultSecurity } = require('../../../utils/auth');
+const order = require('../../controllers/Order');
+const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValidator');
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.getDeliveryStatus('month'), {
-      summary: 'List Purchase Order Status for past 6 months',
+    GET: buildValidatedJsonHandler(order.getAverageDurationForEachStep, {
+      summary: 'Average Step Duration for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
       parameters: [],  
       responses: {
@@ -14,7 +14,7 @@ module.exports = function () {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/orderDeliveryStatus', 
+                $ref: '#/components/schemas/orderAverageStepDuration', 
               },
             },
           },

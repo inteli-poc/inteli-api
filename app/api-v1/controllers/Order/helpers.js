@@ -392,5 +392,12 @@ exports.filterOrdersByPO = (orders) => {
   return statusByMonth;
 };
 
+exports.calculateDuration = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
+  const timeDifference = (end - start) / (1000 * 3600 * 24); 
+
+  return Math.round(timeDifference);
+}
 

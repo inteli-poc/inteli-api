@@ -9,6 +9,7 @@ const {
   getBuildHistory,
   filterOrdersByDate,
   filterOrdersByPO,
+  calculateDuration,
 } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
@@ -224,6 +225,52 @@ module.exports = {
         response: statusByMonth,
       });
   },
+  getAverageDurationForEachStep: async (req, res) => {
+    const orders = await db.getOrdersByDateRange();
+    //const orders = mockOrders.orders; // Use mock data
+    let stepDurations = {
+      'Purchase Order Shared': { totalDuration: 0, count: 0 },
+      'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },
+      'Purchase Order Amended': { totalDuration: 0, count: 0 },
+      'Purchase Order Accepted': { totalDuration: 0, count: 0 },
+      'Purchase Order Cancelled': { totalDuration: 0, count: 0 },
+      'Manufacturing Job Started': { totalDuration: 0, count: 0 },
+      'Part Received': { totalDuration: 0, count: 0 },
+      'Shipped & Invoice Received': { totalDuration: 0, count: 0 },
+    };
+    console.log(orders);
+    const histories = await Promise.all(orders.map(order => module.exports.transaction.getHistory({ params: { id: order.id } })));
+    console.log(histories);
+
+
+    for (let orderHistory of histories) {
+      for (let part of orderHistory.parts) {
+        let previousSubmittedAt = null;
+        for (let stage of part.history) {
+          if (previousSubmittedAt) {
+            const duration = calculateDuration(previousSubmittedAt, stage.submittedAt);
+            if (stepDurations[stage.status]) {
+              stepDurations[stage.status].totalDuration += duration;
+              stepDurations[stage.status].count += 1;
+            }
+          }
+          previousSubmittedAt = stage.submittedAt;
+        }
+      }
+    }
+    const averageDurations = {};
+    for (let status in stepDurations) {
+      if (stepDurations[status].count > 0) {
+        averageDurations[status] = stepDurations[status].totalDuration / stepDurations[status].count;
+      } else {
+        averageDurations[status] = 0;
+      }
+    }
+    return ({
+      status: 200,
+      response: averageDurations,
+    });
+  },    
   transaction: {
     getById: (type) => {
       return async (req) => {
@@ -457,6 +504,7 @@ module.exports = {
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
       orderHistory['parts'] = []
+
       for (let partId of items) {
         let partObj = {}
         let [part] = await db.getPartById(partId)
@@ -550,6 +598,17 @@ module.exports = {
           })
         }
       }
+
+      let previousSubmittedAt = null;
+      for (let part of orderHistory.parts) {
+        for (let stage of part.history) {
+          if (previousSubmittedAt) {
+            stage['duration'] = calculateDuration(previousSubmittedAt, stage.submittedAt);
+          }
+          previousSubmittedAt = stage.submittedAt;
+        }
+      }
+
       return {
         status: 200,
         response: orderHistory,
@@ -557,3 +616,8 @@ module.exports = {
     },
   },
 }
+
+
+
+
+
