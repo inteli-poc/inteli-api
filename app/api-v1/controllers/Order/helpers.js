@@ -109,6 +109,7 @@ exports.getResultForOrderGet = async (result, req) => {
     newItem['id'] = item['id']
     newItem['status'] = item['status']
     newItem['updatedAt'] = item['updated_at'].toISOString()
+    newItem['createdAt'] = item['created_at'].toISOString()
     let parts = []
     for (let partId of item['items']) {
       let partObj = {}
@@ -378,9 +379,8 @@ exports.filterOrdersByPO = (orders) => {
 
   for (let order of orders) {
     const orderStatus = getOrderStatusByPO(order);
-    const orderDate = new Date(order.created_at);
+    const orderDate = new Date(order.createdAt);
     const monthYear = orderDate.toLocaleString('default', { month: 'short', year: 'numeric' });
-
     if (!statusByMonth[monthYear]) {
       statusByMonth[monthYear] = { acknowledged: 0, invoiced: 0 };
     }

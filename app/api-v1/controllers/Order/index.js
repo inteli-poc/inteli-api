@@ -199,14 +199,14 @@ module.exports = {
     }
   },
   getDeliveryStatus: async function (type, req, res) {
-      const currentDate = new Date();
-      const orders = await db.getOrdersByDateRange();
-      
+      const currentDate = new Date()
+      const result = await db.getOrdersByDateRange()
+      const orders = await getResultForOrderGet(result, req)
       const endDate = new Date(currentDate); 
-      const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 6, 1);
+      const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 6, 1)
 
       // Filter orders based on the past 6 months
-      const filteredOrders = filterOrdersByDate(orders, type);
+      const filteredOrders = filterOrdersByDate(orders, type)
 
       return ({
         status: 200,
@@ -214,12 +214,13 @@ module.exports = {
       });
   },
   getPOThroughputStatusByMonth: async (req, res) => {
-      const orders = await db.getOrdersByDateRange();
+    const result = await db.getOrdersByDateRange()
+    const orders = await getResultForOrderGet(result, req)
       
       if (!orders || orders.length === 0) {
         return res.status(404).json({ message: 'No orders found for the last 6 months' });
       }
-      const statusByMonth = filterOrdersByPO(orders);
+      const statusByMonth = filterOrdersByPO(orders)
       return ({
         status: 200,
         response: statusByMonth,
