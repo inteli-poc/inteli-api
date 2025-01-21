@@ -672,6 +672,7 @@ module.exports = {
   getPartsByOrderId,
   getPartByIDs,
   checkDuplicateExternalId,
+  getOrdersByDateRange,
   getOrderCount,
   getRecipeCount,
   getOrdersBySearchQuery,
