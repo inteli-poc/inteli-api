@@ -522,7 +522,7 @@ module.exports = {
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
       orderHistory['parts'] = []
-
+      // let previousSubmittedAt = null
       for (let partId of items) {
         let partObj = {}
         let [part] = await db.getPartById(partId)
@@ -634,8 +634,3 @@ module.exports = {
     },
   },
 }
-
-
-
-
-
