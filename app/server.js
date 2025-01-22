@@ -17,12 +17,21 @@ const { handleErrors } = require('./utils/errors')
 const { verifyJwks } = require('./utils/auth')
 const crypto = require('crypto')
 const fs = require('fs').promises
+const cors = require('cors')
 
 async function createHttpServer() {
   const app = express()
   const requestLogger = pinoHttp({ logger })
 
-  app.use(cors())
+  // CORS Configuration
+  const corsOptions = {
+    origin: '*', 
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+    credentials: true, 
+  } 
+  
+  app.use(cors(corsOptions))
   app.use(compression())
   app.use(bodyParser.json())
 
