@@ -228,7 +228,6 @@ module.exports = {
   },
   getAverageDurationForEachStep: async (req, res) => {
     const orders = await db.getOrdersByDateRange();
-    //const orders = mockOrders.orders; // Use mock data
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
       'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },
@@ -239,13 +238,10 @@ module.exports = {
       'Part Received': { totalDuration: 0, count: 0 },
       'Shipped & Invoice Received': { totalDuration: 0, count: 0 },
     };
-    console.log(orders);
     const histories = await Promise.all(orders.map(order => module.exports.transaction.getHistory({ params: { id: order.id } })));
-    console.log(histories);
-
-
+    
     for (let orderHistory of histories) {
-      for (let part of orderHistory.parts) {
+      for (let part of orderHistory.response.parts) {
         let previousSubmittedAt = null;
         for (let stage of part.history) {
           if (previousSubmittedAt) {
