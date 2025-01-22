@@ -17,6 +17,7 @@ const { handleErrors } = require('./utils/errors')
 const { verifyJwks } = require('./utils/auth')
 const crypto = require('crypto')
 const fs = require('fs').promises
+const cors = require('cors')
 
 async function createHttpServer() {
   const app = express()
