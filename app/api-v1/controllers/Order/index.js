@@ -223,7 +223,7 @@ module.exports = {
       response: statusByMonth,
     }
   },
-  getAverageDurationForEachStep: async function() {
+  getAverageDurationForEachStep: async function () {
     const orders = await db.getOrdersByDateRange()
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
