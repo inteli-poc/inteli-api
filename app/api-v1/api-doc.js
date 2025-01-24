@@ -1277,6 +1277,21 @@ const apiDoc = {
           },
         },
       },
+      orderDeliveryStatus: {
+        description: 'Gets data on Purchase Order forecast delivery performance',
+        type: 'object',
+        properties: {},
+      },
+      orderThroughputStatus: {
+        description: 'Gets data on Purchase Order throughput status',
+        type: 'object',
+        properties: {},
+      },
+      orderAverageStepDuration: {
+        description: 'Gets data on average duration for each Purchase Order step',
+        type: 'object',
+        properties: {},
+      },
     },
     ...securitySchemes,
   },

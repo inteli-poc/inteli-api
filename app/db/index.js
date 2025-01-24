@@ -240,18 +240,13 @@ async function getOrders(limit, page) {
 
 async function getOrdersByDateRange() {
   // Default to 6 months if no value is passed
-  const months = 6;
-  const targetDate = new Date();
-  targetDate.setMonth(targetDate.getMonth() - months); 
-  
-  const formattedDate = targetDate.toISOString();
+  const months = 6
+  const targetDate = new Date()
+  targetDate.setMonth(targetDate.getMonth() - months)
+  const formattedDate = targetDate.toISOString()
 
-  return client('orders')
-    .select()
-    .where('created_at', '>=', formattedDate)  
-    .orderBy('created_at', 'desc');
+  return client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
 }
-
 
 async function getOrderCount() {
   return client('orders').count('*')

@@ -304,100 +304,104 @@ exports.mapOrderData = async (data, type) => {
 
 const getDeliveryStatus = (forecastedDeliveryDate, confirmedReceiptDate) => {
   if (!forecastedDeliveryDate || !confirmedReceiptDate) {
-    return 'failed';
+    return 'failed'
   }
 
-  const forecastDate = new Date(forecastedDeliveryDate);
-  const receiptDate = new Date(confirmedReceiptDate);
+  const forecastDate = new Date(forecastedDeliveryDate)
+  const receiptDate = new Date(confirmedReceiptDate)
 
-  const timeDifference = (receiptDate - forecastDate) / (1000 * 3600 * 24); // Difference in days
+  const timeDifference = (receiptDate - forecastDate) / (1000 * 3600 * 24) // Difference in days
 
   if (timeDifference < -7) {
-    return 'early';
+    return 'early'
   } else if (timeDifference <= 7) {
-    return 'onTime';
+    return 'onTime'
   } else if (timeDifference <= 30) {
-    return 'late';
+    return 'late'
   } else {
-    return 'failed';
+    return 'failed'
   }
-};
+}
 
 //function to filter orders from the past 6 months
 exports.filterOrdersByDate = (orders, type) => {
-  const statusCount = type === 'total' ? {
-    'early': 0,
-    'onTime': 0,
-    'late': 0,
-    'failed': 0,
-  } : {};
+  const statusCount =
+    type === 'total'
+      ? {
+          early: 0,
+          onTime: 0,
+          late: 0,
+          failed: 0,
+        }
+      : {}
 
-  orders.forEach(order => {
-      order.parts.forEach(part => {
-          const forecastedDeliveryDate = part.forecastedDeliveryDate;
-          const confirmedReceiptDate = part.confirmedReceiptDate;
-          const status = getDeliveryStatus(forecastedDeliveryDate, confirmedReceiptDate);
+  orders.forEach((order) => {
+    order.parts.forEach((part) => {
+      const forecastedDeliveryDate = part.forecastedDeliveryDate
+      const confirmedReceiptDate = part.confirmedReceiptDate
+      const status = getDeliveryStatus(forecastedDeliveryDate, confirmedReceiptDate)
 
-          if(type === 'total') {
-            statusCount[status] += 1;
-          }
-          else if(type === 'month') {
-            const monthYear = new Date(forecastedDeliveryDate).toLocaleString('default', { month: 'short', year: 'numeric' });
+      if (type === 'total') {
+        statusCount[status] += 1
+      } else if (type === 'month') {
+        const monthYear = new Date(forecastedDeliveryDate).toLocaleString('default', {
+          month: 'short',
+          year: 'numeric',
+        })
 
-            if (!statusCount[monthYear]) {
-              statusCount[monthYear] = { early: 0, onTime: 0, late: 0, failed: 0 };
-            }
-            statusCount[monthYear][status] += 1;
-          }
-      });
-  });
+        if (!statusCount[monthYear]) {
+          statusCount[monthYear] = { early: 0, onTime: 0, late: 0, failed: 0 }
+        }
+        statusCount[monthYear][status] += 1
+      }
+    })
+  })
 
-  return statusCount;
-};
+  return statusCount
+}
 
 const getOrderStatusByPO = (order) => {
   const status = {
     acknowledged: 0,
-    invoiced: 0
-  };
+    invoiced: 0,
+  }
 
   if (order.status === 'AcknowledgedWithExceptions' || order.status === 'Accepted') {
-    status.acknowledged += 1;
+    status.acknowledged += 1
   }
 
-  order.parts.forEach(part => {
+  order.parts.forEach((part) => {
     if (part.build && part.build.status === 'Completed' && part.build.update_type === 'Invoice Uploaded') {
-      status.invoiced += 1;
+      status.invoiced += 1
     }
-  });
+  })
 
-  return status;
-};
-
-exports.filterOrdersByPO = (orders) => {
-  const statusByMonth = {};
-
-  for (let order of orders) {
-    const orderStatus = getOrderStatusByPO(order);
-    const orderDate = new Date(order.createdAt);
-    const monthYear = orderDate.toLocaleString('default', { month: 'short', year: 'numeric' });
-    if (!statusByMonth[monthYear]) {
-      statusByMonth[monthYear] = { acknowledged: 0, invoiced: 0 };
-    }
-
-    statusByMonth[monthYear].acknowledged += orderStatus.acknowledged;
-    statusByMonth[monthYear].invoiced += orderStatus.invoiced;
-  }
-
-  return statusByMonth;
-};
-
-exports.calculateDuration = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  const timeDifference = (end - start) / (1000 * 3600 * 24); 
-
-  return Math.round(timeDifference);
+  return status
 }
 
+exports.filterOrdersByPO = (orders) => {
+  const statusByMonth = {}
+
+  for (let order of orders) {
+    const orderStatus = getOrderStatusByPO(order)
+    const orderDate = new Date(order.createdAt)
+    const monthYear = orderDate.toLocaleString('default', { month: 'short', year: 'numeric' })
+    if (!statusByMonth[monthYear]) {
+      statusByMonth[monthYear] = { acknowledged: 0, invoiced: 0 }
+    }
+
+    statusByMonth[monthYear].acknowledged += orderStatus.acknowledged
+    statusByMonth[monthYear].invoiced += orderStatus.invoiced
+  }
+
+  return statusByMonth
+}
+
+exports.calculateDuration = (startDate, endDate) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  const timeDifference = (end - start) / (1000 * 3600 * 24)
+
+  return Math.round(timeDifference)
+}
