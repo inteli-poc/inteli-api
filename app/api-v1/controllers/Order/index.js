@@ -198,7 +198,9 @@ module.exports = {
       },
     }
   },
-  getDeliveryStatus: async function (type, req) {
+  getDeliveryStatus: async function (req) {
+    const { type, persona } = req.params
+    console.log('type = ', type, ' persona = ', persona)
     const result = await db.getOrdersByDateRange()
     const orders = await getResultForOrderGet(result, req)
 

@@ -238,14 +238,18 @@ async function getOrders(limit, page) {
   }
 }
 
-async function getOrdersByDateRange() {
+async function getOrdersByDateRange(persona) {
   // Default to 6 months if no value is passed
   const months = 6
   const targetDate = new Date()
   targetDate.setMonth(targetDate.getMonth() - months)
   const formattedDate = targetDate.toISOString()
-
-  return client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
+  if (persona === 'BUYER') {
+    return client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
+  } else {
+    // TODO: include supplier in query
+    return client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
+  }
 }
 
 async function getOrderCount() {
