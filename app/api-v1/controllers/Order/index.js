@@ -198,13 +198,11 @@ module.exports = {
       },
     }
   },
-  getDeliveryStatus: async function (req) {
-    const { type, persona } = req.params
-    console.log('type = ', type, ' persona = ', persona)
-    const result = await db.getOrdersByDateRange()
+  getDeliveryStatus: async function (type, req) {
+    const {supplier} = req.query
+    const result = await db.getOrdersByDateRange(supplier)
     const orders = await getResultForOrderGet(result, req)
 
-    // Filter orders based on the past 6 months
     const filteredOrders = filterOrdersByDate(orders, type)
 
     return {
@@ -213,7 +211,8 @@ module.exports = {
     }
   },
   getPOThroughputStatusByMonth: async (req, res) => {
-    const result = await db.getOrdersByDateRange()
+    const { supplier } = req.query
+    const result = await db.getOrdersByDateRange(supplier)
     const orders = await getResultForOrderGet(result, req)
 
     if (!orders || orders.length === 0) {
@@ -225,8 +224,9 @@ module.exports = {
       response: statusByMonth,
     }
   },
-  getAverageDurationForEachStep: async function () {
-    const orders = await db.getOrdersByDateRange()
+  getAverageDurationForEachStep: async function() {
+    const {supplier} = req.query
+    const orders = await db.getOrdersByDateRange(supplier)
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
       'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },

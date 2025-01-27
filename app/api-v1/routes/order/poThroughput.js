@@ -7,7 +7,16 @@ module.exports = function () {
     GET: buildValidatedJsonHandler(order.getPOThroughputStatusByMonth, {
       summary: 'List Purchase Order throughput Status for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
-      parameters: [],
+      parameters: [
+      {
+        in: 'query',
+        name: 'supplier',
+        description: 'Supplier code to filter the orders (optional)',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },],
       responses: {
         200: {
           description: 'Return Purchase Order delivery status',

@@ -7,7 +7,17 @@ module.exports = function () {
     GET: buildValidatedJsonHandler(order.getDeliveryStatus('month'), {
       summary: 'List Purchase Order Status for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
-      parameters: [],
+      parameters: [
+      {
+        in: 'query',
+        name: 'supplier',
+        description: 'Supplier code to filter the orders (optional)',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+    ],
       responses: {
         200: {
           description: 'Return Purchase Order delivery status',
