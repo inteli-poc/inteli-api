@@ -58,16 +58,16 @@ PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\
 CURRENT_VERSION=$(yq eval '.version' ./package.json -oy)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
-  echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
-  echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-  echo "##[set-output name=IS_NEW_VERSION;]true"
+  echo "VERSION=v$CURRENT_VERSION" >> $GITHUB_ENV
+  echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+  echo "IS_NEW_VERSION=true" >> $GITHUB_ENV
   if [[ $CURRENT_VERSION =~ [-] ]]; then
-    echo "##[set-output name=IS_PRERELEASE;]true"
-    echo "##[set-output name=NPM_RELEASE_TAG;]next"
+    echo "IS_PRERELEASE=true" >> $GITHUB_ENV
+    echo "NPM_RELEASE_TAG=next" >> $GITHUB_ENV
   else
-    echo "##[set-output name=IS_PRERELEASE;]false"
-    echo "##[set-output name=NPM_RELEASE_TAG;]latest"
+    echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+    echo "NPM_RELEASE_TAG=latest" >> $GITHUB_ENV
   fi
 else
-  echo "##[set-output name=IS_NEW_VERSION;]false"
+  echo "IS_NEW_VERSION=false" >> $GITHUB_ENV
 fi
