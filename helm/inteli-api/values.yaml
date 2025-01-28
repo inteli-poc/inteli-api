@@ -41,7 +41,7 @@ service:
 image:
   repository: digicatapult/inteli-api
   pullPolicy: IfNotPresent
-  tag: 'v1.32.0'
+  tag: 'v1.33.1'
   pullSecrets: ['ghcr-digicatapult']
 
 postgresql:
