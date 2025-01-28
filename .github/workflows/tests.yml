@@ -157,7 +157,7 @@ jobs:
       - name: Install Packages
         run: npm ci
       - name: Setup dependencies
-        run: docker-compose up -d
+        run: docker compose up -d
         env: 
           AUTH_TYPE: ${{ matrix.auth }}
       - name: Sleep
