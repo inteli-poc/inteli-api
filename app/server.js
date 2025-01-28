@@ -24,12 +24,12 @@ async function createHttpServer() {
 
   // CORS Configuration
   const corsOptions = {
-    origin: '*', 
+    origin: '*',
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'], 
-    credentials: true, 
-  } 
-  
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }
+
   app.use(cors(corsOptions))
   app.use(compression())
   app.use(bodyParser.json())

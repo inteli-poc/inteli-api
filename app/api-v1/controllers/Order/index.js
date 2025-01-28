@@ -199,7 +199,7 @@ module.exports = {
     }
   },
   getDeliveryStatus: async function (type, req) {
-    const {supplier} = req.query
+    const { supplier } = req.query
     const result = await db.getOrdersByDateRange(supplier)
     const orders = await getResultForOrderGet(result, req)
 
@@ -224,8 +224,8 @@ module.exports = {
       response: statusByMonth,
     }
   },
-  getAverageDurationForEachStep: async function() {
-    const {supplier} = req.query
+  getAverageDurationForEachStep: async function (req) {
+    const { supplier } = req.query
     const orders = await db.getOrdersByDateRange(supplier)
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
