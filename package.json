@@ -10,6 +10,7 @@
     "test:jwt": "NODE_ENV=test AUTH_TYPE=JWT mocha --config ./test/mocharc.js ./test",
     "test:dev": "NODE_ENV=test ./node_modules/.bin/mocha --watch --verbose test/integration/*.*",
     "lint": "eslint .",
+    "lint-fix": "eslint . --fix",
     "depcheck": "depcheck",
     "start": "NODE_ENV=production node app/index.js",
     "dev": "NODE_ENV=development nodemon app/index.js | pino-colada",
