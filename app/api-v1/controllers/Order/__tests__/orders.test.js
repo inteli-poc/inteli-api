@@ -21,6 +21,7 @@ describe('order.get', () => {
         id: 'd3607fc8-442a-4394-a96e-042bd97f061',
         status: 'Submitted',
         updated_at: new Date(),
+        created_at: new Date(),
       },
     ])
     stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
@@ -77,6 +78,7 @@ describe('order.getById', () => {
         id: 'd3607fc8-442a-4394-a96e-042bd97f061',
         status: 'Submitted',
         updated_at: new Date(),
+        created_at: new Date(),
       },
     ])
     stubs.identityByAddress = stub(identityService, 'getMemberByAddress')
