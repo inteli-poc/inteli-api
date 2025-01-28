@@ -1,4 +1,5 @@
 const db = require('../../../db')
+const identity = require('../../services/identityService')
 const { NoTokenError, NothingToProcess, BadRequestError, NotFoundError } = require('../../../utils/errors')
 const { getMetadata } = require('../../../utils/dscp-api')
 const partController = require('../Part/index')
