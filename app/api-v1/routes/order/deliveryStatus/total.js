@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.getDeliveryStatus('total'), {
+    GET: buildValidatedJsonHandler((req) => order.getDeliveryStatus('total',req), {
       summary: 'List Purchase Order Status for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
       parameters: [

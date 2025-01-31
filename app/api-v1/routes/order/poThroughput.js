@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../utils/routeResponseValid
 
 module.exports = function () {
   const doc = {
-    GET: buildValidatedJsonHandler(order.getPOThroughputStatusByMonth, {
+    GET: buildValidatedJsonHandler((req) => order.getPOThroughputStatusByMonth(req), {
       summary: 'List Purchase Order throughput Status for past 6 months',
       description: 'Returns the details of all on-chain orders from the past 6 months.',
       parameters: [
