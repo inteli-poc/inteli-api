@@ -194,4 +194,6 @@ jobs:
       - name: Error if version is not increased
         shell: bash
         run: |
-          exit $([[ "${{ env.IS_NEW_VERSION }}" = "true" ]] && echo 0 || echo 1)
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            exit $([[ "${{ steps.get_version.outputs.IS_NEW_VERSION }}" = "true" ]] && echo 0 || echo 1)
+          fi
