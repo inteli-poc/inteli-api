@@ -247,7 +247,7 @@ async function getOrdersByDateRange(supplier) {
   let query = client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
 
   if (supplier) {
-    query = query.where('businessPartnerCode', '=', supplier)
+    query = query.where('business_partner_code', '=', supplier)
   }
   const orders = await query
   return orders
