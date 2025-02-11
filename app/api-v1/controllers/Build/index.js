@@ -102,7 +102,7 @@ module.exports = {
     build.supplier = selfAddress
     build.external_id = req.body.externalId
     build.completion_estimate = req.body.completionEstimate
-    build.status = 'Created'
+    build.status = 'Simulated'
     const [buildId] = await db.postBuildDb(build)
     let partIds = req.body.partIds
     let updateOriginalTokenId = false
@@ -135,6 +135,9 @@ module.exports = {
         const { id } = req.params
         let transactionId
         switch (type) {
+          case 'Simulation':
+            transactionId = req.params.scheduleId
+            break
           case 'Schedule':
             transactionId = req.params.scheduleId
             break
@@ -180,6 +183,10 @@ module.exports = {
         const buyer = records[0].owner
         let attachment
         switch (type) {
+          case 'Simulation':
+            build.status = 'Simulated'
+            build.completion_estimate = req.body.completionEstimate
+            break
           case 'Schedule':
             if (build.status != 'Created') {
               throw new InternalError({ message: 'Build not in Created state' })
