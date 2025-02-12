@@ -201,7 +201,20 @@ module.exports = {
   getDeliveryStatus: async function (type, req) {
     const { supplier } = req.query
     console.log('getDeliveryStatus - supplier = ', supplier)
-    const result = await db.getOrdersByDateRange(supplier)
+    let result
+    try {
+      result = await db.getOrdersByDateRange(supplier)
+    } catch (err) {
+      return {
+        status: 200,
+        response: {
+          early: 0,
+          onTime: 0,
+          late: 0,
+          failed: 0,
+        },
+      }
+    }
     const orders = await getResultForOrderGet(result, req)
 
     const filteredOrders = filterOrdersByDate(orders, type)
