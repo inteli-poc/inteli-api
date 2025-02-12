@@ -200,6 +200,7 @@ module.exports = {
   },
   getDeliveryStatus: async function (type, req) {
     const { supplier } = req.query
+    console.log('getDeliveryStatus - supplier = ', supplier)
     const result = await db.getOrdersByDateRange(supplier)
     const orders = await getResultForOrderGet(result, req)
 

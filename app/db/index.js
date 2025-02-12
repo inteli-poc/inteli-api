@@ -250,9 +250,11 @@ async function getOrdersByDateRange(supplier) {
     query = query.where('business_partner_code', '=', supplier)
   }
   try {
+    console.log('DB query = ', query)
     const orders = await query
     return orders
   } catch (err) {
+    console.error(err)
     return []
   }
 }
