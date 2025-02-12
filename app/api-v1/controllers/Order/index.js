@@ -220,6 +220,12 @@ module.exports = {
   getPOThroughputStatusByMonth: async (req, res) => {
     const { supplier } = req.query
     const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
     const orders = await getResultForOrderGet(result, req)
 
     if (!orders || orders.length === 0) {
@@ -234,6 +240,12 @@ module.exports = {
   getAverageDurationForEachStep: async function (req) {
     const { supplier } = req.query
     const orders = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
       'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },
