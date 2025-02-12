@@ -240,7 +240,7 @@ module.exports = {
   getAverageDurationForEachStep: async function (req) {
     const { supplier } = req.query
     const orders = await db.getOrdersByDateRange(supplier)
-    if (result.length === 0) {
+    if (orders.length === 0) {
       return {
         status: 200,
         response: {},
