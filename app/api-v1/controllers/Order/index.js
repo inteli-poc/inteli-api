@@ -201,18 +201,11 @@ module.exports = {
   getDeliveryStatus: async function (type, req) {
     const { supplier } = req.query
     console.log('getDeliveryStatus - supplier = ', supplier)
-    let result
-    try {
-      result = await db.getOrdersByDateRange(supplier)
-    } catch (err) {
+    const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
       return {
         status: 200,
-        response: {
-          early: 0,
-          onTime: 0,
-          late: 0,
-          failed: 0,
-        },
+        response: {},
       }
     }
     const orders = await getResultForOrderGet(result, req)
