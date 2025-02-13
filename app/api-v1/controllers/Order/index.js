@@ -200,7 +200,6 @@ module.exports = {
   },
   getDeliveryStatus: async function (type, req) {
     const { supplier } = req.query
-    console.log('getDeliveryStatus - supplier = ', supplier)
     const result = await db.getOrdersByDateRange(supplier)
     if (result.length === 0) {
       return {
@@ -520,7 +519,7 @@ module.exports = {
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
       orderHistory['parts'] = []
-      // let previousSubmittedAt = null
+
       for (let partId of items) {
         let partObj = {}
         let [part] = await db.getPartById(partId)
