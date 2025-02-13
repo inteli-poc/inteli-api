@@ -23,7 +23,7 @@ module.exports = function () {
           description: 'Id of the build approve action',
           in: 'path',
           required: true,
-          name: 'startId',
+          name: 'approvalId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',

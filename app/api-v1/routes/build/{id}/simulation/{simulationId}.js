@@ -23,7 +23,7 @@ module.exports = function () {
           description: 'Unique transaction ID for the Simulation process of the build',
           in: 'path',
           required: true,
-          name: 'SimulationId',
+          name: 'simulationId',
           allowEmptyValue: false,
           schema: {
             $ref: '#/components/schemas/ObjectReference',

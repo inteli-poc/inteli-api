@@ -1066,6 +1066,60 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
       },
+      NewBuildSimulation: {
+        description:
+          'A new action on a build that initiates the simulation process, ensuring the design meets requirements before manufacturing begins.',
+        type: 'object',
+        properties: {
+          completionEstimate: {
+            description: 'Updated Date and time at which the simulation process is estimated to finish',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildSimulation: {
+        description:
+          'An action on a build that initiates the simulation process, ensuring the design meets requirements before manufacturing begins.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSimulation' }],
+      },
+      NewBuildApproval: {
+        description:
+          'A new action on a build that approves the simulation results, allowing the manufacturing process to proceed.',
+        type: 'object',
+        properties: {
+          completionEstimate: {
+            description: 'Updated Date and time at which the approval process is completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildApproval: {
+        description:
+          'An action on a build that approves the simulation results, allowing the manufacturing process to proceed.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildApproval' }],
+      },
+      NewBuildCreation: {
+        description:
+          'A new action on a build that marks the build as created, transitioning it from approval to manufacturing readiness.',
+        type: 'object',
+        properties: {
+          completionEstimate: {
+            description: 'Updated Date and time at which the build creation process is completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildCreation: {
+        description:
+          'An action on a build that marks the build as created, transitioning it from approval to manufacturing readiness.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildCreation' }],
+      },      
       NewMachiningOrderStart: {
         description: 'A new action on a Machining that causes it to be registered on-chain as started',
         type: 'object',
