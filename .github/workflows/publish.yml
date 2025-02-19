@@ -3,7 +3,6 @@ name: Create and publish inteli-api image
 on:
   push:
     branches: ['vitalam-dev', 'develop']
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
