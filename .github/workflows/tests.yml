@@ -194,4 +194,4 @@ jobs:
       - name: Error if version is not increased
         shell: bash
         run: |
-          exit $([[ "${{ steps.get_version.outputs.IS_NEW_VERSION }}" = "true" ]] && echo 0 || echo 1)
+          exit $([[ "${{ env.IS_NEW_VERSION }}" = "true" ]] && echo 0 || echo 1)
