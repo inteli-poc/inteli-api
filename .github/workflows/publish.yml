@@ -2,7 +2,7 @@ name: Create and publish inteli-api image
 
 on:
   push:
-    branches: ['vitalam-dev', 'develop']
+    branches: ['vitalam-dev', 'develop', 'INFRA-428-performance-dashboard-API']
 
 env:
   REGISTRY: ghcr.io
