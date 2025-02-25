@@ -238,6 +238,25 @@ async function getOrders(limit, page) {
   }
 }
 
+async function getOrdersByDateRange(supplier) {
+  const months = 6
+  const targetDate = new Date()
+  targetDate.setMonth(targetDate.getMonth() - months)
+  const formattedDate = targetDate.toISOString()
+
+  let query = client('orders').select().where('created_at', '>=', formattedDate).orderBy('created_at', 'desc')
+
+  if (supplier) {
+    query = query.where('business_partner_code', '=', supplier)
+  }
+  try {
+    const orders = await query
+    return orders
+  } catch (err) {
+    return []
+  }
+}
+
 async function getOrderCount() {
   return client('orders').count('*')
 }
@@ -657,6 +676,7 @@ module.exports = {
   getPartsByOrderId,
   getPartByIDs,
   checkDuplicateExternalId,
+  getOrdersByDateRange,
   getOrderCount,
   getRecipeCount,
   getOrdersBySearchQuery,

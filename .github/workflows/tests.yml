@@ -37,7 +37,7 @@ jobs:
           version: v3.4.0
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: '3.8'
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.0.1
       - name: Run chart-testing (lint)
@@ -66,7 +66,7 @@ jobs:
           version: v3.4.0
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: '3.8'
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.0.1
       - name: Setup Minikube
@@ -157,7 +157,7 @@ jobs:
       - name: Install Packages
         run: npm ci
       - name: Setup dependencies
-        run: docker-compose up -d
+        run: docker compose up -d
         env: 
           AUTH_TYPE: ${{ matrix.auth }}
       - name: Sleep
@@ -194,4 +194,4 @@ jobs:
       - name: Error if version is not increased
         shell: bash
         run: |
-          exit $([[ "${{steps.get_version.outputs.IS_NEW_VERSION}}" = "true" ]] && echo 0 || echo 1)
+          exit $([[ "${{ env.IS_NEW_VERSION }}" = "true" ]] && echo 0 || echo 1)

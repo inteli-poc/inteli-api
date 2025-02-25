@@ -22,7 +22,15 @@ async function createHttpServer() {
   const app = express()
   const requestLogger = pinoHttp({ logger })
 
-  app.use(cors())
+  // CORS Configuration
+  const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }
+
+  app.use(cors(corsOptions))
   app.use(compression())
   app.use(bodyParser.json())
 
@@ -97,11 +105,11 @@ async function createHttpServer() {
     },
   }
 
-  app.use(
-    EXTERNAL_PATH_PREFIX ? `/${EXTERNAL_PATH_PREFIX}/${API_MAJOR_VERSION}/swagger` : `/${API_MAJOR_VERSION}/swagger`,
-    swaggerUi.serve,
-    swaggerUi.setup(null, options)
-  )
+  // app.use(
+  //   EXTERNAL_PATH_PREFIX ? `/${EXTERNAL_PATH_PREFIX}/${API_MAJOR_VERSION}/swagger` : `/${API_MAJOR_VERSION}/swagger`,
+  //   swaggerUi.serve,
+  //   swaggerUi.setup(null, options)
+  // )
   app.use(handleErrors)
 
   logger.trace('Registered Express routes: %s', {

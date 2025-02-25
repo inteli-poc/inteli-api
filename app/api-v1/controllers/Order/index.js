@@ -7,10 +7,14 @@ const {
   getResultForOrderTransactionGet,
   getPartHistory,
   getBuildHistory,
+  filterOrdersByDate,
+  filterOrdersByPO,
+  calculateDuration,
 } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
 const partController = require('../Part/index')
+
 module.exports = {
   post: async function (req) {
     if (!req.body) {
@@ -192,6 +196,94 @@ module.exports = {
       response: {
         count: parseInt(totalOrderCount[0].count),
       },
+    }
+  },
+  getDeliveryStatus: async function (type, req) {
+    const { supplier } = req.query
+    const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
+    const orders = await getResultForOrderGet(result, req)
+
+    const filteredOrders = filterOrdersByDate(orders, type)
+
+    return {
+      status: 200,
+      response: filteredOrders,
+    }
+  },
+  getPOThroughputStatusByMonth: async (req, res) => {
+    const { supplier } = req.query
+    const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
+    const orders = await getResultForOrderGet(result, req)
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: 'No orders found for the last 6 months' })
+    }
+    const statusByMonth = filterOrdersByPO(orders)
+    return {
+      status: 200,
+      response: statusByMonth,
+    }
+  },
+  getAverageDurationForEachStep: async function (req) {
+    const { supplier } = req.query
+    const orders = await db.getOrdersByDateRange(supplier)
+    if (orders.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
+    let stepDurations = {
+      'Purchase Order Shared': { totalDuration: 0, count: 0 },
+      'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },
+      'Purchase Order Amended': { totalDuration: 0, count: 0 },
+      'Purchase Order Accepted': { totalDuration: 0, count: 0 },
+      'Purchase Order Cancelled': { totalDuration: 0, count: 0 },
+      'Manufacturing Job Started': { totalDuration: 0, count: 0 },
+      'Part Received': { totalDuration: 0, count: 0 },
+      'Shipped & Invoice Received': { totalDuration: 0, count: 0 },
+    }
+    const histories = await Promise.all(
+      orders.map((order) => module.exports.transaction.getHistory({ params: { id: order.id } }))
+    )
+    for (let orderHistory of histories) {
+      for (let part of orderHistory.response.parts) {
+        let previousSubmittedAt = null
+        for (let stage of part.history) {
+          if (previousSubmittedAt) {
+            const duration = calculateDuration(previousSubmittedAt, stage.submittedAt)
+            if (stepDurations[stage.status]) {
+              stepDurations[stage.status].totalDuration += duration
+              stepDurations[stage.status].count += 1
+            }
+          }
+          previousSubmittedAt = stage.submittedAt
+        }
+      }
+    }
+    const averageDurations = {}
+    for (let status in stepDurations) {
+      if (stepDurations[status].count > 0) {
+        averageDurations[status] = stepDurations[status].totalDuration / stepDurations[status].count
+      } else {
+        averageDurations[status] = 0
+      }
+    }
+    return {
+      status: 200,
+      response: averageDurations,
     }
   },
   transaction: {
@@ -427,6 +519,7 @@ module.exports = {
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
       orderHistory['parts'] = []
+
       for (let partId of items) {
         let partObj = {}
         let [part] = await db.getPartById(partId)
@@ -520,6 +613,17 @@ module.exports = {
           })
         }
       }
+
+      let previousSubmittedAt = null
+      for (let part of orderHistory.parts) {
+        for (let stage of part.history) {
+          if (previousSubmittedAt) {
+            stage['duration'] = calculateDuration(previousSubmittedAt, stage.submittedAt)
+          }
+          previousSubmittedAt = stage.submittedAt
+        }
+      }
+
       return {
         status: 200,
         response: orderHistory,
