@@ -10,6 +10,9 @@ const {
   filterOrdersByDate,
   filterOrdersByPO,
   calculateDuration,
+  filterOrdersByDate,
+  filterOrdersByPO,
+  calculateDuration,
 } = require('./helpers')
 const identity = require('../../services/identityService')
 const { BadRequestError, NotFoundError, IdentityError, InternalError } = require('../../../utils/errors')
@@ -201,6 +204,12 @@ module.exports = {
   getDeliveryStatus: async function (type, req) {
     const { supplier } = req.query
     const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
     const orders = await getResultForOrderGet(result, req)
 
     const filteredOrders = filterOrdersByDate(orders, type)
@@ -213,6 +222,12 @@ module.exports = {
   getPOThroughputStatusByMonth: async (req, res) => {
     const { supplier } = req.query
     const result = await db.getOrdersByDateRange(supplier)
+    if (result.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
     const orders = await getResultForOrderGet(result, req)
 
     if (!orders || orders.length === 0) {
@@ -227,6 +242,12 @@ module.exports = {
   getAverageDurationForEachStep: async function (req) {
     const { supplier } = req.query
     const orders = await db.getOrdersByDateRange(supplier)
+    if (orders.length === 0) {
+      return {
+        status: 200,
+        response: {},
+      }
+    }
     let stepDurations = {
       'Purchase Order Shared': { totalDuration: 0, count: 0 },
       'Purchase Order Acknowledged': { totalDuration: 0, count: 0 },
@@ -501,7 +522,7 @@ module.exports = {
       orderHistory['id'] = order.id
       orderHistory['externalId'] = order.external_id
       orderHistory['parts'] = []
-      // let previousSubmittedAt = null
+
       for (let partId of items) {
         let partObj = {}
         let [part] = await db.getPartById(partId)

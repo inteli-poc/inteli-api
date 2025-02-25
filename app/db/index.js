@@ -249,8 +249,12 @@ async function getOrdersByDateRange(supplier) {
   if (supplier) {
     query = query.where('business_partner_code', '=', supplier)
   }
-  const orders = await query
-  return orders
+  try {
+    const orders = await query
+    return orders
+  } catch (err) {
+    return []
+  }
 }
 
 async function getOrderCount() {
