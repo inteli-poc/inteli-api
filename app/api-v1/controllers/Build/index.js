@@ -102,7 +102,7 @@ module.exports = {
     build.supplier = selfAddress
     build.external_id = req.body.externalId
     build.completion_estimate = req.body.completionEstimate
-    build.status = 'Created'
+    build.status = 'Simulated'
     const [buildId] = await db.postBuildDb(build)
     let partIds = req.body.partIds
     let updateOriginalTokenId = false
@@ -135,6 +135,15 @@ module.exports = {
         const { id } = req.params
         let transactionId
         switch (type) {
+          case 'Simulation':
+            transactionId = req.params.simulationId;
+            break
+          case 'Approval':
+            transactionId = req.params.approvalId;
+            break
+          case 'Creation':
+            transactionId = req.params.creationId;
+            break
           case 'Schedule':
             transactionId = req.params.scheduleId
             break
@@ -180,6 +189,37 @@ module.exports = {
         const buyer = records[0].owner
         let attachment
         switch (type) {
+          case 'Simulation':
+            build.status = 'Simulated';
+            build.completion_estimate = req.body.completionEstimate;
+
+            if (!req.body.attachmentId) {
+              throw new BadRequestError('Attachment ID is required for Simulation');
+            }
+
+            build.attachment_id = req.body.attachmentId;
+            attachment = await db.getAttachment(build.attachment_id);
+            if (attachment.length === 0) {
+              throw new NotFoundError('Attachment not found');
+            }
+
+            binary_blob = attachment[0].binary_blob;
+            filename = attachment[0].filename;
+            break
+          case 'Approval':
+            if (build.status != 'Simulated') {
+              throw new InternalError({ message: 'Build not in Simulated state' })
+            }
+            build.status = 'Approved'
+            build.completion_estimate = req.body.completionEstimate
+            break
+          case 'Creation':
+            if (build.status != 'Approved') {
+              throw new InternalError({ message: 'Build not in Approved state' })
+            }
+            build.status = 'Created'
+            build.completion_estimate = req.body.completionEstimate
+            break
           case 'Schedule':
             if (build.status != 'Created') {
               throw new InternalError({ message: 'Build not in Created state' })
