@@ -17,17 +17,21 @@ const partController = require('../Part/index')
 
 module.exports = {
   post: async function (req) {
-    console.log('Order POST request object: ', req)
+    console.log('Order POST request body: ', req.body)
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
     let duplicateExternalId = await db.checkDuplicateExternalId(req.body.externalId, 'orders')
+    console.log('Duplicate ID check: ', duplicateExternalId)
     if (duplicateExternalId.length != 0) {
       throw new InternalError({ message: 'duplicate externalId found' })
     }
     const { address: supplierAddress } = await identity.getMemberByAlias(req, req.body.supplier)
+    console.log('supplier address = ', supplierAddress)
     const selfAddress = await identity.getMemberBySelf(req)
+    console.log('self address = ', selfAddress)
     const { alias: selfAlias } = await identity.getMemberByAddress(req, selfAddress)
+    console.log('self alias = ', selfAlias)
     const order = { ...req.body, supplierAddress: supplierAddress, status: 'Created', buyerAddress: selfAddress }
     const parts = req.body.items
     let partResponseArray = []
@@ -36,7 +40,9 @@ module.exports = {
       req.body = part
       let partResponse
       try {
+        console.log('part controller POST')
         partResponse = await partController.post(req)
+        console.log('part controller POST response = ', partResponse)
       } catch (err) {
         throw new InternalError({ message: 'failed to save part to db : ' + err.message })
       }
@@ -45,7 +51,9 @@ module.exports = {
       req.params = {}
       req.params.id = partResponse.id
       try {
+        console.log('part transaction CREATE')
         let partTransactionResponse = await partController.transaction.create('Creation')(req)
+        console.log('part transaction CREATE response = ', partTransactionResponse)
         if (partTransactionResponse.status !== 201) {
           throw {
             message: partTransactionResponse.response.message,
