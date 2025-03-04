@@ -17,6 +17,7 @@ const partController = require('../Part/index')
 
 module.exports = {
   post: async function (req) {
+    console.log('Order POST request object: ', req)
     if (!req.body) {
       throw new BadRequestError('missing req.body')
     }
