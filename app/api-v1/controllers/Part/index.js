@@ -228,14 +228,18 @@ module.exports = {
         try {
           console.log('----- running process -----')
           const result = await runProcess(payload, req.token)
+          console.log('finished running process')
           if (Array.isArray(result)) {
             await db.updatePartTransaction(transaction.id, result[0])
+            console.log('finished updating part transaction')
             let updateOriginalTokenIdForOrder = false
             if (!part.latest_token_id) {
               updateOriginalTokenIdForOrder = true
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
+              console.log('finished updating part 1')
             } else {
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
+              console.log('finished updating part 2')
             }
           } else {
             await db.removeTransactionPart(transaction.id)
