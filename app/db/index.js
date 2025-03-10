@@ -40,6 +40,10 @@ async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
 
+async function postPartException(exception, partID) {
+  return client('exception').update({ exception }).where({ id: partID })
+}
+
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
   reqBody.updated_at = updated_at
@@ -708,4 +712,5 @@ module.exports = {
   removePart,
   removeBuild,
   removeMachiningOrder,
+  postPartException,
 }
