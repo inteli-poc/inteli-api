@@ -1246,6 +1246,16 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartCreation' }],
       },
+      PartExceptionCreation: {
+        description: 'A',
+        type: 'object',
+        properties: {},
+      },
+      PartException: {
+        description: 'An action on a part that registers it on-chain',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/PartExceptionCreation' }],
+      },
       NewPartMetadataUpdate: {
         description: 'A new action on a part that adds arbitrary metadata',
         type: 'object',
