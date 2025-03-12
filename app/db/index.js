@@ -40,8 +40,28 @@ async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
 
-async function postPartException(exception, partID) {
-  return client('exception').update({ exception }).where({ id: partID })
+async function postPartException(newException, partID) {
+  return client('parts').where({ id: partID }).update({
+    exceptions: knex.raw('exceptions || ?', [JSON.stringify([newException])])
+  })
+}
+
+async function updatePartExceptionStatus(poStep, status, partID) {
+  return client('parts').where({ id: partID })
+    .update({
+      exception: knex.raw(`
+      (
+        SELECT jsonb_agg(
+          CASE 
+            WHEN elem->>'poStep' = ?
+            THEN jsonb_set(elem, '{status}', to_jsonb(?::text)) 
+            ELSE elem 
+          END
+        ) 
+        FROM jsonb_array_elements(exceptions) AS elem
+      )
+      `, [poStep, status])
+    })
 }
 
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
@@ -713,4 +733,5 @@ module.exports = {
   removeBuild,
   removeMachiningOrder,
   postPartException,
+  updatePartExceptionStatus,
 }

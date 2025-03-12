@@ -279,5 +279,16 @@ module.exports = {
       status: 200,
       response: result,
     }
+  },
+  updateExceptionStatus: async function (req) {
+    if (!req.body) {
+      throw new BadRequestError('missing req.body')
+    }
+    const { id } = req.params
+    const result = await db.updatePartExceptionStatus(req.body.poStep, req.body.status, id)
+    return {
+      status: 200,
+      response: result,
+    }
   }
 }
