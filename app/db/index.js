@@ -41,15 +41,19 @@ async function postPartDb(part) {
 }
 
 async function postPartException(newException, partID) {
-  return client('parts').where({ id: partID }).update({
-    exceptions: knex.raw('exceptions || ?', [JSON.stringify([newException])])
-  })
+  return client('parts')
+    .where({ id: partID })
+    .update({
+      exceptions: knex.raw('exceptions || ?', [JSON.stringify([newException])]),
+    })
 }
 
 async function updatePartExceptionStatus(poStep, status, partID) {
-  return client('parts').where({ id: partID })
+  return client('parts')
+    .where({ id: partID })
     .update({
-      exception: knex.raw(`
+      exception: knex.raw(
+        `
       (
         SELECT jsonb_agg(
           CASE 
@@ -60,7 +64,9 @@ async function updatePartExceptionStatus(poStep, status, partID) {
         ) 
         FROM jsonb_array_elements(exceptions) AS elem
       )
-      `, [poStep, status])
+      `,
+        [poStep, status]
+      ),
     })
 }
 

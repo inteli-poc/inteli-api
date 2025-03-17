@@ -9,14 +9,14 @@ url = `${url}/${API_MAJOR_VERSION}`
 const securitySchemes =
   AUTH_TYPE === 'JWT'
     ? {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
         },
-      },
-    }
+      }
     : {}
 
 const apiDoc = {

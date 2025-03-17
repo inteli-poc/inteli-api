@@ -136,13 +136,13 @@ module.exports = {
         let transactionId
         switch (type) {
           case 'Simulation':
-            transactionId = req.params.simulationId;
+            transactionId = req.params.simulationId
             break
           case 'Approval':
-            transactionId = req.params.approvalId;
+            transactionId = req.params.approvalId
             break
           case 'Creation':
-            transactionId = req.params.creationId;
+            transactionId = req.params.creationId
             break
           case 'Schedule':
             transactionId = req.params.scheduleId
@@ -190,21 +190,21 @@ module.exports = {
         let attachment
         switch (type) {
           case 'Simulation':
-            build.status = 'Simulated';
-            build.completion_estimate = req.body.completionEstimate;
+            build.status = 'Simulated'
+            build.completion_estimate = req.body.completionEstimate
 
             if (!req.body.attachmentId) {
-              throw new BadRequestError('Attachment ID is required for Simulation');
+              throw new BadRequestError('Attachment ID is required for Simulation')
             }
 
-            build.attachment_id = req.body.attachmentId;
-            attachment = await db.getAttachment(build.attachment_id);
+            build.attachment_id = req.body.attachmentId
+            attachment = await db.getAttachment(build.attachment_id)
             if (attachment.length === 0) {
-              throw new NotFoundError('Attachment not found');
+              throw new NotFoundError('Attachment not found')
             }
 
-            binary_blob = attachment[0].binary_blob;
-            filename = attachment[0].filename;
+            binary_blob = attachment[0].binary_blob
+            filename = attachment[0].filename
             break
           case 'Approval':
             if (build.status != 'Simulated') {

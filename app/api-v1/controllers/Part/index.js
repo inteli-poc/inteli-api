@@ -167,7 +167,7 @@ module.exports = {
             imageAttachmentId = req.body.attachmentId
             certificationType = req.body.certificationType
             await insertCertificationIntoPart(part, certificationIndex, imageAttachmentId)
-              ;[build] = await db.getBuildById(part.build_id)
+            ;[build] = await db.getBuildById(part.build_id)
             build.update_type = certificationType
             latest_token_id = build.latest_token_id
             updateOriginalTokenId = false
@@ -278,5 +278,5 @@ module.exports = {
       status: 200,
       response: result,
     }
-  }
+  },
 }
