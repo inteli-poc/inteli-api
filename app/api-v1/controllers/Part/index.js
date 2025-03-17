@@ -139,12 +139,10 @@ module.exports = {
         let latest_token_id
         let certificationType
         const { id } = req.params
-        console.log('part transaction create function, id = ', id)
         if (!id) {
           throw new BadRequestError('missing params')
         }
         let [part] = await db.getPartById(id)
-        console.log('part by id = ', part)
         if (!part) {
           throw new NotFoundError('part')
         }
@@ -193,9 +191,7 @@ module.exports = {
         if (!recipe) {
           throw new BadRequestError('recipe not found')
         }
-        console.log('recipe by ID = ', recipe)
         let machiningOrder = await db.getMachiningOrderByPartId(part.id)
-        console.log('machining order by ID = ', machiningOrder)
         let partSupplier
         if (machiningOrder.length !== 0 && machiningOrder[0].status === 'Started') {
           partSupplier = machiningOrder[0].supplier
@@ -221,30 +217,23 @@ module.exports = {
             type
           )
         } catch (err) {
-          console.log('removing transaction part and throwing error: ', err)
           await db.removeTransactionPart(transaction.id)
           throw err
         }
         try {
-          console.log('----- running process -----')
           const result = await runProcess(payload, req.token)
-          console.log('finished running process')
           if (Array.isArray(result)) {
             await db.updatePartTransaction(transaction.id, result[0])
-            console.log('finished updating part transaction')
             let updateOriginalTokenIdForOrder = false
             if (!part.latest_token_id) {
               updateOriginalTokenIdForOrder = true
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
-              console.log('finished updating part 1')
             } else {
               await db.updatePart(part, result[0], updateOriginalTokenIdForOrder)
-              console.log('finished updating part 2')
             }
           } else {
             await db.removeTransactionPart(transaction.id)
             if (type === 'Creation') {
-              console.log('Creation if block, removing part by ID 1')
               await db.removePart(id)
             }
             return {
@@ -257,7 +246,6 @@ module.exports = {
         } catch (err) {
           await db.removeTransactionPart(transaction.id)
           if (type === 'Creation') {
-            console.log('Creation if block, removing part by ID 2')
             await db.removePart(id)
           }
           throw err
