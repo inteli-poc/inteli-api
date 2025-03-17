@@ -103,7 +103,7 @@ jobs:
         with:
           node-version: 16.x
       - name: Cache Node.js modules
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -123,7 +123,7 @@ jobs:
         with:
           node-version: 16.x
       - name: Cache Node.js modules
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -147,7 +147,7 @@ jobs:
         with:
           node-version: 16.x
       - name: Cache Node.js modules
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
