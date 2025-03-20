@@ -3,20 +3,21 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-    await knex.schema.alterTable("build_transactions", (table) => {
-        table.enu("type", [
-            "Schedule",
-            "Start",
-            "progress-update",
-            "Complete",
-            "Simulation",  
-            "Approval",    
-            "Created"      
-        ], {
-            useNative: true,
-            enumName: 'build_transaction_type'
-        }).notNullable().alter();
-    });
+    await knex.schema.raw(`
+        CREATE TYPE build_transaction_type AS ENUM (
+            'Schedule',
+            'Start',
+            'progress-update',
+            'Complete',
+            'Simulation',
+            'Approval',
+            'Created'
+        );
+
+        ALTER TABLE build_transactions 
+        ALTER COLUMN type TYPE build_transaction_type 
+        USING type::text::build_transaction_type;
+    `);
 };
 
 /**
