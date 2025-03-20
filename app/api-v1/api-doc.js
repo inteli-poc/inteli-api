@@ -18,7 +18,6 @@ const securitySchemes =
         },
       }
     : {}
-
 const apiDoc = {
   openapi: '3.0.3',
   info: {
@@ -1247,9 +1246,37 @@ const apiDoc = {
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartCreation' }],
       },
       PartExceptionCreation: {
-        description: 'A',
+        description: 'An action that creates a new exception on a part',
         type: 'object',
-        properties: {},
+        properties: {
+          exception: {
+            description: 'Exception object to be added to the part',
+            type: 'object',
+            example: {
+              raisedDate: '2025-02-19T00:00:00.000Z',
+              poStep: 'Canister Fill',
+              reason: 'Test',
+              status: 'Declined',
+              attachments: [{ attachmentId: '123', description: 'Canister Filling Failure Report' }],
+            },
+          },
+        },
+      },
+      PartExceptionStatus: {
+        description: 'An action on an exception that updates its status',
+        type: 'object',
+        properties: {
+          poStep: {
+            description: 'Name of the step whose exception is being updated',
+            type: 'string',
+            example: 'Canister Fill',
+          },
+          status: {
+            description: 'Status that the exception is being updated to',
+            type: 'string',
+            example: 'Pending',
+          },
+        },
       },
       PartException: {
         description: 'An action on a part that registers it on-chain',

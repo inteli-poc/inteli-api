@@ -167,7 +167,7 @@ module.exports = {
             imageAttachmentId = req.body.attachmentId
             certificationType = req.body.certificationType
             await insertCertificationIntoPart(part, certificationIndex, imageAttachmentId)
-            ;[build] = await db.getBuildById(part.build_id)
+              ;[build] = await db.getBuildById(part.build_id)
             build.update_type = certificationType
             latest_token_id = build.latest_token_id
             updateOriginalTokenId = false
@@ -258,18 +258,18 @@ module.exports = {
     },
   },
   postException: async function (req) {
-    if (!req.body) {
+    if (!req.body.exception) {
       throw new BadRequestError('missing req.body')
     }
     const { id } = req.params
-    const result = await db.postPartException(req.body, id)
+    const result = await db.postPartException(req.body.exception, id)
     return {
       status: 200,
       response: result,
     }
   },
   updateExceptionStatus: async function (req) {
-    if (!req.body) {
+    if (!req.body.poStep || !req.body.status) {
       throw new BadRequestError('missing req.body')
     }
     const { id } = req.params

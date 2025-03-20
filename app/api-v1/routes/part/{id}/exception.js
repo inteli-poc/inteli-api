@@ -4,7 +4,7 @@ const { buildValidatedJsonHandler } = require('../../../../utils/routeResponseVa
 
 module.exports = function () {
   const doc = {
-    POST: buildValidatedJsonHandler(partController.postException(), {
+    POST: buildValidatedJsonHandler(partController.postException, {
       summary: 'Create Part Exception',
       description: 'A supplier creates a PO step exception for a part.',
       parameters: [
@@ -53,7 +53,7 @@ module.exports = function () {
       security: getDefaultSecurity(),
       tags: ['part'],
     }),
-    PUT: buildValidatedJsonHandler(partController.updateExceptionStatus(), {
+    PUT: buildValidatedJsonHandler(partController.updateExceptionStatus, {
       summary: 'Update Part Exception status',
       description: 'A buyer can acknowledge or decline an exception which will upadte the status of the exception.',
       parameters: [
@@ -72,7 +72,7 @@ module.exports = function () {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/PartExceptionCreation',
+              $ref: '#/components/schemas/PartExceptionStatus',
             },
           },
         },
