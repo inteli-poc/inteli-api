@@ -4,19 +4,28 @@
  */
 exports.up = async function (knex) {
     await knex.schema.raw(`
-        CREATE TYPE build_transaction_type AS ENUM (
-            'Schedule',
-            'Start',
-            'progress-update',
-            'Complete',
-            'Simulation',
-            'Approval',
-            'Created'
-        );
+        DO $$ 
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'build_transaction_type') THEN
+                CREATE TYPE build_transaction_type AS ENUM (
+                    'Schedule',
+                    'Start',
+                    'progress-update',
+                    'Complete',
+                    'Simulation',
+                    'Approval',
+                    'Created'
+                );
+            END IF;
+        END $$;
 
-        ALTER TABLE build_transactions 
-        ALTER COLUMN type TYPE build_transaction_type 
-        USING type::text::build_transaction_type;
+        ALTER TABLE build_transactions ADD COLUMN type_new build_transaction_type;
+
+        UPDATE build_transactions SET type_new = type::text::build_transaction_type;
+
+        ALTER TABLE build_transactions DROP COLUMN type;
+
+        ALTER TABLE build_transactions RENAME COLUMN type_new TO type;
     `);
 };
 
