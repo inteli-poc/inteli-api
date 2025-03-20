@@ -37,7 +37,6 @@ exports.up = async function (knex) {
     def.datetime('required_by').notNullable()
     def.foreign('image_attachment_id').references('id').on('attachments').onDelete('CASCADE').onUpdate('CASCADE')
     def.primary(['id'])
-    def.jsonb('exceptions')
   })
 }
 
