@@ -3,11 +3,9 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-    return knex.schema.raw(`
-        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Simulation';
-        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Approval';
-        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Created';
-    `);
+    return knex.schema.alterTable('build_transactions', (table) => {
+        table.specificType('type', `ENUM('Schedule', 'Start', 'progress-update', 'Complete', 'Simulation', 'Approval', 'Created')`).alter();
+    });
 };
 
 /**
