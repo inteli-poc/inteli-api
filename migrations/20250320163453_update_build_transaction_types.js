@@ -4,9 +4,9 @@
  */
 exports.up = function (knex) {
     return knex.schema.raw(`
-        ALTER TYPE "type" ADD VALUE 'Simulation';
-        ALTER TYPE "type" ADD VALUE 'Approval';
-        ALTER TYPE "type" ADD VALUE 'Created';
+        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Simulation';
+        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Approval';
+        ALTER TYPE "type" ADD VALUE IF NOT EXISTS 'Created';
     `);
 };
 
