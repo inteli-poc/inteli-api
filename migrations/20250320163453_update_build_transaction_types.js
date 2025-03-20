@@ -12,7 +12,10 @@ exports.up = async function (knex) {
             "Simulation",  
             "Approval",    
             "Created"      
-        ]).notNullable().alter();
+        ], {
+            useNative: true,
+            enumName: 'build_transaction_type'
+        }).notNullable().alter();
     });
 };
 
