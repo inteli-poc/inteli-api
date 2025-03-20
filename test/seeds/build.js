@@ -1,4 +1,3 @@
-const exception = require('../../app/api-v1/routes/part/{id}/exception')
 const { client } = require('../../app/db')
 
 const cleanup = async () => {
@@ -89,7 +88,7 @@ const seed = async () => {
           status: 'Pending',
           attachments: [{ attachmentId: '123', description: 'Canister Filling Failure Report' }],
         },
-      ])
+      ]),
     },
   ])
 }
