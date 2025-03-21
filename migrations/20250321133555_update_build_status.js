@@ -1,5 +1,3 @@
-const logger = require('../app/utils/Logger')
-
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -37,5 +35,5 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function () {
-  logger.log('Warning: PostgreSQL does not support removing ENUM values.')
+  // Warning: PostgreSQL does not support removing ENUM values.
 }
