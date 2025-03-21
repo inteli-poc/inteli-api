@@ -25,6 +25,7 @@ module.exports = {
     },
     authToken
   ) {
+    console.log('inside run process')
     const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/run-process`
     const formData = new FormData()
 

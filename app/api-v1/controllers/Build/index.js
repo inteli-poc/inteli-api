@@ -285,17 +285,22 @@ module.exports = {
             filename = attachment[0].filename
             break
         }
+        console.log('Outside switch - calling buildTransaction')
         const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
         let payload
         try {
           payload = await mapBuildData({ ...build, transaction, partIds, supplier, buyer, binary_blob, filename }, type)
+          console.log('Mapped build data')
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
+          console.log('Error while mapping build transaction: ', err.message)
           throw err
         }
         try {
+          console.log('before runProcess')
           const result = await runProcess(payload, req.token)
           if (Array.isArray(result)) {
+            console.log('updating build transaction')
             await db.updateBuildTransaction(transaction.id, result[0])
             let updateOriginalTokenIdForOrder = false
             if (type == 'Schedule') {
