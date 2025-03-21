@@ -1,9 +1,11 @@
+const logger = require('../app/utils/Logger')
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-    await knex.schema.raw(`
+  await knex.schema.raw(`
         DO $$ 
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'build_transaction_type') THEN
@@ -26,13 +28,13 @@ exports.up = async function (knex) {
         ALTER TABLE build_transactions DROP COLUMN type;
 
         ALTER TABLE build_transactions RENAME COLUMN type_new TO type;
-    `);
-};
+    `)
+}
 
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function (knex) {
-    console.log("Warning: PostgreSQL does not support removing ENUM values.");
-};
+exports.down = function () {
+  logger.log('Warning: PostgreSQL does not support removing ENUM values.')
+}
