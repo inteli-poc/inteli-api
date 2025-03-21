@@ -14,7 +14,7 @@ exports.up = async function (knex) {
                   'Completed',
                   'Simulated',
                   'Approved',
-                  'Part Received',
+                  'Part Received'
               );
           END IF;
       END
