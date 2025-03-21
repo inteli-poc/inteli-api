@@ -175,12 +175,15 @@ module.exports = {
         let binary_blob
         let filename
         const { id } = req.params
+        console.log('ID = ', id)
         if (!id) throw new BadRequestError('missing params')
 
         const [build] = await db.getBuildById(id)
+        console.log('build by ID = ', build)
         if (!build) throw new NotFoundError('build')
         const supplier = build.supplier
         const parts = await db.getPartsByBuildId(id)
+        console.log('Parts = ', parts)
         const recipes = parts.map((item) => {
           return item.recipe_id
         })
@@ -188,6 +191,7 @@ module.exports = {
           return item.id
         })
         const records = await db.getRecipeByIDs(recipes)
+        console.log('Records = ', records)
         const buyer = records[0].owner
         let attachment
         switch (type) {
@@ -201,6 +205,7 @@ module.exports = {
 
             build.attachment_id = req.body.attachmentId
             attachment = await db.getAttachment(build.attachment_id)
+            console.log('Got attachment')
             if (attachment.length === 0) {
               throw new NotFoundError('Attachment not found')
             }
