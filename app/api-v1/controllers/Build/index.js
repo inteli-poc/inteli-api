@@ -170,6 +170,8 @@ module.exports = {
     },
     create: (type) => {
       return async (req) => {
+        console.log('Simulation create')
+        console.log('Simulation Request body = ', req.body)
         let binary_blob
         let filename
         const { id } = req.params

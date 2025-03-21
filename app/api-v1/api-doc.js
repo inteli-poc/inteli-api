@@ -1070,7 +1070,6 @@ const apiDoc = {
           'A new action on a build that initiates the simulation process, ensuring the design meets requirements before manufacturing begins.',
         type: 'object',
         properties: {
-          // need to update
           attachmentId: {
             description: 'Attachment IDs of files uploaded',
             type: 'string',
