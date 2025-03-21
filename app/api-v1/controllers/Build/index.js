@@ -194,6 +194,7 @@ module.exports = {
         console.log('Records = ', records)
         const buyer = records[0].owner
         let attachment
+        console.log('Type = ', type)
         switch (type) {
           case 'Simulation':
             build.status = 'Simulated'
