@@ -21,7 +21,7 @@ exports.up = async function (knex) {
   
       ALTER TABLE build ADD COLUMN status_new build_status;
   
-      UPDATE build SET status_new = type::text::build_status;
+      UPDATE build SET status_new = status::text::build_status;
   
       ALTER TABLE build DROP COLUMN status;
   
