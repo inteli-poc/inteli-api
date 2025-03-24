@@ -28,7 +28,7 @@ module.exports = {
     console.log('inside run process')
     const url = `http://${DSCP_API_HOST}:${DSCP_API_PORT}/v3/run-process`
     const formData = new FormData()
-
+    console.log('Payload = ', payload)
     formData.append('request', JSON.stringify(payload))
     if (requiredCerts) formData.append('file', requiredCerts, 'required_certs.json')
     if (image) formData.append('file', image, payload.outputs[0].metadata.image.value)

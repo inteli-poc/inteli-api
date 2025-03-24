@@ -299,6 +299,7 @@ module.exports = {
         try {
           console.log('before runProcess')
           const result = await runProcess(payload, req.token)
+          console.log('Result from runProcess = ', result)
           if (Array.isArray(result)) {
             console.log('updating build transaction')
             await db.updateBuildTransaction(transaction.id, result[0])
