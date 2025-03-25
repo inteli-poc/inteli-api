@@ -158,7 +158,7 @@ const buildBuildOutputs = (data, type) => {
       actionType: { type: 'LITERAL', value: type },
       ...(type == 'progress-update' && { updateType: { type: 'LITERAL', value: data.update_type } }),
     },
-    ...(type != 'Schedule' && { parent_index: 0 }),
+    ...((type != 'Schedule' || type != 'Simulation') && { parent_index: 0 }),
   }
 }
 
