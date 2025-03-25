@@ -309,6 +309,7 @@ module.exports = {
         }
         console.log('Outside switch - calling buildTransaction')
         const typeEnum = Object.keys(build_transaction_type).find(k => build_transaction_type[k] === type)
+        console.log('type enum = ', typeEnum)
         const transaction = await db.insertBuildTransaction(id, build_transaction_type[typeEnum], 'Submitted')
         let payload
         try {
