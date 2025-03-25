@@ -104,11 +104,13 @@ module.exports = {
     build.completion_estimate = req.body.completionEstimate
     build.status = 'Simulated'
     const [buildId] = await db.postBuildDb(build)
+    console.log('Build created, ID = ', buildId)
     let partIds = req.body.partIds
     let updateOriginalTokenId = false
     for (let partId of partIds) {
       let [part] = await db.getPartById(partId)
       part.build_id = buildId.id
+      console.log('Part latest token ID = ', part.latest_token_id)
       await db.updatePart(part, part.latest_token_id, updateOriginalTokenId)
     }
     build.id = buildId.id
