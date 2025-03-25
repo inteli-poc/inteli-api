@@ -151,8 +151,8 @@ const buildBuildOutputs = (data, type) => {
         data.filename && { image: { type: 'FILE', value: data.filename } }),
       ...((type == 'Complete' || type == 'progress-update') &&
         data.attachment_id && {
-          imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
-        }),
+        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
+      }),
       parts: { type: 'FILE', value: 'parts.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
@@ -165,7 +165,7 @@ const buildBuildOutputs = (data, type) => {
 exports.mapBuildData = async (data, type) => {
   let inputs
   let outputs
-  if (type == 'Schedule') {
+  if (type == 'Schedule' || type == 'Simulation') {
     inputs = []
   } else {
     inputs = [data.latest_token_id]
@@ -176,8 +176,8 @@ exports.mapBuildData = async (data, type) => {
     id: Buffer.from(JSON.stringify(data.id)),
     ...((type == 'progress-update' || type == 'Complete') &&
       data.attachment_id && {
-        imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
-      }),
+      imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
+    }),
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
