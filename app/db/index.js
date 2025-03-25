@@ -88,10 +88,12 @@ async function updateBuild(reqBody, latest_token_id, updateOriginalTokenId) {
   reqBody.updated_at = updated_at
   reqBody.latest_token_id = latest_token_id
   if (updateOriginalTokenId) {
+    console.log('db build update - if')
     return client('build')
       .update({ status: reqBody.status, updated_at, latest_token_id, original_token_id: latest_token_id })
       .where({ id: reqBody.id })
   } else {
+    console.log('db build update - else')
     return client('build').update(reqBody).where({ id: reqBody.id })
   }
 }

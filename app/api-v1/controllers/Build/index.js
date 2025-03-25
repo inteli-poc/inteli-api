@@ -305,11 +305,15 @@ module.exports = {
           if (Array.isArray(result)) {
             console.log('updating build transaction')
             await db.updateBuildTransaction(transaction.id, result[0])
+            console.log('finished updating build transaction')
             let updateOriginalTokenIdForOrder = false
             if (type == 'Simulation') {
+              console.log('Simulation if condition')
               updateOriginalTokenIdForOrder = true
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
+              console.log('finished updating build')
             } else {
+              console.log('Not simulation')
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
               let [part_build] = await db.getPartsByBuildId(build.id)
               let part_order = await db.getPartsByOrderId(part_build.order_id)
@@ -330,6 +334,7 @@ module.exports = {
               }
             }
           } else {
+            console.log('removing build transaction - else')
             await db.removeTransactionBuild(transaction.id)
             if (type === 'Simulation' || type === 'Start') {
               await db.removeBuild(id)
@@ -342,6 +347,7 @@ module.exports = {
             }
           }
         } catch (err) {
+          console.log('removing build transaction - catch')
           await db.removeTransactionBuild(transaction.id)
           if (type === 'Simulation' || type === 'Start') {
             await db.removeBuild(id)
