@@ -44,7 +44,7 @@ async function postPartException(newException, partID) {
   return client('parts')
     .where({ id: partID })
     .update({
-      exceptions: knex.raw('exceptions || ?', [JSON.stringify([newException])]),
+      exceptions: client.raw('exceptions || ?', [JSON.stringify([newException])]),
     })
 }
 
@@ -52,7 +52,7 @@ async function updatePartExceptionStatus(poStep, status, partID) {
   return client('parts')
     .where({ id: partID })
     .update({
-      exception: knex.raw(
+      exception: client.raw(
         `
       (
         SELECT jsonb_agg(
