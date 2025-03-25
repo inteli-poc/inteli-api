@@ -310,8 +310,8 @@ module.exports = {
             if (type == 'Simulation') {
               console.log('Simulation if condition')
               updateOriginalTokenIdForOrder = true
-              await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
-              console.log('finished updating build')
+              const buildUpdated = await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
+              console.log('finished updating build = ', buildUpdated)
             } else {
               console.log('Not simulation')
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)

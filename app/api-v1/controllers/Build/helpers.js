@@ -19,7 +19,8 @@ exports.validate = async (items, supplier) => {
 }
 
 exports.getResponse = async (type, transaction, req) => {
-  return {
+  console.log('getResponse function')
+  const response = {
     id: req.params.id,
     transactionId: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
@@ -29,7 +30,10 @@ exports.getResponse = async (type, transaction, req) => {
     ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
     ...(type == 'Complete' && { completedAt: req.body.completedAt }),
     ...(type == 'progress-update' && { updateType: req.body.updateType }),
+    ...(type == 'Simulation' && { attachmentId: req.body.attachmentId })
   }
+  console.log('getResponse response = ', response)
+  return response
 }
 
 exports.getResultForBuildGet = async (build, req) => {
