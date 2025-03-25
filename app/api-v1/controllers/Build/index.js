@@ -309,7 +309,7 @@ module.exports = {
         }
         console.log('Outside switch - calling buildTransaction')
         const typeEnum = Object.keys(build_transaction_type).find(k => build_transaction_type[k] === type)
-        const transaction = await db.insertBuildTransaction(id, build_transaction_type.typeEnum, 'Submitted')
+        const transaction = await db.insertBuildTransaction(id, build_transaction_type[typeEnum], 'Submitted')
         let payload
         try {
           payload = await mapBuildData({ ...build, transaction, partIds, supplier, buyer, binary_blob, filename }, type)
