@@ -158,14 +158,14 @@ const buildBuildOutputs = (data, type) => {
       actionType: { type: 'LITERAL', value: type },
       ...(type == 'progress-update' && { updateType: { type: 'LITERAL', value: data.update_type } }),
     },
-    ...((type != 'Schedule' || type != 'Simulation') && { parent_index: 0 }),
+    ...(type != 'Simulation' && { parent_index: 0 }),
   }
 }
 
 exports.mapBuildData = async (data, type) => {
   let inputs
   let outputs
-  if (type == 'Schedule' || type == 'Simulation') {
+  if (type == 'Simulation') {
     inputs = []
   } else {
     inputs = [data.latest_token_id]

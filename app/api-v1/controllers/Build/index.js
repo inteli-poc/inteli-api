@@ -306,7 +306,7 @@ module.exports = {
             console.log('updating build transaction')
             await db.updateBuildTransaction(transaction.id, result[0])
             let updateOriginalTokenIdForOrder = false
-            if (type == 'Schedule') {
+            if (type == 'Simulation') {
               updateOriginalTokenIdForOrder = true
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
             } else {
@@ -331,7 +331,7 @@ module.exports = {
             }
           } else {
             await db.removeTransactionBuild(transaction.id)
-            if (type === 'Schedule' || type === 'Start') {
+            if (type === 'Simulation' || type === 'Start') {
               await db.removeBuild(id)
             }
             return {
@@ -343,7 +343,7 @@ module.exports = {
           }
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
-          if (type === 'Schedule' || type === 'Start') {
+          if (type === 'Simulation' || type === 'Start') {
             await db.removeBuild(id)
           }
           throw err
