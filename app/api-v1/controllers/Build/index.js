@@ -11,6 +11,26 @@ const {
   getResultForBuildTransactionGet,
 } = require('./helpers')
 
+const build_transaction_type = {
+  SCHEDULE: 'Schedule',
+  START: 'Start',
+  PROGRESS_UPDATE: 'progress-update',
+  COMPLETE: 'Complete',
+  SIMULATION: 'Simulation',
+  APPROVAL: 'Approval',
+  CREATED: 'Created'
+}
+
+const build_status = {
+  CREATED: 'Created',
+  SCHEDULED: 'Scheduled',
+  STARTED: 'Started',
+  COMPLETED: 'Completed',
+  SIMULATED: 'Simulated',
+  APPROVED: 'Approved',
+  PART_RECEIVED: 'Part Received'
+}
+
 module.exports = {
   getAll: async function (req) {
     let build
@@ -199,7 +219,7 @@ module.exports = {
         console.log('Type = ', type)
         switch (type) {
           case 'Simulation':
-            build.status = 'Simulated'
+            build.status = build_status.SIMULATED
             build.completion_estimate = req.body.completionEstimate
 
             if (!req.body.attachmentId) {
@@ -217,42 +237,42 @@ module.exports = {
             filename = attachment[0].filename
             break
           case 'Approval':
-            if (build.status != 'Simulated') {
+            if (build.status != build_status.SIMULATED) {
               throw new InternalError({ message: 'Build not in Simulated state' })
             }
-            build.status = 'Approved'
+            build.status = build_status.APPROVED
             build.completion_estimate = req.body.completionEstimate
             break
           case 'Creation':
-            if (build.status != 'Approved') {
+            if (build.status != build_status.APPROVED) {
               throw new InternalError({ message: 'Build not in Approved state' })
             }
-            build.status = 'Created'
+            build.status = build_status.CREATED
             build.completion_estimate = req.body.completionEstimate
             break
           case 'Schedule':
-            if (build.status != 'Created') {
+            if (build.status != build_status.CREATED) {
               throw new InternalError({ message: 'Build not in Created state' })
             }
-            build.status = 'Scheduled'
+            build.status = build_status.SCHEDULED
             build.completion_estimate = req.body.completionEstimate
             break
           case 'Start':
-            if (build.status != 'Scheduled') {
+            if (build.status != build_status.SCHEDULED) {
               throw new InternalError({ message: 'Build not in Scheduled state' })
             }
-            build.status = 'Started'
+            build.status = build_status.STARTED
             build.completion_estimate = req.body.completionEstimate
             build.started_at = req.body.startedAt
             break
           case 'progress-update':
-            if (build.status != 'Started' && build.status != 'Completed' && build.status != 'Part Received') {
+            if (build.status != build_status.STARTED && build.status != build_status.COMPLETED && build.status != build_status.PART_RECEIVED) {
               throw new InternalError({ message: 'Build not in Started or Completed state' })
             }
             if (req.body.updateType == 'GRN Uploaded' || req.body.updateType == '3-Way Match Completed') {
-              build.status = 'Part Received'
+              build.status = build_status.PART_RECEIVED
             } else {
-              build.status = 'Started'
+              build.status = build_status.STARTED
             }
             build.update_type = req.body.updateType
             if (req.body.completionEstimate) {
@@ -270,12 +290,12 @@ module.exports = {
             break
           case 'Complete':
             if (
-              build.status != 'Started' ||
+              build.status != build_status.STARTED ||
               (build.update_type != 'ASN Uploaded' && build.update_type != 'Invoice Uploaded')
             ) {
               throw new InternalError({ message: 'Build not in Started state or ASN or Invoice not uploaded' })
             }
-            build.status = 'Completed'
+            build.status = build_status.COMPLETED
             build.completed_at = req.body.completedAt
             build.attachment_id = req.body.attachmentId
             build.update_type = null
@@ -288,7 +308,8 @@ module.exports = {
             break
         }
         console.log('Outside switch - calling buildTransaction')
-        const transaction = await db.insertBuildTransaction(id, type, 'Submitted')
+        const typeEnum = Object.keys(build_transaction_type).find(k => build_transaction_type[k] === type)
+        const transaction = await db.insertBuildTransaction(id, build_transaction_type.typeEnum, 'Submitted')
         let payload
         try {
           payload = await mapBuildData({ ...build, transaction, partIds, supplier, buyer, binary_blob, filename }, type)
@@ -321,7 +342,7 @@ module.exports = {
               for (let part of part_order) {
                 let [build] = await db.getBuildById(part.build_id)
                 if (typeof build?.status !== 'undefined') {
-                  if (build.status != 'Part Received') {
+                  if (build.status != build_status.PART_RECEIVED) {
                     orderComplete = false
                     break
                   }
