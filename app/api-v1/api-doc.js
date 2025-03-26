@@ -1435,6 +1435,7 @@ const notRequired = [
   'build',
   'updateType',
   'completionEstimate',
+  'attachments',
 ]
 const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part']
 
