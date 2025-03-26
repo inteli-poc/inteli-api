@@ -9,14 +9,14 @@ url = `${url}/${API_MAJOR_VERSION}`
 const securitySchemes =
   AUTH_TYPE === 'JWT'
     ? {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
         },
-      }
+      },
+    }
     : {}
 const apiDoc = {
   openapi: '3.0.3',
@@ -1279,14 +1279,13 @@ const apiDoc = {
                 type: 'array',
                 items: {
                   description: 'Attachment details',
+                  type: 'object',
                   properties: {
-                    attachmentId: {
-                      description: 'Attachment ID',
-                      type: 'uuid',
-                    },
                     description: {
-                      description: 'Name of attachment',
                       type: 'string',
+                    },
+                    attachmentId: {
+                      allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
                     },
                   },
                 },
