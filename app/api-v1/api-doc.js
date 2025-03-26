@@ -1256,12 +1256,41 @@ const apiDoc = {
           exception: {
             description: 'Exception object to be added to the part',
             type: 'object',
-            example: {
-              raisedDate: '2025-02-19T00:00:00.000Z',
-              poStep: 'Canister Fill',
-              reason: 'Test',
-              status: 'Declined',
-              attachments: [{ attachmentId: '123', description: 'Canister Filling Failure Report' }],
+            properties: {
+              raisedDate: {
+                description: 'Date the exception was raised',
+                type: 'string',
+                format: 'date-time',
+              },
+              poStep: {
+                description: 'The Purchase Order step that the exception was raised for',
+                type: 'string',
+              },
+              reason: {
+                description: 'The reason for raising the exception',
+                type: 'string',
+              },
+              status: {
+                description: 'The status that the exception is at',
+                type: 'string',
+              },
+              attachments: {
+                description: 'Attachments uploaded to support the exceptions',
+                type: 'array',
+                items: {
+                  description: 'Attachment details',
+                  properties: {
+                    attachmentId: {
+                      description: 'Attachment ID',
+                      type: 'uuid',
+                    },
+                    description: {
+                      description: 'Name of attachment',
+                      type: 'string',
+                    },
+                  },
+                },
+              },
             },
           },
         },
