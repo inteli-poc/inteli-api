@@ -1440,18 +1440,18 @@ const notRequired = [
 const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part', 'PartExceptionCreation']
 
 // make all schema properties required
-const makeSchemaPropsRequired = (schemaObj, key) => {
+const makeSchemaPropsRequired = (schemaObj, schemaKey) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
     let props = Object.keys(schemaObj.properties)
-    if (keys.includes(key)) {
+    if (keys.includes(schemaKey)) {
       props = props.filter((value) => !notRequired.includes(value))
     }
     if (props.length > 0) {
       schemaObj.required = props
     }
     let schemas = schemaObj.properties
-    for (let key in schemas) {
-      makeSchemaPropsRequired(schemas[key], key)
+    for (let propertyName in schemas) {
+      makeSchemaPropsRequired(schemas[propertyName], schemaKey) 
     }
   }
 }
