@@ -42,10 +42,10 @@ async function postPartDb(part) {
 
 async function postPartException(newException, partID) {
   return client('parts')
-    .where({ id: partID })
     .update({
-      exceptions: client.raw('exceptions || ?', [JSON.stringify([newException])]),
+      exceptions: client.raw('COALESCE(exceptions, \'[]\'::jsonb) || ?', [JSON.stringify([newException])]),
     })
+    .where({ id: partID })
 }
 
 async function updatePartExceptionStatus(poStep, status, partID) {
