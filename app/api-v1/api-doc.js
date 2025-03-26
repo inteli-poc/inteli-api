@@ -1276,7 +1276,7 @@ const apiDoc = {
               },
               attachments: {
                 description: 'Attachments uploaded to support the exceptions',
-                type: 'array',
+                oneOf: [{ type: 'array' }, { type: 'null' }],
                 nullable: true,
                 items: {
                   description: 'Attachment details',
