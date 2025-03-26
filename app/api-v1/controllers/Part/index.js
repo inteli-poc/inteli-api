@@ -262,7 +262,7 @@ module.exports = {
       throw new BadRequestError('missing req.body')
     }
     const { id } = req.params
-    const [result] = await db.postPartException(req.body.exception, id)
+    const result = await db.postPartException(req.body.exception, id)
     return {
       status: 200,
       response: { ...result, ...req.body },
