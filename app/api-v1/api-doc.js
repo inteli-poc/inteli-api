@@ -1437,7 +1437,7 @@ const notRequired = [
   'completionEstimate',
   'attachments',
 ]
-const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part']
+const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part', 'PartExceptionCreation']
 
 // make all schema properties required
 const makeSchemaPropsRequired = (schemaObj, key) => {
