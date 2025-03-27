@@ -52,7 +52,7 @@ async function updatePartExceptionStatus(poStep, status, partID) {
   return client('parts')
     .where({ id: partID })
     .update({
-      exception: client.raw(
+      exceptions: client.raw(
         `
       (
         SELECT jsonb_agg(
