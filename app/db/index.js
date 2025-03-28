@@ -40,6 +40,36 @@ async function postPartDb(part) {
   return client('parts').insert(part).returning(['id'])
 }
 
+async function postPartException(newException, partID) {
+  return client('parts')
+    .update({
+      exceptions: client.raw('jsonb_set(COALESCE(exceptions, \'[]\'::jsonb), \'{-1}\', ?::jsonb, true)', [JSON.stringify(newException)]),
+    })
+    .where({ id: partID })
+}
+
+async function updatePartExceptionStatus(poStep, status, partID) {
+  return client('parts')
+    .where({ id: partID })
+    .update({
+      exceptions: client.raw(
+        `
+      (
+        SELECT jsonb_agg(
+          CASE 
+            WHEN elem->>'poStep' = ?
+            THEN jsonb_set(elem, '{status}', to_jsonb(?::text)) 
+            ELSE elem 
+          END
+        ) 
+        FROM jsonb_array_elements(exceptions) AS elem
+      )
+      `,
+        [poStep, status]
+      ),
+    })
+}
+
 async function updateOrder(reqBody, latest_token_id, updateOriginalTokenId) {
   const updated_at = new Date().toISOString()
   reqBody.updated_at = updated_at
@@ -708,4 +738,6 @@ module.exports = {
   removePart,
   removeBuild,
   removeMachiningOrder,
+  postPartException,
+  updatePartExceptionStatus,
 }

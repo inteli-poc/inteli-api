@@ -3,11 +3,12 @@ require('express-async-errors')
 const cors = require('cors')
 const pinoHttp = require('pino-http')
 const { initialize } = require('express-openapi')
-const swaggerUi = require('swagger-ui-express')
+// const swaggerUi = require('swagger-ui-express')
 const multer = require('multer')
 const path = require('path')
 const bodyParser = require('body-parser')
 const compression = require('compression')
+// eslint-disable-next-line no-unused-vars
 const { PORT, API_VERSION, API_MAJOR_VERSION, AUTH_TYPE, EXTERNAL_PATH_PREFIX } = require('./env')
 const logger = require('./utils/Logger')
 const v1ApiDoc = require('./api-v1/api-doc')
@@ -94,16 +95,16 @@ async function createHttpServer() {
     paths: [path.resolve(__dirname, `api-${API_MAJOR_VERSION}/routes`)],
   })
 
-  const options = {
-    swaggerOptions: {
-      urls: [
-        {
-          url: `${v1ApiDoc.servers[0].url}/api-docs`,
-          name: 'Inteli API Service',
-        },
-      ],
-    },
-  }
+  // const options = {
+  //   swaggerOptions: {
+  //     urls: [
+  //       {
+  //         url: `${v1ApiDoc.servers[0].url}/api-docs`,
+  //         name: 'Inteli API Service',
+  //       },
+  //     ],
+  //   },
+  // }
 
   // app.use(
   //   EXTERNAL_PATH_PREFIX ? `/${EXTERNAL_PATH_PREFIX}/${API_MAJOR_VERSION}/swagger` : `/${API_MAJOR_VERSION}/swagger`,

@@ -80,6 +80,15 @@ const seed = async () => {
       price_type: 'some-price-type',
       confirmed_receipt_date: '2022-09-23T09:30:51.190Z',
       description: 'some-description',
+      exceptions: JSON.stringify([
+        {
+          raisedDate: '2025-02-19T00:00:00.000Z',
+          poStep: 'Canister Fill',
+          reason: 'Test',
+          status: 'Pending',
+          attachments: [{ attachmentId: '123', description: 'Canister Filling Failure Report' }],
+        },
+      ]),
     },
   ])
 }

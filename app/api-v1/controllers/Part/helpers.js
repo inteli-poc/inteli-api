@@ -116,6 +116,7 @@ exports.getResultForPartGet = async (parts, req, metadataType) => {
         newItem['requiredBy'] = item.required_by.toISOString()
         newItem['forecastedDeliveryDate'] = item.forecast_delivery_date.toISOString()
         newItem['comments'] = item.comments
+        newItem['exceptions'] = item.exceptions
         newItem['attachments'] = []
         let attachment = {}
         attachment['description'] = 'Design'

@@ -9,16 +9,15 @@ url = `${url}/${API_MAJOR_VERSION}`
 const securitySchemes =
   AUTH_TYPE === 'JWT'
     ? {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
         },
-      }
+      },
+    }
     : {}
-
 const apiDoc = {
   openapi: '3.0.3',
   info: {
@@ -1066,6 +1065,64 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSchedule' }],
       },
+      NewBuildSimulation: {
+        description:
+          'A new action on a build that initiates the simulation process, ensuring the design meets requirements before manufacturing begins.',
+        type: 'object',
+        properties: {
+          attachmentId: {
+            description: 'Attachment IDs of files uploaded',
+            type: 'string',
+          },
+          completionEstimate: {
+            description: 'Updated Date and time at which the simulation process is estimated to finish',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildSimulation: {
+        description:
+          'An action on a build that initiates the simulation process, ensuring the design meets requirements before manufacturing begins.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildSimulation' }],
+      },
+      NewBuildApproval: {
+        description:
+          'A new action on a build that approves the simulation results, allowing the manufacturing process to proceed.',
+        type: 'object',
+        properties: {
+          completionEstimate: {
+            description: 'Updated Date and time at which the approval process is completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildApproval: {
+        description:
+          'An action on a build that approves the simulation results, allowing the manufacturing process to proceed.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildApproval' }],
+      },
+      NewBuildCreation: {
+        description:
+          'A new action on a build that marks the build as created, transitioning it from approval to manufacturing readiness.',
+        type: 'object',
+        properties: {
+          completionEstimate: {
+            description: 'Updated Date and time at which the build creation process is completed',
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      BuildCreation: {
+        description:
+          'An action on a build that marks the build as created, transitioning it from approval to manufacturing readiness.',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewBuildCreation' }],
+      },
       NewMachiningOrderStart: {
         description: 'A new action on a Machining that causes it to be registered on-chain as started',
         type: 'object',
@@ -1192,6 +1249,72 @@ const apiDoc = {
         type: 'object',
         allOf: [{ $ref: '#/components/schemas/ChainAction' }, { $ref: '#/components/schemas/NewPartCreation' }],
       },
+      PartExceptionCreation: {
+        description: 'An action that creates a new exception on a part',
+        type: 'object',
+        properties: {
+          exception: {
+            description: 'Exception object to be added to the part',
+            type: 'object',
+            properties: {
+              raisedDate: {
+                description: 'Date the exception was raised',
+                type: 'string',
+                format: 'date-time',
+              },
+              poStep: {
+                description: 'The Purchase Order step that the exception was raised for',
+                type: 'string',
+              },
+              reason: {
+                description: 'The reason for raising the exception',
+                type: 'string',
+              },
+              status: {
+                description: 'The status that the exception is at',
+                type: 'string',
+              },
+              attachments: {
+                description: 'Attachments uploaded to support the exceptions',
+                oneOf: [{ type: 'array' }, { type: 'null' }],
+                items: {
+                  description: 'Attachment details',
+                  type: 'object',
+                  properties: {
+                    description: {
+                      type: 'string',
+                    },
+                    attachmentId: {
+                      allOf: [{ $ref: '#/components/schemas/ObjectReference' }],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      PartExceptionStatus: {
+        description: 'An action on an exception that updates its status',
+        type: 'object',
+        properties: {
+          poStep: {
+            description: 'Name of the step whose exception is being updated',
+            type: 'string',
+            example: 'Canister Fill',
+          },
+          status: {
+            description: 'Status that the exception is being updated to',
+            type: 'string',
+            example: 'Pending',
+          },
+        },
+      },
+      PartException: {
+        description: 'An action on a part that registers it on-chain',
+        type: 'object',
+        allOf: [{ $ref: '#/components/schemas/PartExceptionCreation' }],
+      },
       NewPartMetadataUpdate: {
         description: 'A new action on a part that adds arbitrary metadata',
         type: 'object',
@@ -1311,22 +1434,23 @@ const notRequired = [
   'build',
   'updateType',
   'completionEstimate',
+  'attachments',
 ]
-const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part']
+const keys = ['NewOrderAcknowledgement', 'NewBuildProgressUpdate', 'NewPart', 'Build', 'Part', 'PartExceptionCreation']
 
 // make all schema properties required
-const makeSchemaPropsRequired = (schemaObj, key) => {
+const makeSchemaPropsRequired = (schemaObj, schemaKey) => {
   if (schemaObj.type === 'object' && schemaObj.properties) {
     let props = Object.keys(schemaObj.properties)
-    if (keys.includes(key)) {
+    if (keys.includes(schemaKey)) {
       props = props.filter((value) => !notRequired.includes(value))
     }
     if (props.length > 0) {
       schemaObj.required = props
     }
     let schemas = schemaObj.properties
-    for (let key in schemas) {
-      makeSchemaPropsRequired(schemas[key], key)
+    for (let propertyName in schemas) {
+      makeSchemaPropsRequired(schemas[propertyName], schemaKey) 
     }
   }
 }

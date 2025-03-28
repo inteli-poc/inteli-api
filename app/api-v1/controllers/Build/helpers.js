@@ -19,7 +19,7 @@ exports.validate = async (items, supplier) => {
 }
 
 exports.getResponse = async (type, transaction, req) => {
-  return {
+  const response = {
     id: req.params.id,
     transactionId: transaction.id,
     submittedAt: new Date(transaction.created_at).toISOString(),
@@ -29,7 +29,9 @@ exports.getResponse = async (type, transaction, req) => {
     ...((type == 'progress-update' || type == 'Complete') && { attachmentId: req.body.attachmentId }),
     ...(type == 'Complete' && { completedAt: req.body.completedAt }),
     ...(type == 'progress-update' && { updateType: req.body.updateType }),
+    ...(type == 'Simulation' && { attachmentId: req.body.attachmentId })
   }
+  return response
 }
 
 exports.getResultForBuildGet = async (build, req) => {
@@ -151,21 +153,21 @@ const buildBuildOutputs = (data, type) => {
         data.filename && { image: { type: 'FILE', value: data.filename } }),
       ...((type == 'Complete' || type == 'progress-update') &&
         data.attachment_id && {
-          imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
-        }),
+        imageAttachmentId: { type: 'FILE', value: 'image_attachment_id.json' },
+      }),
       parts: { type: 'FILE', value: 'parts.json' },
       id: { type: 'FILE', value: 'id.json' },
       actionType: { type: 'LITERAL', value: type },
       ...(type == 'progress-update' && { updateType: { type: 'LITERAL', value: data.update_type } }),
     },
-    ...(type != 'Schedule' && { parent_index: 0 }),
+    ...(type != 'Simulation' && { parent_index: 0 }),
   }
 }
 
 exports.mapBuildData = async (data, type) => {
   let inputs
   let outputs
-  if (type == 'Schedule') {
+  if (type == 'Simulation') {
     inputs = []
   } else {
     inputs = [data.latest_token_id]
@@ -176,8 +178,8 @@ exports.mapBuildData = async (data, type) => {
     id: Buffer.from(JSON.stringify(data.id)),
     ...((type == 'progress-update' || type == 'Complete') &&
       data.attachment_id && {
-        imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
-      }),
+      imageAttachmentId: Buffer.from(JSON.stringify(data.attachment_id)),
+    }),
     ...((type == 'progress-update' || type == 'Complete') && data.binary_blob && { image: data.binary_blob }),
     inputs,
     outputs,
