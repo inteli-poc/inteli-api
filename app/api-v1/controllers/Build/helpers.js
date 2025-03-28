@@ -19,7 +19,6 @@ exports.validate = async (items, supplier) => {
 }
 
 exports.getResponse = async (type, transaction, req) => {
-  console.log('getResponse function')
   const response = {
     id: req.params.id,
     transactionId: transaction.id,
@@ -32,7 +31,6 @@ exports.getResponse = async (type, transaction, req) => {
     ...(type == 'progress-update' && { updateType: req.body.updateType }),
     ...(type == 'Simulation' && { attachmentId: req.body.attachmentId })
   }
-  console.log('getResponse response = ', response)
   return response
 }
 

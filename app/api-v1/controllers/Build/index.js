@@ -124,13 +124,11 @@ module.exports = {
     build.completion_estimate = req.body.completionEstimate
     build.status = 'Simulated'
     const [buildId] = await db.postBuildDb(build)
-    console.log('Build created, ID = ', buildId)
     let partIds = req.body.partIds
     let updateOriginalTokenId = false
     for (let partId of partIds) {
       let [part] = await db.getPartById(partId)
       part.build_id = buildId.id
-      console.log('Part latest token ID = ', part.latest_token_id)
       await db.updatePart(part, part.latest_token_id, updateOriginalTokenId)
     }
     build.id = buildId.id
@@ -192,20 +190,15 @@ module.exports = {
     },
     create: (type) => {
       return async (req) => {
-        console.log('Simulation create')
-        console.log('Simulation Request body = ', req.body)
         let binary_blob
         let filename
         const { id } = req.params
-        console.log('ID = ', id)
         if (!id) throw new BadRequestError('missing params')
 
         const [build] = await db.getBuildById(id)
-        console.log('build by ID = ', build)
         if (!build) throw new NotFoundError('build')
         const supplier = build.supplier
         const parts = await db.getPartsByBuildId(id)
-        console.log('Parts = ', parts)
         const recipes = parts.map((item) => {
           return item.recipe_id
         })
@@ -213,10 +206,8 @@ module.exports = {
           return item.id
         })
         const records = await db.getRecipeByIDs(recipes)
-        console.log('Records = ', records)
         const buyer = records[0].owner
         let attachment
-        console.log('Type = ', type)
         switch (type) {
           case 'Simulation':
             build.status = build_status.SIMULATED
@@ -228,7 +219,6 @@ module.exports = {
 
             build.attachment_id = req.body.attachmentId
             attachment = await db.getAttachment(build.attachment_id)
-            console.log('Got attachment')
             if (attachment.length === 0) {
               throw new NotFoundError('Attachment not found')
             }
@@ -307,35 +297,24 @@ module.exports = {
             filename = attachment[0].filename
             break
         }
-        console.log('Outside switch - calling buildTransaction')
         const typeEnum = Object.keys(build_transaction_type).find(k => build_transaction_type[k] === type)
-        console.log('type enum = ', typeEnum)
         const transaction = await db.insertBuildTransaction(id, build_transaction_type[typeEnum], 'Submitted')
         let payload
         try {
           payload = await mapBuildData({ ...build, transaction, partIds, supplier, buyer, binary_blob, filename }, type)
-          console.log('Mapped build data')
         } catch (err) {
           await db.removeTransactionBuild(transaction.id)
-          console.log('Error while mapping build transaction: ', err.message)
           throw err
         }
         try {
-          console.log('before runProcess')
           const result = await runProcess(payload, req.token)
-          console.log('Result from runProcess = ', result)
           if (Array.isArray(result)) {
-            console.log('updating build transaction')
             await db.updateBuildTransaction(transaction.id, result[0])
-            console.log('finished updating build transaction')
             let updateOriginalTokenIdForOrder = false
             if (type == 'Simulation') {
-              console.log('Simulation if condition')
               updateOriginalTokenIdForOrder = true
               const buildUpdated = await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
-              console.log('finished updating build = ', buildUpdated)
             } else {
-              console.log('Not simulation')
               await db.updateBuild(build, result[0], updateOriginalTokenIdForOrder)
               let [part_build] = await db.getPartsByBuildId(build.id)
               let part_order = await db.getPartsByOrderId(part_build.order_id)
@@ -356,7 +335,6 @@ module.exports = {
               }
             }
           } else {
-            console.log('removing build transaction - else')
             await db.removeTransactionBuild(transaction.id)
             if (type === 'Simulation' || type === 'Start') {
               await db.removeBuild(id)
@@ -369,7 +347,6 @@ module.exports = {
             }
           }
         } catch (err) {
-          console.log('removing build transaction - catch')
           await db.removeTransactionBuild(transaction.id)
           if (type === 'Simulation' || type === 'Start') {
             await db.removeBuild(id)
